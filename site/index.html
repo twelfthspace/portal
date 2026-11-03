@@ -537,6 +537,11 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .cdel{display:inline-flex;align-items:center;min-height:40px}
 .sthead{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.sthead h2{margin:2px 0}.stmeta{display:grid;grid-template-columns:auto auto;gap:4px 12px;font-size:13px;align-content:start}.stmeta span{color:var(--muted)}.sthead .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
 @media print{#rail,#head,.scrim,.noprint,#mbg,#toast,.pha{display:none!important}body,.canvas,#wrap,#view{background:#fff!important}.canvas{margin:0!important;border-radius:0!important;padding:0!important}.card{border:0!important;box-shadow:none!important}.ptitle{display:none}.rt td,.rt th{font-size:12px}}
+.av,.uav{overflow:hidden}.av img,.uav img{width:100%;height:100%;object-fit:cover;display:block}
+.photo{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.photo .av,.photo .ph{width:84px;height:84px;font-size:24px}
+.photo .ph{border-radius:50%;overflow:hidden;display:grid;place-items:center;font-weight:600;color:#3E4631;flex:none}.photo .ph img{width:100%;height:100%;object-fit:cover}
+.photo .acts{display:flex;gap:8px;flex-wrap:wrap}.photo input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.paybox{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;background:var(--canvas)}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
@@ -573,7 +578,9 @@ const gs=p=>`<small>GHS</small>${(Math.abs(p)/100).toLocaleString('en-US',{minim
 const I={megaphone:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M18 5a9 9 0 0 1 0 14",logout:"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",mail:"M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6",gear:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z",refresh:"M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5",filter:"M3 5h18l-7 8v6l-4 2v-8z",dots:"M5 12h.01M12 12h.01M19 12h.01",pencil:"M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",swap:"M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3",upright:"M7 17L17 7M8 7h9v9",downleft:"M17 7L7 17M16 17H7V8",pluscircle:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v8M8 12h8",home:"M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8",send:"M22 2L11 13M22 2l-7 20-4-9-9-4z",brief:"M3 7h18v13H3zM8 7V4h8v3",layers:"M12 2l10 5-10 5L2 7zM2 12l10 5 10-5M2 17l10 5 10-5",card:"M2 5h20v14H2zM2 10h20",pct:"M19 5L5 19M7 6.5a1.5 1.5 0 1 0 0 .01M17 17.5a1.5 1.5 0 1 0 0 .01",wallet:"M3 7h16a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2zM3 7V5a2 2 0 0 1 2-2h12v4M16 14h2",chart:"M3 3v18h18M7 15v3M12 9v9M17 5v13",chat:"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",shield:"M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z",sliders:"M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4",user:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8",bell:"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0",plus:"M12 5v14M5 12h14",arrowr:"M9 6l6 6-6 6",clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",search:"M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-5-5",menu:"M4 6h16M4 12h16M4 18h16",back:"M15 6l-6 6 6 6",x:"M6 6l12 12M18 6L6 18"};
 const ic=(n,s=20,w=1.8)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${I[n]}"/></svg>`;
 const AVC=['#D2E3C0','#C2CBAF','#FAFF7E','#EDECE1','#FEFFDA','#D2E3C0'];
-const av=(n,i=0)=>`<span class="av" style="background:${AVC[Math.abs(i)%AVC.length]}">${esc(n.split(' ').map(w=>w[0]).slice(0,2).join(''))}</span>`;
+const avUrl=n=>(typeof D!=='undefined'&&D.avByName&&D.avByName[n])||'';
+const inits=n=>esc(String(n||'').split(' ').map(w=>w[0]).slice(0,2).join(''));
+const av=(n,i=0)=>`<span class="av" style="background:${AVC[Math.abs(i)%AVC.length]}">${avUrl(n)?`<img src="${esc(avUrl(n))}" alt="">`:inits(n)}</span>`;
 const tag=(t,c='')=>`<span class="tag ${c}">${esc(t)}</span>`;
 const TODAY=new Date().toISOString().slice(0,10);
 const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
@@ -591,7 +598,7 @@ const PST={not_started:'Not started',in_progress:'In progress',on_hold:'On hold'
 const PM={mobile_money:'Mobile money',bank_transfer:'Bank transfer',cash:'Cash'};
 const RST={pending:'Pending review',flagged:'Flagged',approved:'Approved',rejected:'Rejected'};
 const flip=o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[v,k])),PSTr=flip(PST),PMr=flip(PM);
-const blankD=()=>({hold:5,notes:[],audit:[],adj:[],partners:[],invites:[],clients:[],projects:[],payments:[],payouts:[],refs:[],msgs:{},unreadA:{},unreadP:{},ann:[],read:{},chat:[],cs:{admin:{},partner:{}},dir:[],bal:{},newlink:null});
+const blankD=()=>({pay:{},avByName:{},avById:{},hold:5,notes:[],audit:[],adj:[],partners:[],invites:[],clients:[],projects:[],payments:[],payouts:[],refs:[],msgs:{},unreadA:{},unreadP:{},ann:[],read:{},chat:[],cs:{admin:{},partner:{}},dir:[],bal:{},newlink:null});
 const D=blankD();const resetD=()=>Object.assign(D,blankD());
 let ME=null,MEP=null,ROLE=null,BOOTED=false;
 const q=async p=>{const {data,error}=await p;if(error)throw error;return data};
@@ -646,6 +653,10 @@ async function loadAll(){
     q(sb.rpc('community_directory')),
     adm?q(sb.from('audit_log').select('*').order('at',{ascending:false}).limit(300)):none,
     adm?q(sb.rpc('pending_invitations')):none]);
+  const payAcc=await q(sb.from('payout_accounts').select('*'));
+  D.pay=Object.fromEntries(payAcc.map(a=>[a.partner_id,a]));
+  const withPic=dir.filter(x=>x.avatar_path);D.avByName={};D.avById={};
+  if(withPic.length){try{const {data:urls}=await sb.storage.from('avatars').createSignedUrls(withPic.map(x=>x.avatar_path),3600);(urls||[]).forEach((u,k)=>{if(u&&u.signedUrl){const x=withPic[k];D.avById[x.id]=u.signedUrl;if(x.full_name)D.avByName[x.full_name]=u.signedUrl}})}catch(_){}}
   const nameOf=id=>{const p=profiles.find(x=>x.id===id)||dir.find(x=>x.id===id);return p?(p.full_name||p.email||'Member'):'Former member'};
   const roleOf=id=>{const p=dir.find(x=>x.id===id)||profiles.find(x=>x.id===id);return p&&p.role};
   MEP=profiles.find(p=>p.id===ME)||MEP;
@@ -682,6 +693,26 @@ const doit=async(fn,ok)=>{try{await fn()}catch(e){return nice(e)}await reload();
 const fire=async(fn,ok)=>{const e=await doit(fn,ok);if(e)toast(e);render()};
 const nowIso=()=>new Date().toISOString();
 const markNotesRead=()=>{const L=notesFor(role()).filter(n=>n.n);if(!L.length)return;L.forEach(n=>n.n=false);sb.from('notifications').update({read_at:nowIso()}).in('id',L.map(n=>n.id)).then(()=>{})};
+const KINDS={momo:'Mobile Money',bank:'Bank account'};
+const MOMO_NETS=['MTN MoMo','Telecel Cash','AT Money'];
+const GH_BANKS=['Absa Bank Ghana','Access Bank Ghana','ADB','Bank of Africa','CalBank','Consolidated Bank Ghana','Ecobank Ghana','FBNBank Ghana','Fidelity Bank Ghana','First Atlantic Bank','First National Bank Ghana','GCB Bank','GTBank Ghana','National Investment Bank','Omni BSIC Bank','Prudential Bank','Republic Bank Ghana','Société Générale Ghana','Stanbic Bank Ghana','Standard Chartered Ghana','UBA Ghana','UMB','Zenith Bank Ghana'];
+const maskNo=n=>n?'•••• '+String(n).slice(-4):'';
+const payLine=(a,full)=>a?`${esc(a.provider)} · ${full?esc(a.account_number):maskNo(a.account_number)} · ${esc(a.account_name)}${a.branch?' · '+esc(a.branch):''}`:'Not added yet';
+const meAv=()=>D.avById[ME]||'';
+async function shrink(file){const img=await new Promise((ok,no)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);ok(i)};i.onerror=()=>{URL.revokeObjectURL(u);no(new Error('That file is not an image we can read.'))};i.src=u});
+  const s=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement('canvas');c.width=c.height=400;
+  c.getContext('2d').drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,400,400);
+  return await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(new Error('Could not prepare the photo.')),'image/jpeg',0.86))}
+async function uploadPhoto(file){
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){toast('Choose a JPG, PNG or WebP photo.');return}
+  if(file.size>15*1024*1024){toast('That photo is too large. Choose one under 15 MB.');return}
+  toast('Uploading photo…');
+  try{const blob=await shrink(file),path=ME+'/avatar-'+Date.now()+'.jpg',old=MEP&&MEP.avatar_path;
+    const {error}=await sb.storage.from('avatars').upload(path,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;
+    await q(sb.from('profiles').update({avatar_path:path}).eq('id',ME));
+    if(old)sb.storage.from('avatars').remove([old]).then(()=>{});
+    await reload();toast('Photo updated');render()}catch(e){toast(nice(e))}}
+const photoCard=()=>{const n=MEP?MEP.full_name||MEP.email:'',u=meAv();return card('Profile photo',`<div class="photo"><span class="ph" style="background:${AVC[0]}">${u?`<img src="${esc(u)}" alt="Your profile photo">`:inits(n)}</span><div><p class="muted small" style="margin-bottom:10px">A clear photo of your face helps the studio and other partners recognise you. JPG, PNG or WebP.</p><div class="acts"><label class="btn sm pink" for="photo-in" style="cursor:pointer">${u?'Change photo':'Upload photo'}</label><input type="file" id="photo-in" accept="image/jpeg,image/png,image/webp">${u?act('Remove','photodel','','line'):''}</div></div></div>`)};
 const dl=(name,t)=>{const b=new Blob(['﻿'+t],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('CSV downloaded')};
 /* lookups and derived money */
 const P=id=>D.partners.find(x=>x.id===id)||D.dir.find(x=>x.id===id)||{id,name:'Former member',email:'',city:'',phone:'',acct:'',st:'Suspended'},CL=id=>D.clients.find(x=>x.id===id)||{id,name:'Client',contact:'',email:'',p:null},PR=id=>D.projects.find(x=>x.id===id)||{id,name:'Project',c:null,budget:0,rate:0,st:'Not started'};
@@ -714,7 +745,7 @@ function chart(id,vals,kind){
   return `<div class="bchart ${kind==='grey'?'grey':''}">${vals.map((v,i)=>`<button type="button" class="bcol ${i===a?'on':''}" data-bar="${id}:${i}" aria-label="Week of ${Lb[i]}: ${g(v)}"><span class="bt" style="--h:${Math.max(6,Math.round(v/mx*100))}%"><span class="tip">${g(v)}</span><i></i></span><span class="bl">${Lb[i].replace(' ',' ')}</span></button>`).join('')}</div>`}
 const delta=v=>{const a=v.slice(0,3).reduce((s,x)=>s+x,0),b=v.slice(3).reduce((s,x)=>s+x,0);if(!a&&!b)return'';if(!a)return'<span class="dl nw">new</span>';const p=Math.round((b-a)/a*100);return `<span class="dl ${p>=0?'up':'dn'}">${p>0?'+':''}${p}% vs prev</span>`};
 const weekly=(p,f=com)=>{const v=[0,0,0,0,0,0];D.payments.filter(x=>!p||own(x)===p).forEach(x=>{const w=Math.floor((new Date(TODAY)-new Date(x.d))/864e5/7);if(w>=0&&w<6)v[5-w]+=f(x)});return v};
-const field=(l,n,o={})=>`<div class="fld"><label for="f-${n}">${l}</label>${o.opts?`<select id="f-${n}" name="${n}">${o.opts.map(x=>`<option value="${esc(x[0])}" ${x[0]===o.val?'selected':''}>${esc(x[1])}</option>`).join('')}</select>`:o.area?`<textarea id="f-${n}" name="${n}" rows="3" placeholder="${esc(o.ph||'')}">${esc(o.val||'')}</textarea>`:`<input id="f-${n}" name="${n}" type="${o.type||'text'}" value="${esc(o.val||'')}" placeholder="${esc(o.ph||'')}" ${o.ro?'readonly':''} ${o.inputmode?`inputmode="${o.inputmode}"`:''} autocomplete="off">`}${o.hint?`<div class="hint">${o.hint}</div>`:''}</div>`;
+const field=(l,n,o={})=>`<div class="fld"><label for="f-${n}">${l}</label>${o.opts?`<select id="f-${n}" name="${n}">${o.opts.map(x=>`<option value="${esc(x[0])}" ${x[0]===o.val?'selected':''}>${esc(x[1])}</option>`).join('')}</select>`:o.area?`<textarea id="f-${n}" name="${n}" rows="3" placeholder="${esc(o.ph||'')}">${esc(o.val||'')}</textarea>`:`<input id="f-${n}" name="${n}" ${n==='provider'?'list="provlist"':''} type="${o.type||'text'}" value="${esc(o.val||'')}" placeholder="${esc(o.ph||'')}" ${o.ro?'readonly':''} ${o.inputmode?`inputmode="${o.inputmode}"`:''} autocomplete="${o.ac||'off'}">`}${o.hint?`<div class="hint">${o.hint}</div>`:''}</div>`;
 const two=(a,b)=>`<div class="two">${a}${b}</div>`;
 const reasonField=()=>field('Reason (saved in the audit log)','reason',{area:true,ph:'Why is this change needed?'});
 const needReason=f=>(f.reason||'').trim().length<3?'Enter a reason of at least a few words.':'';
@@ -776,7 +807,7 @@ const ACT={
   return doit(()=>q(sb.from('payments').insert({project_id:f.pr,received_on:f.d,amount:a,tax:t,method:PMr[f.m],reference:ref})),'Payment recorded')})},
  refund(id){const x=D.payments.find(p=>p.id==id),left=x.amt-x.tax-x.refunded;modal('Refund '+esc(x.ref),'Up to '+g(left)+' can still be refunded.',field('Refund amount (GHS)','amt',{inputmode:'decimal'})+reasonField(),'Record refund',f=>{const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the refund amount.';if(a>left)return'That is more than the '+g(left)+' left on this payment.';const e=needReason(f);if(e)return e;return doit(()=>rpc('refund_payment',{p_payment:id,p_amount:a,p_reason:f.reason.trim()}),'Refund recorded. Commission reduced.')})},
  reverse(id){const x=D.payments.find(p=>p.id==id);modal('Reverse '+esc(x.ref),'Use this when the payment never really arrived. Its commission is removed.',reasonField(),'Reverse payment',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reverse_payment',{p_payment:id,p_reason:f.reason.trim()}),'Payment reversed')})},
- payout(id,amt){if(!D.partners.length){toast('Invite a partner first.');return}modal('Record a payout','Send the money outside the portal, then record it here.',field('Partner','p',{opts:PO(),val:id})+two(field('Amount paid (GHS)','amt',{inputmode:'decimal',val:amt||''}),field('Date paid','d',{type:'date',val:TODAY}))+two(field('Method','m',{opts:['Mobile money','Bank transfer'].map(x=>[x,x])}),field('Transaction reference','ref'))+field('Account (masked)','mask',{ph:'****1234',hint:'Store only a masked account. Full numbers are rejected.'}),'Record payout',f=>{
+ payout(id,amt){if(!D.partners.length){toast('Invite a partner first.');return}modal('Record a payout','Send the money outside the portal, then record it here.',field('Partner','p',{opts:PO(),val:id})+two(field('Amount paid (GHS)','amt',{inputmode:'decimal',val:amt||''}),field('Date paid','d',{type:'date',val:TODAY}))+two(field('Method','m',{opts:['Mobile money','Bank transfer'].map(x=>[x,x])}),field('Transaction reference','ref'))+field('Account (masked)','mask',{ph:'****1234',val:D.pay[id]?'****'+D.pay[id].account_number.slice(-4):'',hint:D.pay[id]?'Pay to '+payLine(D.pay[id],true):'This partner has not added payout details yet.'}),'Record payout',f=>{
   const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the amount paid.';const av_=avail(f.p);if(a>av_)return'That is more than '+P(f.p).name+' can be paid now ('+g(av_)+').';
   if(!f.ref.trim())return'Enter the transaction reference.';if(/\d{5,}/.test(f.mask))return'Enter only a masked account such as ****1234.';if(!f.d||f.d>TODAY)return'Choose a valid date. It cannot be in the future.';
   return doit(()=>rpc('record_payout',{p_partner:f.p,p_amount:a,p_paid_on:f.d,p_method:PMr[f.m],p_reference:f.ref.trim(),p_account_mask:f.mask.trim()||null}),'Payout recorded')})},
@@ -802,6 +833,7 @@ const ACT={
  readall(){const L=D.ann.filter(a=>!D.read[a.id]);L.forEach(a=>D.read[a.id]=true);toast('All marked as read');render();if(L.length)sb.from('announcement_reads').upsert(L.map(a=>({announcement_id:a.id})),{onConflict:'announcement_id,user_id',ignoreDuplicates:true}).then(()=>{})},
  cdel(id){fire(()=>q(sb.from('community_messages').delete().eq('id',id)),'Message deleted')},
  signout(){sb.auth.signOut()},
+ photodel(){const old=MEP&&MEP.avatar_path;if(!old)return;fire(async()=>{await q(sb.from('profiles').update({avatar_path:null}).eq('id',ME));await sb.storage.from('avatars').remove([old])},'Photo removed')},
  back(){S.open=false;render()}
 };
 
@@ -959,7 +991,7 @@ ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),e
 
 PG['admin-messages']=()=>chat('admin');
 PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
-PG['admin-settings']=()=>`<div class="stack form" style="max-width:640px">${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
+PG['admin-settings']=()=>`<div class="stack form" style="max-width:640px">${photoCard()}${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
 
 /* partner */
 const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);
@@ -983,7 +1015,11 @@ PG['partner-projects']=()=>card('My projects',tbl(['Project','Client','Rate','St
 PG['partner-commissions']=()=>`<div class="stack"><div class="cards">${stat('Earned',gs(earned(ME)),'')}${stat('Paid',gs(paid(ME)),'')}${stat('Balance',gs(bal(ME)),'')}</div>${card('My ledger',tbl(['Date','Entry','Detail','Amount',''],ledger().filter(l=>l.p===ME).map(l=>({c:[dfmt(l.d),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a),l.pid&&l.t==='Accrual'?act('How','how',l.pid,'line'):'']})),[3]))}</div>`;
 PG['partner-payments']=()=>card('Payouts to me',tbl(['Date','Method','Reference','Amount'],D.payouts.filter(x=>x.p===ME).map(x=>({c:[dfmt(x.d),x.m,esc(x.ref),x.void?tag('Voided','pink'):g(x.amt)]})),[3]));
 PG['partner-messages']=()=>chat('partner');
-PG['partner-profile']=()=>{const p=P(ME);return `<div class="stack form">${card('My details',`<form id="pform" novalidate><div class="who">${av(p.name,0)}<div><b>${esc(p.name)}</b><span>${esc(p.email)}</span></div></div>${field('Phone','phone',{val:p.phone})}${field('City','city',{val:p.city})}${field('Payout account (masked)','acct',{val:p.acct||'',ph:'****1234',hint:'Only a masked number. Full account numbers are rejected.'})}<div class="hint">Name, email, role and status can only be changed by an administrator.</div><div class="err" id="perr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">Save changes</button></div></form>`)}</div>`};
+PG['partner-profile']=()=>{const p=P(ME),a=D.pay[ME]||{},k=S.payKind||a.kind||'momo';
+  const provOpts=k==='momo'?MOMO_NETS:GH_BANKS;
+  return `<div class="stack form">${photoCard()}
+  ${card('My details',`<form id="pform" novalidate><div class="who">${av(p.name,0)}<div><b>${esc(p.name)}</b><span>${esc(p.email)}</span></div></div>${field('Phone number','phone',{val:p.phone,type:'tel',ac:'tel',inputmode:'tel',ph:'024 123 4567',hint:'The number the studio can call you on.'})}${field('City or town','city',{val:p.city,ac:'address-level2',ph:'Accra'})}<div class="hint">Your name and email can only be changed by the studio.</div><div class="err" id="perr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">Save details</button></div></form>`)}
+  ${card('How you get paid',`${D.pay[ME]?`<div class="paybox"><div class="small muted">Currently paid to</div><b>${esc(KINDS[a.kind])}</b><div>${payLine(a,true)}</div><div class="small muted" style="margin-top:4px">Last changed ${dfmt(String(a.updated_at).slice(0,10))}</div></div>`:''}<form id="payform" novalidate>${field('Payment method','kind',{opts:[['momo','Mobile Money'],['bank','Bank account']],val:k})}${field(k==='momo'?'Network':'Bank','provider',{val:a.kind===k?a.provider:'',ph:k==='momo'?'MTN MoMo':'GCB Bank',ac:'off'})}<datalist id="provlist">${provOpts.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${two(field(k==='momo'?'Mobile Money number':'Account number','acct',{val:'',inputmode:'numeric',ph:k==='momo'?'024 123 4567':'Account number',ac:'off'}),field('Type the number again','acct2',{val:'',inputmode:'numeric',ac:'off'}))}${field(k==='momo'?'Name on the Mobile Money account':'Account name','aname',{val:a.kind===k?a.account_name:p.name,ac:'off'})}${k==='bank'?field('Branch (optional)','branch',{val:a.branch||'',ac:'off'}):''}<div class="hint">Only you and the studio can see these details. The studio is told whenever they change.</div><div class="err" id="payerr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">${D.pay[ME]?'Update payout details':'Save payout details'}</button></div></form>`)}</div>`};
 
 /* ---------- router + shell ---------- */
 const NAV={admin:[['dashboard','Dashboard','home'],['referrals','Referrals','send'],['clients','Clients','brief'],['projects','Projects','layers'],['payments','Payments','card'],['commissions','Commissions','pct'],['payouts','Payouts','wallet'],['partners','Partners','users'],['messages','Messages','chat'],['community','Community','megaphone'],['reports','Reports','chart'],['audit','Audit log','shield']],
@@ -1001,7 +1037,7 @@ function sIndex(){const r=role(),o=[];
 function profCard(r){
   if(r==='admin'){const a=D.partners.filter(p=>p.st==='Active').length,pe=D.invites.length,pc=Math.round(a/((a+pe)||1)*100);
     return `<div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>Team joined</b><p>${pe?pe+' invitation'+(pe>1?'s':'')+' waiting to be accepted.':'Everyone invited has joined.'}</p></div><button class="btn soft wide" type="button" data-act="invite">Invite a partner</button>`}
-  const p=P(ME),st=[true,!!p.phone,!!p.city,!!p.acct,D.refs.some(x=>x.p===ME)],pc=Math.round(st.filter(Boolean).length/st.length*100);
+  const p=P(ME),st=[true,!!p.phone,!!p.city,!!D.pay[ME],D.refs.some(x=>x.p===ME)],pc=Math.round(st.filter(Boolean).length/st.length*100);
   return `<div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>${pc===100?'Profile complete':'Complete profile'}</b><p>${pc===100?'You are ready to be paid.':'Add the missing details to be ready for payouts.'}</p></div><a class="btn soft wide" href="#partner-profile">${pc===100?'View profile':'Complete profile'}</a>`}
 const back=(h,l)=>`<a class="btn white" href="#${h}">${ic('back',16)} ${l}</a>`;
 const kv=rows=>`<div class="kv">${rows.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`;
@@ -1012,7 +1048,7 @@ PG.partnerD=id=>{const p=P(id);if(!p)return PG['admin-partners']();
   const cs=D.clients.filter(c=>c.p===id),prs=D.projects.filter(x=>CL(x.c).p===id),po=D.payouts.filter(x=>x.p===id).sort((a,b)=>b.d.localeCompare(a.d)),rf=D.refs.filter(x=>x.p===id);
   return `<div class="pha">${back('admin-partners','Partners')}<span class="grow"></span><a class="btn white" href="#admin-messages">${ic('chat',16)} Message</a>${act(p.st==='Active'?'Suspend':'Reactivate','suspend',id,'white')}<button class="btn pink" data-act="payout" data-id="${id}" type="button">${ic('plus',16)} Record payout</button></div>
   <div class="stack"><div class="cards">${stat('Earned so far',gs(earned(id)),pluralize(cs.length,'client'))}${stat('Paid out',gs(paid(id)),pluralize(po.filter(x=>!x.void).length,'payout'))}${stat('Balance',gs(bal(id)),'Available now '+g(avail(id)))}</div>
-  ${card('Details',kv([['Status',stTag(p.st)],['Email',esc(p.email)],['Phone',esc(p.phone)],['City',esc(p.city)]]))}
+  ${card('Details',kv([['Status',stTag(p.st)],['Email',esc(p.email)],['Phone',esc(p.phone)],['City',esc(p.city)],['Payout to',D.pay[id]?esc(KINDS[D.pay[id].kind])+' · '+payLine(D.pay[id],true):'<span class="muted">Not added yet</span>']]))}
   ${card('Clients',tbl(['Client','Projects','Paid so far','Commission'],cs.map(c=>({href:'admin-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),D.projects.filter(x=>x.c===c.id).length,g(cPaid(c)),g(cCom(c))]})),[2,3]))}
   ${card('Projects',tbl(['Project','Client','Rate','Status'],prs.map(x=>({href:'admin-project-'+x.id,c:[`<b>${esc(x.name)}</b>`,esc(CL(x.c).name),pct(x.rate),stTag(x.st)]})),[2]))}
   ${card('Payouts',tbl(['Date','Reference','Method','Amount'],po.map(x=>({c:[dfmt(x.d),esc(x.id)+'<div class="small muted">'+esc(x.ref)+'</div>',esc(x.m),x.void?tag('Voided'):g(x.amt)]})),[3]))}
@@ -1087,7 +1123,7 @@ function render_(){
   $('#nav').innerHTML=NAV[r].map(n=>`<a href="#${r}-${n[0]}" class="ni ${n[0]===nk?'on':''}"><span class="ico">${ic(n[2],17)}</span><span>${n[1]}</span>${badge[n[0]]?`<span class="cnt">${badge[n[0]]}</span>`:''}</a>`).join('');
   $('#prof').innerHTML=profCard(r);
   const me=P(ME);
-  $('#urow').innerHTML=r==='admin'?`<span class="uav">TS</span><div class="uinfo"><b>${esc(MEP.full_name||'Studio admin')}</b><small>${esc(MEP.email)}</small></div><a class="ibtn dk" href="#admin-settings" aria-label="Settings">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`:`<span class="uav">${esc(me.name.split(' ').map(w=>w[0]).join(''))}</span><div class="uinfo"><b>${esc(me.name)}</b><small>${esc(me.email)}</small></div><a class="ibtn dk" href="#partner-profile" aria-label="My profile">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`;
+  $('#urow').innerHTML=r==='admin'?`<span class="uav">${meAv()?`<img src="${esc(meAv())}" alt="">`:inits(MEP.full_name||'TS')}</span><div class="uinfo"><b>${esc(MEP.full_name||'Studio admin')}</b><small>${esc(MEP.email)}</small></div><a class="ibtn dk" href="#admin-settings" aria-label="Settings">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`:`<span class="uav">${meAv()?`<img src="${esc(meAv())}" alt="">`:inits(me.name)}</span><div class="uinfo"><b>${esc(me.name)}</b><small>${esc(me.email)}</small></div><a class="ibtn dk" href="#partner-profile" aria-label="My profile">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`;
   const nn=notesFor(r),un=nn.filter(n=>n.n).length;
   $('#head').innerHTML=`<button class="ibtn menu" type="button" id="menubtn" aria-label="Open menu">${ic('menu',18)}</button><div class="gsearch"><label>${ic('search',17)}<input id="gs" type="text" placeholder="${innerWidth<560?'Search…':'Search anything…'}" autocomplete="off" aria-label="Search"><kbd>/</kbd></label><div class="sres" id="sres" role="listbox"></div></div><span class="grow"></span><div class="rel"><button class="ibtn" type="button" id="bell" aria-label="Notifications">${ic('bell',18)}${un?'<i class="rd"></i>':''}</button><div class="pop" id="pop"><h3>Notifications</h3>${nn.slice(0,6).map(n=>`<a href="#${n.h}" class="${n.n?'new':''}">${esc(n.t)}</a>`).join('')||'<div class="empty">All caught up.</div>'}<a class="pall" href="#${r}-notifications">View all notifications</a></div></div><a class="ibtn" href="#${r}-messages" aria-label="Messages">${ic('mail',18)}${um?'<i class="rd"></i>':''}</a>`;
   $('#view').innerHTML=(key==='dashboard'?'<h1 class="sr">Dashboard</h1>':`<h1 class="ptitle">${esc(title)}</h1>`)+html;
@@ -1137,13 +1173,31 @@ document.addEventListener('input',e=>{if(e.target.id!=='gs')return;const q=e.tar
 document.addEventListener('input',e=>{if(e.target.id!=='xin')return;const v=e.target.value.slice(0,e.target.selectionStart),m=v.match(/(?:^|\s)@([A-Za-z]*)$/),box=$('#sug');if(!m){box.classList.remove('open');return}const q=m[1].toLowerCase();
   const o=D.dir.filter(p=>p.role==='partner'&&p.id!==vid()).map(p=>({h:p.name.split(' ')[0],n:p.name,i:pIdx(p.id)})).concat(role()==='admin'?[{h:'everyone',n:'Everyone',i:3}]:[{h:'Studio',n:'Studio team',i:3}]).filter(x=>x.h.toLowerCase().startsWith(q));
   box.innerHTML=o.map(x=>`<button type="button" data-sug="${x.h}">${av(x.n,x.i)}<span><b>@${x.h}</b><small class="muted"> ${esc(x.n)}</small></span></button>`).join('');box.classList.toggle('open',o.length>0)});
-document.addEventListener('change',e=>{if(e.target.id==='qp-p'){const p=e.target.value;$('#qp-av').textContent=g(avail(p));$('#qp-hold').textContent='On hold '+g(held(p));$('#qp-a').value=''}});
+document.addEventListener('change',e=>{if(e.target.id==='photo-in'&&e.target.files&&e.target.files[0]){uploadPhoto(e.target.files[0]);e.target.value='';return}
+  if(e.target.closest('#payform')&&e.target.name==='kind'){S.payKind=e.target.value;const y=scrollY;render();scrollTo(0,y);return}
+  if(e.target.id==='qp-p'){const p=e.target.value;$('#qp-av').textContent=g(avail(p));$('#qp-hold').textContent='On hold '+g(held(p));$('#qp-a').value=''}});
 document.addEventListener('input',e=>{const q=e.target.dataset&&e.target.dataset.q;if(q){S.q[q]=e.target.value;const pos=e.target.selectionStart;render();const n=document.querySelector(`[data-q="${q}"]`);if(n){n.focus();n.setSelectionRange(pos,pos)}}});
 document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.set;if(k==='hold'){fire(()=>q(sb.from('settings').update({hold_days:Number(e.target.value)}).eq('id',1)),'Setting saved')}});
 document.addEventListener('submit',e=>{
   if(e.target.id==='xform'){e.preventDefault();const v=$('#xin').value.trim();if(!v)return;$('#xin').value='';fire(()=>q(sb.from('community_messages').insert({body:v}))).then(()=>{const x=$('#xin');x&&x.focus()});return}
   if(e.target.id==='cform'){e.preventDefault();const v=$('#cin').value.trim();if(!v)return;const cid=role()==='admin'?S.conv:ME;if(!cid)return;$('#cin').value='';fire(()=>q(sb.from('messages').insert({partner_id:cid,body:v}))).then(()=>{$('#cin')&&$('#cin').focus()});return}
-  if(e.target.id==='pform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!f.phone.trim()||!f.city.trim()){$('#perr').textContent='Enter your phone number and city.';return}if(!/^[0-9+\s]{9,16}$/.test(f.phone.trim())){$('#perr').textContent='Enter a valid phone number.';return}const ac=(f.acct||'').trim();if(/\d{5,}/.test(ac)){$('#perr').textContent='Enter only a masked account such as ****1234.';return}fire(()=>q(sb.from('profiles').update({phone:f.phone.trim(),city:f.city.trim(),account_mask:ac||null}).eq('id',ME)),'Profile saved')}
+  if(e.target.id==='pform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#perr').textContent=t};
+    const ph=(f.phone||'').trim(),digits=ph.replace(/[\s\-().]/g,'');
+    if(!ph)return er('Enter your phone number.');
+    if(!/^\+?\d{9,15}$/.test(digits))return er('Enter a phone number using digits only, like 024 123 4567 or +233 24 123 4567.');
+    if(!(f.city||'').trim())return er('Enter your city or town.');
+    fire(()=>q(sb.from('profiles').update({phone:ph,city:f.city.trim()}).eq('id',ME)),'Details saved')}
+  if(e.target.id==='payform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#payerr').textContent=t};
+    let n=(f.acct||'').replace(/[\s\-]/g,''),n2=(f.acct2||'').replace(/[\s\-]/g,'');
+    if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n))n='0'+n.replace(/^\+?233/,'');if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n2))n2='0'+n2.replace(/^\+?233/,'');
+    if(!(f.provider||'').trim())return er(f.kind==='momo'?'Choose your Mobile Money network.':'Enter your bank.');
+    if(!/^\d+$/.test(n))return er('Enter the number using digits only.');
+    if(f.kind==='momo'&&!/^0\d{9}$/.test(n))return er('A Mobile Money number has 10 digits, like 024 123 4567.');
+    if(f.kind==='bank'&&!/^\d{6,20}$/.test(n))return er('Enter the full account number (6 to 20 digits).');
+    if(n!==n2)return er('The two numbers do not match. Check them and type them again.');
+    if((f.aname||'').trim().length<2)return er('Enter the name on the account.');
+    const row={kind:f.kind,provider:f.provider.trim(),account_number:n,account_name:f.aname.trim(),branch:f.kind==='bank'?(f.branch||'').trim()||null:null};
+    fire(()=>D.pay[ME]?q(sb.from('payout_accounts').update(row).eq('partner_id',ME)):q(sb.from('payout_accounts').insert(Object.assign({partner_id:ME},row))),'Payout details saved. The studio has been told.')}
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeModal();closeFb();closeRail();const s=$('#sres');s&&s.classList.remove('open');if(S.rm||S.fm){S.rm=null;S.fm=false;render()}return}

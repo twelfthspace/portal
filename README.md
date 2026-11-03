@@ -14,7 +14,7 @@ Private portal for the studio and its invited Growth Partners. The page itself i
 | `supabase/functions/partner-admin/` | Edge Function for invite, revoke invite, suspend, reactivate. Already deployed. |
 | `supabase/tests/rls_smoke_test.sql` | Access-rule test. Run it in the SQL editor; it always rolls back and prints results as an error. |
 | `site/index.html` | The live portal page. Published by `.github/workflows/pages.yml` on every push to `main`. |
-| `tools/make_live.py` | Rebuilds `site/index.html` from the design preview: `python3 -I tools/make_live.py preview.html site/index.html`. |
+| `tools/make_live.py` | One-time conversion of the design preview into the first live page. `site/index.html` is now edited directly. |
 | `tools/smoke.js` | Headless browser test with Supabase mocked: signs in as admin and partner and opens every page. |
 
 ## Rules the database enforces

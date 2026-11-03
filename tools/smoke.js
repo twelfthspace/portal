@@ -32,6 +32,7 @@ const data = {
   notifications: [{ id: 'x1', user_id: ADM, text: 'Ama Mensah sent a message', link: 'admin-messages', read_at: null, created_at: T }],
   partner_balances: [{ partner_id: AMA, full_name: 'Ama Mensah', earned: 43000, paid: 10000, held: 13500, balance: 33000, available: 19500 },
                      { partner_id: KOJO, full_name: 'Kojo Boateng', earned: 0, paid: 0, held: 0, balance: 0, available: 0 }],
+  payout_accounts: [{ partner_id: AMA, kind: 'momo', provider: 'MTN MoMo', account_number: '0240312264', account_name: 'Ama Mensah', branch: null, updated_at: T }],
   audit_log: [{ id: 1, at: T, actor_id: ADM, action: 'update', entity: 'projects', entity_id: PR1, reason: 'Agreed', old_row: { name: 'Brand refresh', rate_bp: 1000 }, new_row: { name: 'Brand refresh', rate_bp: 1500 } }],
 };
 
@@ -55,13 +56,17 @@ async function run(who) {
     const user = { id: me.id, email: me.email, aud: 'authenticated', role: 'authenticated', user_metadata: {} };
     if (u.pathname === '/auth/v1/token') return json({ access_token: 'fake.jwt.token', token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r', user });
     if (u.pathname === '/auth/v1/user') return json(user);
+    if (u.hostname === 'bflvfcvltkpyshnedgtf.supabase.co' && u.pathname.startsWith('/storage/v1/object/sign/avatars/') && m === 'GET') return r.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') });
     if (u.pathname === '/auth/v1/logout') return r.fulfill({ status: 204, body: '' });
     if (u.pathname.startsWith('/rest/v1/rpc/')) {
       const fn = u.pathname.split('/').pop();
-      if (fn === 'community_directory') return json(profiles.map(p => ({ id: p.id, full_name: p.full_name, role: p.role })));
+      if (fn === 'community_directory') return json(profiles.map(p => ({ id: p.id, full_name: p.full_name, role: p.role, avatar_path: p.id === AMA ? AMA + '/avatar-1.jpg' : null })));
       if (fn === 'pending_invitations') return json([{ id: 'i1', email: 'nii@studio.test', full_name: 'Nii Lamptey', invited_at: T }]);
       writes.push(m + ' rpc ' + fn + ' ' + r.request().postData()); return json(null);
     }
+    if (u.pathname.startsWith('/storage/v1/object/sign/')) { const b = JSON.parse(r.request().postData() || '{}'); return json((b.paths || []).map(x => ({ path: x, signedURL: '/object/sign/avatars/' + x + '?token=t', error: null }))); }
+    if (u.pathname.startsWith('/storage/v1/object/avatars/')) { writes.push(m + ' storage ' + u.pathname.replace('/storage/v1/object/', '')); return json({ Key: 'avatars/x', Id: 'x' }); }
+    if (u.pathname.startsWith('/storage/v1/')) { return json([]); }
     const t = u.pathname.replace('/rest/v1/', '');
     if (m !== 'GET') { writes.push(m + ' ' + t + ' ' + (r.request().postData() || u.search)); return json(acc.includes('object') ? { id: 'new-id', status: 'pending' } : []); }
     let rows = t === 'profiles' ? (me.role === 'admin' ? profiles : [me]) : data[t];
@@ -101,6 +106,19 @@ async function run(who) {
     writes.push('overpay msg: ' + await page.textContent('#merr'));
     await page.click('[data-close]');
   } else {
+    await page.evaluate(() => { location.hash = 'partner-profile' }); await page.waitForTimeout(200);
+    writes.push('photo shown: ' + await page.evaluate(() => !!document.querySelector('.photo .ph img')));
+    await page.fill('#f-phone', 'Raymond Kwabla'); await page.click('#pform button[type=submit]'); await page.waitForTimeout(100);
+    writes.push('bad phone msg: ' + await page.textContent('#perr'));
+    await page.fill('#f-phone', '+233 24 031-2264'); await page.click('#pform button[type=submit]'); await page.waitForTimeout(300);
+    await page.fill('#f-acct', '024 031 2264'); await page.fill('#f-acct2', '0240312265'); await page.click('#payform button[type=submit]'); await page.waitForTimeout(100);
+    writes.push('mismatch msg: ' + await page.textContent('#payerr'));
+    await page.fill('#f-acct2', '+233240312264'); await page.click('#payform button[type=submit]'); await page.waitForTimeout(300);
+    await page.selectOption('#f-kind', 'bank'); await page.waitForTimeout(150);
+    writes.push('bank form: branch=' + await page.evaluate(() => !!document.querySelector('#f-branch')) + ' label=' + await page.textContent('label[for=f-provider]'));
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await page.setInputFiles('#photo-in', { name: 'me.png', mimeType: 'image/png', buffer: png }); await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(outdir, 'partner-profile.png'), fullPage: true });
     await page.evaluate(() => { location.hash = 'partner-referrals' }); await page.waitForTimeout(150);
     await page.click('button[data-act=referral]'); await page.fill('#f-biz', 'Tema Prints');
     await page.click('#mform button[type=submit]'); await page.waitForTimeout(400);
