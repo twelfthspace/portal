@@ -1,0 +1,1173 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>Twelfth Space Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout recreated from the Payflow dashboard reference: dark docked sidebar with a nav card, off-white rounded canvas, white cards with hairline borders, dark gradient balance card, dot status pills, sand and grey bar charts. No shadows. One colour scheme, all colours are tokens below so the brand palette can be swapped in later. */
+:root{
+  --side:#24282C;--side-2:#24282C;--canvas:#F3F3E7;--card:#fff;--line:rgba(62,70,49,.13);--line-2:rgba(62,70,49,.08);
+  --ink:#24282C;--muted:#6a7360;--dark:#3E4631;--dark-2:#24282C;
+  --sand:#FAFF7E;--sand-2:#FEFFDA;--grey-1:#C2CBAF;--grey-2:#D2E3C0;
+  --ok:#4f8a3a;--warn:#e29a1d;--bad:#d9503f;--info:#4a74d4;
+  --up-bg:#e5f5d9;--up:#3c7a1d;--dn-bg:#fde7e4;--dn:#c0392b;
+  --f:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{overflow-x:clip;background:var(--side-2)}
+body{margin:0;min-height:100vh;background:var(--side-2);color:var(--ink);font:14px/1.45 var(--f);-webkit-font-smoothing:antialiased;overflow-x:clip}
+h1,h2,h3,p,ul{margin:0}ul{padding:0;list-style:none}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.side :focus-visible{outline-color:#f3f1ee}
+.ic{flex:none;display:block}
+.muted{color:var(--muted)}.small{font-size:13px}.num{font-variant-numeric:tabular-nums}
+.grow{flex:1}.rel{position:relative}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sub{font-size:12.5px;color:var(--muted);font-weight:400}
+
+/* ---- shell ---- */
+.app{display:flex;align-items:flex-start;min-height:100vh;max-width:1760px;margin:0 auto}
+.side{position:sticky;top:0;height:100vh;height:100dvh;width:262px;flex:none;display:flex;flex-direction:column;gap:12px;padding:16px 14px 14px;color:#f3f1ee;z-index:60;background:var(--side-2)}
+.brand{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;flex:none}
+.logo-full{height:30px;width:auto;display:block}
+.brand .close{display:none}
+.navcard{flex:0 1 auto;min-height:0;overflow-y:auto;background:rgba(253,253,239,.07);border-radius:22px;padding:8px;display:flex;flex-direction:column;gap:2px;scrollbar-width:none}
+.navcard::-webkit-scrollbar{display:none}
+.ni{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 12px 0 5px;border-radius:18px;color:#d2d8c6;font-weight:500;font-size:14px;transition:background .15s,color .15s;flex:none}
+.ni .ico{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center;flex:none}
+.ni:hover{background:rgba(253,253,239,.07);color:#fff}
+.ni.on{background:linear-gradient(90deg,#5d6a48,#3E4631);color:#fff}
+.ni.on .ico{background:rgba(255,255,255,.18)}
+.cnt{margin-left:auto;background:var(--sand);color:#24282C;border-radius:10px;min-width:20px;height:20px;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+.switch{border:1.5px dashed rgba(255,255,255,.16);border-radius:18px;padding:10px;flex:none}
+.switch .cap{display:block;font-size:11px;color:#a3ab95;margin:0 0 6px 4px}
+.seg{display:flex;gap:4px;background:rgba(253,253,239,.07);border-radius:12px;padding:3px}
+.seg a{flex:1;text-align:center;padding:7px 6px;border-radius:9px;color:#d2d8c6;font-weight:500;font-size:13px}
+.seg a.on{background:#FDFDEF;color:#24282C}
+.side .spacer{flex:1;min-height:0}
+.prof{background:#fff;color:var(--ink);border-radius:22px;padding:14px;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center;flex:none}
+.ring{--p:40;width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--dark) calc(var(--p)*1%),#dfe2d0 0);display:grid;place-items:center;position:relative;flex:none;font-size:11px;font-weight:600}
+.ring::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
+.ring span{position:relative}
+.ptx{flex:1;min-width:0}.ptx b{display:block;font-size:14px}.ptx p{margin-top:2px;font-size:12px;color:var(--muted);line-height:1.35}
+.urow{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 8px;background:linear-gradient(90deg,#3E4631,#2c3128);border-radius:20px;flex:none}
+.uav{width:42px;height:42px;border-radius:50%;background:var(--sand);color:#24282C;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.uinfo{flex:1;min-width:0}.uinfo b{display:block;font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.uinfo small{display:block;font-size:12px;color:#a3ab95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.canvas{flex:1;min-width:0;margin:10px 10px 10px 0;border-radius:28px;background:var(--canvas);padding:20px 22px 48px;min-height:calc(100vh - 20px);position:relative}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:18px;position:relative}
+.top .menu{display:none}
+.ibtn{width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);position:relative;flex:none;transition:background .15s}
+.ibtn:hover{background:#F8F8EE}
+.ibtn.act{background:var(--dark);color:#fff;border-color:var(--dark)}
+.ibtn.dk{background:transparent;border:0;color:#d2d8c6}.ibtn.dk:hover{background:rgba(255,255,255,.08);color:#fff}
+.ibtn .rd,.avb .rd{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid #fff;box-sizing:content-box;margin:-2px -2px 0 0}
+.avb .rd{top:2px;right:2px}
+.gsearch{position:relative;flex:1;max-width:420px;min-width:0}
+.gsearch label{display:flex;align-items:center;gap:10px;height:42px;border-radius:999px;background:#fff;border:1px solid var(--line);padding:0 8px 0 14px;color:var(--muted)}
+.gsearch input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:500 14px var(--f);color:var(--ink)}
+.gsearch input::placeholder{color:var(--muted)}
+kbd{font:600 12px var(--f);color:var(--muted);background:var(--canvas);border-radius:9px;padding:5px 9px}
+.sres,.pop{position:absolute;top:50px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:8px;z-index:70;display:none}
+.sres{left:0;right:0;min-width:min(320px,calc(100vw - 32px))}
+.pop{right:0;width:min(330px,calc(100vw - 32px))}
+.sres.open,.pop.open{display:block}
+.sres a{display:block;padding:9px 10px;border-radius:12px}
+.sres a:hover,.pop a:hover{background:var(--canvas)}
+.sres b{display:block;font-weight:600;font-size:14px}.sres small{display:block;color:var(--muted);font-size:12px}
+.pop h3{font-size:14px;padding:6px 10px 8px}
+.pop a{display:block;padding:10px;border-radius:12px;font-weight:500;font-size:14px}
+.pop a.new{font-weight:700}
+.ptitle{font-size:24px;font-weight:600;letter-spacing:-.02em;margin:2px 0 16px;overflow-wrap:anywhere}
+.pha{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
+
+/* ---- cards ---- */
+.stack{display:flex;flex-direction:column;gap:16px}
+.row2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:16px}
+.card,.glass{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;min-width:0;color:var(--ink)}
+.card h2,.glass h2{font-size:16px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h2 .more{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
+.stat .lab{font-size:13px;font-weight:500;color:var(--muted)}
+.big{font-size:clamp(22px,2.4vw,28px);font-weight:600;margin-top:8px;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.big small{font-size:.5em;font-weight:600;color:var(--muted);margin-right:5px}
+.stat .foot{margin-top:6px;font-size:12px;color:var(--muted)}
+
+/* dashboard grid */
+.dgrid{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,270px);gap:16px;align-items:start}
+.dgrid>.mid{order:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.bal{background:linear-gradient(165deg,#4d583c 0,#24282C 75%);border:0;border-radius:24px;padding:14px 6px 6px;color:#fff}
+.bal .bh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:0 12px 14px}
+.bal h2{font-size:16px;margin:0;color:#fff;display:block}
+.bal small{display:block;color:#c9d0bc;font-size:12px;font-weight:400;margin-top:2px}
+.curp{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border-radius:14px;padding:8px 10px;font-weight:600;font-size:13px;color:#fff;flex:none}
+.flag{width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,#ce1126 0 33%,#fcd116 33% 66%,#006b3f 66%);display:block}
+.inner{background:#fff;color:var(--ink);border-radius:18px;padding:14px 16px 0;overflow:hidden}
+.inner .lab{font-size:12.5px;color:var(--muted);font-weight:500}
+.amt{font-size:clamp(24px,7vw,30px);font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px}
+.amt .cur{font-size:.55em;font-weight:500;color:var(--muted);margin-right:2px;letter-spacing:0}
+.amt .dec{color:#a9b09b}
+.cells{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin:14px -16px 0}
+.cells>*{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;font-weight:500;font-size:13.5px;padding:0 8px;text-align:center}
+.cells>*+*{border-left:1px solid var(--line)}
+.cells>*:hover{background:#F8F8EE}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.ch h2{margin:0;font-size:15px;font-weight:600}
+.ch .sub{margin-top:2px}
+.mini-link{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted);flex:none}
+.mini-link:hover{background:var(--canvas);color:var(--ink)}
+.avs{display:flex;gap:10px;flex-wrap:wrap}
+.avb{position:relative;border-radius:50%;display:block}
+.avb .av{width:44px;height:44px;font-size:14px}
+.avb:hover .av{outline:2px solid var(--dark);outline-offset:2px}
+.ctb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.ctb .btn{width:100%;padding:0 10px}
+.dashbtn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1.5px dashed #cdd2bf;border-radius:16px;color:var(--muted);font-weight:500;width:100%;text-align:center;padding:0 12px}
+.dashbtn:hover{background:#fff;color:var(--ink)}
+
+/* transactions */
+.txc{padding:0}
+.tt{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 20px 14px}
+.tt h2{margin:0 0 2px;font-size:16px}
+.tt p{font-size:12.5px;color:var(--muted)}
+.tools{display:flex;gap:8px}
+.fchip{margin:0 20px 12px;display:inline-flex;align-items:center;gap:8px;background:var(--canvas);border-radius:999px;padding:5px 6px 5px 12px;font-size:12.5px;font-weight:500}
+.fchip button{width:20px;height:20px;border-radius:50%;background:#fff;font-size:14px;line-height:1}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) 62px 96px 112px 34px;gap:10px;align-items:center;padding:12px 20px;border-top:1px solid var(--line-2);position:relative;font-size:13px}
+.trow.hd{background:#F8F8EE;color:var(--muted);font-size:12px;padding:10px 20px;border-top:1px solid var(--line)}
+.tn{display:flex;align-items:center;gap:10px;min-width:0}
+.tn .av{width:34px;height:34px;font-size:11.5px}
+.tn div{min-width:0}.tn b{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tn small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.ta{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ta.dim{color:var(--muted);text-decoration:line-through}
+.tm{position:relative;justify-self:end}
+.dots{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.dots:hover{background:var(--canvas);color:var(--ink)}
+.rmenu{position:absolute;right:0;top:34px;min-width:176px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;z-index:40}
+.rmenu>*{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:500;white-space:nowrap}
+.rmenu>*:hover{background:var(--canvas)}
+.rmenu>.on{font-weight:700}
+.fm{right:0;top:48px}
+.vall{display:flex;justify-content:center;padding:16px 20px 20px;border-top:1px solid var(--line-2)}
+.pad{padding:22px 20px}
+
+/* charts */
+.cc{min-width:0}
+.duo{padding:0}
+.duo .cc{padding:18px 20px 16px}
+.duo .cc+.cc{border-top:1px solid var(--line)}
+.cc .ch{margin-bottom:4px}.cc .ch h2{font-weight:500;font-size:14px}
+.cn{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cn b{font-size:21px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.dl{font-size:11px;font-weight:600;border-radius:8px;padding:3px 7px;white-space:nowrap}
+.dl.up{background:var(--up-bg);color:var(--up)}.dl.dn{background:var(--dn-bg);color:var(--dn)}.dl.nw{background:var(--canvas);color:var(--muted)}
+.bchart{display:flex;gap:6px;margin-top:34px}
+.bcol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bt{position:relative;height:92px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.bt i{display:block;width:min(100%,30px);height:var(--h);border-radius:8px 8px 6px 6px;background:linear-gradient(180deg,var(--sand),var(--sand-2));transition:background .15s}
+.bcol.on .bt i{background:linear-gradient(180deg,#e4ea4a,#f4f9a6)}
+.bchart.grey .bt i{background:linear-gradient(180deg,var(--grey-1),var(--grey-2))}
+.bchart.grey .bcol.on .bt i{background:linear-gradient(180deg,#24282C,#3E4631)}
+.bl{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.tip{display:none;position:absolute;bottom:calc(var(--h) + 8px);left:50%;transform:translateX(-50%);background:var(--dark-2);color:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:600;white-space:nowrap;z-index:5}
+.bcol:first-child .tip{left:0;transform:none}
+.bcol:last-child .tip{left:auto;right:0;transform:none}
+.bcol:hover .tip,.bcol.on .tip{display:block}
+.bchart:hover .bcol.on:not(:hover) .tip{display:none}
+.bcol{cursor:pointer}
+
+/* quick payout and status card */
+.qbox{border:1px solid var(--line);border-radius:16px;position:relative}
+.qr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;min-height:54px;font-size:14px}
+.qr+.qr{border-top:1px solid var(--line)}
+.qr .muted{white-space:nowrap}
+a.qr:hover{background:#F8F8EE}
+.qr select{min-height:40px;border:0;background:transparent;font:500 13.5px var(--f);width:58%;min-width:0;padding:6px 0;color:var(--ink)}
+.qr input{border:0;outline:0;background:transparent;text-align:right;font:500 20px var(--f);width:38%;min-width:0;color:var(--ink)}
+.qr .v{font-size:17px;font-weight:600;text-align:right;white-space:nowrap}
+.swap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;z-index:2}
+.swap:hover{background:var(--canvas)}
+.qfoot{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin:10px 2px 14px;flex-wrap:wrap}
+
+/* ---- controls ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;height:44px;border-radius:14px;font-weight:600;font-size:14px;background:var(--dark);color:#fff;white-space:nowrap;border:1px solid var(--dark);transition:background .15s}
+.btn:hover{background:#2f3625}
+.btn.white{background:#fff;color:var(--ink);border-color:var(--line)}.btn.white:hover{background:#F8F8EE}
+.btn.soft{background:#EDECE1;color:var(--ink);border-color:#EDECE1}.btn.soft:hover{background:#e2e1d3}
+.btn.line{background:transparent;color:var(--ink);border-color:#cdd2bf}.btn.line:hover{background:#fff}
+.btn.sm{height:34px;padding:0 12px;font-size:12.5px;border-radius:11px}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tabs{display:inline-flex;max-width:100%;flex-wrap:wrap;gap:2px;background:#E6E7D8;border-radius:14px;padding:4px}
+.tabs button{padding:9px 14px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs .on{background:var(--dark);color:#fff}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:0 16px;min-height:42px;flex:1;max-width:380px;min-width:180px;color:var(--muted)}
+.search input{border:0;outline:0;background:transparent;width:100%;min-width:0;padding:10px 0;font:500 14px var(--f)}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;background:#fff;border:1px solid #d9ddca;color:var(--ink)}
+.tag::before{content:"";width:6px;height:6px;border-radius:50%;background:#b5b2ac}
+.tag.mint::before{background:var(--ok)}.tag.sky::before{background:var(--info)}.tag.pink::before{background:var(--bad)}.tag.sun::before{background:var(--warn)}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:12px;color:#3E4631;flex:none}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who b{display:block;font-weight:600}
+.who div{min-width:0}.who div span{display:block;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+
+table{border-collapse:collapse;width:100%;font-size:14px;color:inherit}
+th{text-align:left;font-size:12px;color:var(--muted);padding:0 12px 10px;font-weight:500;white-space:nowrap}
+td{padding:13px 12px;border-top:1px solid var(--line-2);vertical-align:middle;overflow-wrap:anywhere}
+td.r,th.r{text-align:right}
+tbody tr:hover{background:#F8F8EE}
+tr.link{cursor:pointer}
+td.act{text-align:right}
+.list>*{padding:12px 0;border-top:1px solid var(--line-2);display:flex;align-items:center;gap:12px;min-width:0}
+.list>*:first-child{border-top:0;padding-top:0}
+.list .grow{flex:1;min-width:0}
+.empty{padding:20px 0;color:var(--muted)}
+.note{font-size:12.5px;color:var(--dn);margin-top:4px;font-weight:500}
+.banner{background:var(--sand);color:#3E4631;border-radius:16px;padding:12px 16px;margin-bottom:16px;font-size:14px;font-weight:500}
+.bar{margin:12px 0}.bar .t{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.bar .tr{height:12px;border-radius:7px;background:#EDECE1;margin-top:6px}.bar .fi{height:12px;border-radius:7px;background:linear-gradient(90deg,#C2CBAF,#3E4631)}
+
+/* chat */
+.chat{display:grid;grid-template-columns:290px minmax(0,1fr);background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;min-height:480px}
+.convs{border-right:1px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:4px}
+.conv{display:flex;gap:10px;align-items:center;padding:10px;border-radius:16px;text-align:left;width:100%}
+.conv.on{background:var(--canvas)}.conv:hover{background:#F8F8EE}
+.conv .t{flex:1;min-width:0}.conv .t b{display:flex;justify-content:space-between;gap:6px;font-weight:600}.conv .t span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px}
+.ub{background:var(--dark);color:#fff;border-radius:10px;min-width:20px;height:20px;font-size:11px;display:inline-grid;place-items:center;padding:0 6px}
+.thread{display:flex;flex-direction:column;min-width:0}
+.thead{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}
+.thead .back{display:none}
+.msgs{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;background:#F8F8EE;overflow-y:auto;height:360px}
+.bub{max-width:min(78%,460px);padding:10px 14px;border-radius:18px;background:#EDECE1;overflow-wrap:anywhere}
+.bub.me{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:6px}
+.bub:not(.me){border-bottom-left-radius:6px}
+.bub small{display:block;margin-top:4px;opacity:.65;font-size:11px;text-align:right}
+.compose{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--line)}
+.compose input{flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:11px 18px;background:#fff;font-size:14px}
+.chat.solo{grid-template-columns:minmax(0,1fr)}
+
+/* modal, toast, forms */
+.scrim{position:fixed;inset:0;background:rgba(36,40,44,.5);z-index:55;display:none}
+.scrim.open{display:block}
+.modalbg{position:fixed;inset:0;background:rgba(36,40,44,.5);z-index:80;display:none;place-items:center;padding:16px}
+.modalbg.open{display:grid}
+.modal{background:#fff;color:var(--ink);border-radius:26px;padding:24px;width:min(520px,100%);max-height:90vh;max-height:90dvh;overflow-y:auto}
+.modal h2{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.fld label{font-size:12.5px;font-weight:600;color:#4a4743}
+.fld input,.fld select,.fld textarea{border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:#F8F8EE;width:100%;min-height:44px;font-size:14.5px}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--dark);background:#fff}
+.fld input[readonly]{opacity:.8}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.err{color:var(--dn);font-size:14px;font-weight:600;margin-top:12px}
+.mact{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--dark-2);color:#fff;padding:12px 20px;border-radius:999px;z-index:120;display:none;max-width:calc(100vw - 32px);text-align:center;font-weight:500}
+.toast.on{display:block}
+.form{max-width:560px}
+
+/* feedback board */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:70;background:var(--dark-2);color:#fff;border-radius:999px;padding:0 16px;min-height:46px;display:flex;gap:10px;align-items:center;font-weight:600;border:2px solid #fff}
+.fab .n{background:var(--sand);color:#24282C;border-radius:10px;min-width:20px;height:20px;display:grid;place-items:center;font-size:11px;padding:0 6px;font-weight:700}
+.fbp{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:#fff;color:var(--ink);z-index:90;display:none;flex-direction:column;border-left:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.fbp.open{display:flex}.fbp.hide{display:none}
+.fbh{padding:18px 20px 10px;display:flex;align-items:center;gap:10px}
+.fbh h2{font-size:22px;font-weight:600;flex:1;letter-spacing:-.02em}
+.fbc{padding:0 20px 14px;border-bottom:1px solid var(--line)}
+.kinds{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.kinds button{padding:8px 14px;border-radius:999px;background:var(--canvas);font-size:13px;font-weight:600;color:var(--muted)}
+.kinds button.on{background:var(--dark);color:#fff}
+.fbc textarea{width:100%;border:1px solid var(--line);background:#F8F8EE;border-radius:16px;padding:12px 14px;min-height:84px;resize:vertical;font-size:14px}
+.fbc input[type=text]{border:1px solid var(--line);background:#F8F8EE;border-radius:999px;padding:10px 14px;min-width:0;flex:1;font-size:14px}
+.fbl{flex:1;overflow-y:auto;padding:12px 20px 20px;display:flex;flex-direction:column;gap:10px}
+.fi2{border:1px solid var(--line);border-radius:18px;padding:12px 14px;background:#F8F8EE}
+.fi2.done{opacity:.55}
+.fi2 .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:6px}
+.fi2 p{white-space:pre-wrap;overflow-wrap:anywhere}
+.fi2 .ac{display:flex;gap:12px;margin-top:8px;font-size:13px;font-weight:600;flex-wrap:wrap}
+.fbn{font-size:13px;background:var(--sand-2);border-radius:14px;padding:8px 12px;margin:0 20px 8px;font-weight:500}
+.pin{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50% 50% 50% 4px;background:var(--dark-2);color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center;z-index:25;border:2px solid var(--sand);transform:rotate(-45deg)}
+.pin span{transform:rotate(45deg)}
+.pin.pend{background:#fff;color:var(--ink);border:2px dashed var(--ink)}
+.pinmode #wrap{cursor:crosshair}
+.pinbar{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:95;background:var(--dark-2);color:#fff;border-radius:999px;padding:8px 8px 8px 20px;display:none;gap:14px;align-items:center;font-weight:500;max-width:calc(100vw - 32px)}
+.pinbar.on{display:flex}
+.pinbar button{background:var(--sand);color:#24282C;border-radius:999px;padding:8px 14px;font-weight:700}
+#wrap{position:relative}
+
+/* ---- responsive ---- */
+@media (min-width:1400px){.dgrid{grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,270px)}}
+@media (max-width:1399px){
+  .dgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .dgrid>.mid{grid-column:1/-1;order:3}
+}
+@media (max-height:880px){.prof{display:none}}
+@media (max-width:999px){
+  body,html{background:var(--canvas)}
+  .app{display:block}
+  .side{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(300px,86vw);transform:translateX(-102%);transition:transform .2s;border-radius:0 24px 24px 0;padding-top:calc(env(safe-area-inset-top,0px) + 16px)}
+  .side.open{transform:none}
+  .brand .close{display:grid}
+  .canvas{margin:0;border-radius:0;min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,env(safe-area-inset-right,0px)) 90px max(16px,env(safe-area-inset-left,0px))}
+  .top .menu{display:grid}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:859px){
+  .rt .cv{text-align:right;min-width:0;overflow-wrap:anywhere}
+  .rt td.lead .cv{text-align:left;width:100%}
+  .rt td.act .cv{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;width:100%}
+  .card .rt tr{background:transparent;border:0;border-top:1px solid var(--line-2);border-radius:0;padding:12px 0;margin:0}
+  .card .rt tr:first-child{border-top:0;padding-top:0}
+  .list>*{flex-wrap:wrap}
+  .list .grow{display:none}
+  .list>*>.who{flex:1 1 190px}
+  .list>*>.btn,.list>*>.acts{margin-left:auto}
+  .row2{grid-template-columns:minmax(0,1fr)}
+  .rt thead{display:none}
+  .rt,.rt tbody,.rt tr,.rt td{display:block;width:100%}
+  .rt tr{background:#F8F8EE;border:1px solid var(--line-2);border-radius:16px;padding:10px 14px;margin-bottom:10px}
+  .rt td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:6px 0;text-align:right}
+  .rt td:before{content:attr(data-l);color:var(--muted);font-size:12px;font-weight:500;text-align:left;flex:none}
+  .rt td.lead{text-align:left;justify-content:flex-start;padding:0 0 8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .rt td.lead:before,.rt td.act:before{display:none}
+  .rt td.act{justify-content:flex-end;padding-top:10px}
+  .rt td.act:empty{display:none}
+  .chat{grid-template-columns:minmax(0,1fr)}
+  .chat:not(.solo) .thread{display:none}
+  .chat.open .thread{display:flex}.chat.open .convs{display:none}
+  .thead .back{display:grid}
+}
+@media (max-width:720px){
+  .dgrid{grid-template-columns:minmax(0,1fr)}
+  .trow.hd{display:none}
+  .trow{grid-template-columns:minmax(0,1fr) auto 32px;grid-template-areas:"n a m" "d s m";row-gap:6px;padding:12px 16px}
+  .trow .tn{grid-area:n}.trow .ta{grid-area:a;text-align:right}.trow .td{grid-area:d}.trow .ts{grid-area:s;justify-self:end}.trow .tm{grid-area:m}
+  .tt{padding:16px 16px 12px}.fchip{margin-left:16px}
+  .vall{padding:14px 16px 16px}
+}
+@media (max-width:560px){
+  .fab{width:44px;min-height:44px;padding:0;justify-content:center;position:fixed}
+  .fab .n{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;font-size:10px}
+  .pha .btn.sm{flex:1 1 140px}
+  .two{grid-template-columns:1fr}
+  .card,.glass{padding:16px;border-radius:20px}
+  .txc,.duo{padding:0}
+  .duo .cc{padding:16px}
+  .ptitle{font-size:22px}
+  .fab .lbl{display:none}.fab{padding:0 14px}
+  .search{max-width:none}
+  .pha .btn{flex:1}
+  .tabs{border-radius:14px}
+  .gsearch kbd{display:none}
+  .top>.grow{display:none}
+  .gsearch{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.post h2{margin-bottom:4px}.post .sub{margin-bottom:10px}.post-b{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}.post.unread{border-color:var(--dark)}
+
+.cwrap{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
+.rules{background:var(--sand-2);color:var(--dark);font-size:12.5px;padding:10px 16px;font-weight:500}
+#cmsgs{height:min(520px,58vh);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cm{display:flex;gap:10px;align-items:flex-start;min-width:0;padding:8px 10px;border-radius:14px}
+.cm.ment{background:rgba(250,255,126,.32)}
+.cmb{flex:1;min-width:0}
+.cmh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cmh small{font-size:12px}.mnote{color:var(--dark);font-weight:600}
+.cmt{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;margin-top:2px}
+.cdel{margin-left:auto;color:var(--muted);font-size:12px;font-weight:600}.cdel:hover{color:var(--dn)}
+.men{background:var(--grey-2);color:var(--dark);border-radius:6px;padding:0 4px;font-weight:600}.men.me{background:var(--sand)}
+.sug{position:absolute;bottom:62px;left:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;z-index:30;min-width:220px;max-width:calc(100% - 32px);display:none}
+.sug.open{display:block}
+.sug button{display:flex;gap:10px;align-items:center;width:100%;padding:7px 10px;border-radius:9px;text-align:left}
+.sug button:hover{background:var(--canvas)}.sug .av{width:30px;height:30px;font-size:11px}
+
+/* tap targets and contrast */
+.dots{width:40px;height:40px}
+.trow{grid-template-columns:minmax(0,1fr) 62px 96px 112px 40px}
+.btn.sm{height:38px}
+.mini-link{width:38px;height:38px}
+.tabs button{min-height:40px;color:#505a43}
+.tabs .on{color:#fff}
+.cdel{padding:12px 10px;margin:-12px -10px -12px auto}
+.urow .ibtn{width:36px;height:36px}
+@media (max-width:720px){.trow{grid-template-columns:minmax(0,1fr) auto 40px}.btn.sm{height:40px}}
+.plinks{display:flex;gap:4px 12px;flex-wrap:wrap;margin:8px 4px 0;font-size:11.5px}
+.plinks a{color:#a3ab95;text-decoration:underline;padding:4px 0}
+.plinks a:hover{color:#fff}
+/* sign-in screens */
+#auth{display:none;min-height:100vh;place-items:center;padding:24px 16px;background:var(--canvas);position:relative}
+.authmode #auth{display:grid}
+.authmode .app{display:none}
+body.authmode,html:has(body.authmode){background:var(--canvas)}
+.acard{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:26px;padding:28px}
+.alogo{background:var(--side);border-radius:16px;display:inline-flex;padding:12px 16px;margin-bottom:20px}
+.alogo img{height:28px;width:auto;display:block}
+.acard h1{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.alinks{margin-top:14px;text-align:center;font-weight:500}.alinks a{text-decoration:underline}
+.apre{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.pw{position:relative}.pw input{padding-right:72px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;padding:10px;color:var(--dark)}
+.rl-list{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.rl{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}.rl.ok{color:var(--ok)}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13.5px}
+.chk input{margin-top:2px;width:18px;height:18px;flex:none}
+.bks{margin-top:10px}.bk{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line-2);font-size:14px}
+.bk b{font-weight:600;white-space:nowrap}.bk.sum{font-weight:600}
+@media (max-width:560px){.acard{padding:22px}}
+
+/* bigger touch targets */
+.tabs button{min-height:40px;color:#4a5240}.tabs .on{color:#fff}
+.cdel{padding:10px 8px;margin:-10px -8px -10px auto}
+@media (max-width:999px){.dots{width:40px;height:40px}.btn.sm{height:40px}.mini-link{width:40px;height:40px}.tabs button{min-height:42px}}
+
+/* split sign-in layout: photo, notch with dots, gradient form panel */
+.authmode #auth{background:var(--side-2);padding:20px}
+body.authmode,html:has(body.authmode){background:var(--side-2)}
+.asplit{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:min(1060px,100%);min-height:min(660px,calc(100vh - 40px))}
+.aphoto{position:relative;border-radius:26px;overflow:hidden;margin-right:6px;min-height:320px}
+.aphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block}
+.achip{position:absolute;left:14px;bottom:14px;background:rgba(36,40,44,.7);color:#fff;border-radius:14px;padding:10px 14px;font-size:12.5px;display:flex;flex-direction:column;line-height:1.3}
+.achip b{font-weight:600}.achip span{color:#d2d8c6}
+.apanel{border-radius:26px;background:linear-gradient(135deg,#D2E3C0 0%,#FEFFDA 58%,#FAFF7E 125%);display:grid;place-items:center;padding:40px 32px;-webkit-mask:radial-gradient(circle 50px at 0 50%,#0000 98%,#000);mask:radial-gradient(circle 50px at 0 50%,#0000 98%,#000)}
+.anotch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:46px;padding:0 16px;margin-left:-3px;background:var(--side-2);border-radius:999px;display:flex;gap:7px;align-items:center;z-index:3}
+.anotch a{width:8px;height:8px;border-radius:50%;background:#6f7862;display:block;position:relative}
+.anotch a::after{content:"";position:absolute;inset:-12px -4px}
+.anotch a.on{width:28px;border-radius:5px;background:#fff}
+.apanel .acard{background:transparent;border:0;padding:0;width:min(380px,100%)}
+.apanel .alogo{margin-bottom:22px}
+.apanel .acard h1{font-size:clamp(28px,3.4vw,38px);font-weight:500;letter-spacing:-.03em;line-height:1.1;margin-bottom:8px}
+.apanel .acard>.muted{color:#4a5240}
+.apanel .fld input,.apanel .fld select,.apanel .fld textarea{background:rgba(255,255,255,.6);border:1px solid rgba(62,70,49,.18)}
+.apanel .fld input:focus,.apanel .fld textarea:focus{background:#fff}
+.apanel .btn.wide{justify-content:space-between;padding:0 20px;height:48px;border-radius:14px}
+.apanel .btn.wide::after{content:"→";font-size:16px}
+.apanel .alinks a,.apanel .apre{color:var(--dark)}
+.apanel .apre{border-top-color:rgba(62,70,49,.18)}
+@media (max-width:820px){
+  .authmode #auth{place-items:start center;padding:14px}
+  .asplit{grid-template-columns:minmax(0,1fr);min-height:0}
+  .aphoto{margin:0 0 6px;min-height:0;height:200px}
+  .aphoto img{object-position:50% 12%}
+  .achip{display:none}
+  .anotch{display:none}
+  .apanel{-webkit-mask:none;mask:none;padding:28px 20px 30px}
+}
+
+/* full-bleed split sign-up (reference: dark green story panel + black form panel) */
+.authmode #auth{display:block;padding:0;background:#0d1011;min-height:100vh}
+body.authmode,html:has(body.authmode){background:#0d1011}
+.aw{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);min-height:100vh;width:100%;color:#fff}
+.al{position:relative;margin:8px;border-radius:20px;overflow:hidden;padding:32px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;
+  background:radial-gradient(ellipse 70% 60% at 22% 18%,#4b5a38 0,transparent 62%),radial-gradient(ellipse 65% 55% at 85% 78%,#5d7a45 0,transparent 60%),radial-gradient(ellipse 80% 70% at 10% 95%,#2c3a26 0,transparent 70%),#151b14}
+.al .alogo{align-self:flex-start;background:rgba(0,0,0,.28);margin:0}
+.al-b{display:flex;flex-direction:column;gap:28px}
+.al-t{display:flex;gap:28px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.al-t h2{font-size:clamp(34px,3.1vw,46px);font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.al-t p{max-width:200px;font-size:14px;line-height:1.5;color:#cfd8c3}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.steps li{min-height:120px;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;background:rgba(255,255,255,.1);color:#e6ecdd;font-weight:500;font-size:14px;line-height:1.3}
+.steps li span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,.18)}
+.steps li.on{background:#fff;color:#1b2018}.steps li.on span{background:#111;color:#fff}
+.ar{display:grid;place-items:center;padding:40px clamp(20px,5vw,72px)}
+.ar .acard{width:min(400px,100%);background:transparent;border:0;padding:0}
+.ar h1{font-size:22px;font-weight:600;text-align:center;letter-spacing:-.01em;margin-bottom:6px;color:#fff}
+.ar .acard>.muted{text-align:center;color:#a3ab98;font-size:13.5px;margin-bottom:8px}
+.ar .fld label{color:#d4dac9}
+.ar .fld input,.ar .fld select,.ar .fld textarea{background:#1f2427;border:1px solid #2c3235;color:#fff}
+.ar .fld input::placeholder,.ar .fld textarea::placeholder{color:#7d867a}
+.ar .fld input:focus,.ar .fld textarea:focus{background:#242a2d;border-color:#8a9680}
+.ar .fld input[readonly]{opacity:.75}
+.ar .hint{color:#8d9686}
+.ar .pw button{color:#e6ecdd}
+.ar .chk{color:#cfd6c4}
+.ar .err{color:#ff9d8a}
+.ar .btn.wide{background:#fff;color:#14181a;border-color:#fff;height:46px;justify-content:center;padding:0 18px}
+.ar .btn.wide::after{content:none}.ar .btn.wide:hover{background:#e9eee0}
+.ar .alinks,.ar .alinks a{color:#d4dac9}.ar .alinks{font-weight:400;font-size:13.5px}.ar .alinks a{color:#fff;text-decoration:underline;font-weight:600}
+.ar .apre{border-top-color:#2c3235;color:#8d9686}
+@media (max-width:900px){
+  .aw{grid-template-columns:minmax(0,1fr);min-height:0}
+  .al{margin:8px 8px 0;padding:22px 20px;min-height:0;gap:20px}
+  .al-b{gap:18px}.al-t{gap:10px}.al-t h2{font-size:30px}.al-t p{max-width:none}
+  .steps{gap:8px}.steps li{min-height:84px;padding:12px;font-size:12px;gap:8px}
+  .ar{padding:28px 20px 90px;place-items:start center}
+}
+
+/* feedback tab docked on the right edge: never covers buttons at the bottom, works on every screen */
+.fab{right:0;left:auto;bottom:auto;top:50%;transform:translateY(-50%) translateX(6px);flex-direction:column;gap:10px;width:42px;min-height:0;padding:14px 0 12px;border-radius:16px 0 0 16px;border:0;border-left:3px solid var(--sand);background:var(--dark-2);color:#fff;justify-content:center;transition:transform .18s}
+.fab:hover,.fab:focus-visible{transform:translateY(-50%) translateX(0)}
+.fab .lbl{display:block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:12.5px;letter-spacing:.04em;white-space:nowrap}
+.fab .n{position:static;min-width:20px;height:20px;font-size:11px}
+.fab svg{width:18px;height:18px}
+body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
+@media (max-width:560px){
+  .fab{width:30px;padding:10px 0;transform:translateY(-50%) translateX(4px);bottom:auto;top:58%}
+  .fab .lbl{display:none}.fab svg{width:16px;height:16px}
+  .fab .n{min-width:18px;height:18px;font-size:10px}
+}
+/* logo sits directly on the page, no background shape */
+.alogo,.al .alogo{background:none!important;padding:0!important;border-radius:0!important;border:0!important;margin:0 0 4px!important}
+.alogo img{height:34px}
+
+/* feedback hidden */
+#fab,.fab,#fbp,.fbp{display:none!important}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 20px}.kv>div{min-width:0}.kv span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}.kv b{font-weight:600;overflow-wrap:anywhere}.kv a{color:inherit;text-decoration:underline}
+.kv .tag{display:inline-flex;width:auto}
+
+.frhero{display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--dark);color:#fff}.frhero h2{color:#fff;font-size:22px;margin:4px 0 8px}.frhero p{color:#dfe5d2;margin:0;max-width:46ch}.frhero .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sand)}
+.fsteps{list-style:none;margin:8px 0 0;padding:0}.fsteps li{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--grey-2)}.fsteps li:first-child{border-top:0}.fsteps li>div:nth-child(2){flex:1;min-width:0}.fsteps p{margin:2px 0 0}
+.fsteps .tick{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--sand-2);border:1px solid var(--grey-1);font-weight:600;font-size:13px}.fsteps .done .tick{background:var(--dark);color:#fff;border-color:var(--dark)}
+@media (max-width:640px){.fsteps li{flex-wrap:wrap}.fsteps .facts{width:100%;padding-left:44px}.frhero{flex-direction:column-reverse;align-items:flex-start}}
+.frhero .ring{width:68px;height:68px;font-size:15px;background:conic-gradient(var(--sand) calc(var(--p)*1%),rgba(255,255,255,.22) 0)}.frhero .ring::before{inset:5px;background:var(--dark)}.frhero .ring span{color:#fff}
+
+.fsel select{min-height:40px;padding:0 34px 0 14px;border-radius:999px;border:1px solid var(--grey-1);background:#fff;color:var(--ink,#14181a);font:inherit;font-size:13.5px;cursor:pointer}
+.more-row{display:flex;justify-content:center;padding:14px 0 4px}
+.linkbtn{background:none;border:0;padding:0;color:inherit;text-decoration:underline;font:inherit;cursor:pointer;min-height:40px}
+.errstate{max-width:560px}.errstate h2{margin-bottom:6px}
+.notes{display:flex;flex-direction:column}.nrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--grey-2);padding:14px 4px;min-height:52px;font:inherit;color:inherit;cursor:pointer}.nrow:first-child{border-top:0}.nrow .dot{width:9px;height:9px;border-radius:50%;background:transparent;flex:none}.nrow.new .dot{background:#d9463b}.nrow.new .nt{font-weight:600}.nrow .nt{flex:1;min-width:0;overflow-wrap:anywhere}.nrow .go{color:var(--muted)}
+.readby{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:13px;color:var(--muted)}.readby b{color:inherit}.rbar{flex:none;width:80px;height:6px;border-radius:99px;background:var(--grey-2);overflow:hidden}.rbar i{display:block;height:100%;background:var(--dark)}.readby span{min-width:0;overflow-wrap:anywhere}
+.cdel{display:inline-flex;align-items:center;min-height:40px}
+.sthead{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.sthead h2{margin:2px 0}.stmeta{display:grid;grid-template-columns:auto auto;gap:4px 12px;font-size:13px;align-content:start}.stmeta span{color:var(--muted)}.sthead .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+@media print{#rail,#head,.scrim,.noprint,#mbg,#toast,.pha{display:none!important}body,.canvas,#wrap,#view{background:#fff!important}.canvas{margin:0!important;border-radius:0!important;padding:0!important}.card{border:0!important;box-shadow:none!important}.ptitle{display:none}.rt td,.rt th{font-size:12px}}
+.pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="rail" aria-label="Main navigation">
+    <div class="brand"><img class="logo-full" src="data:image/png;base64,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" alt="Twelfth Space"><button class="ibtn dk close" type="button" id="railx" aria-label="Close menu"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <nav class="navcard" id="nav" aria-label="Pages"></nav>
+    <div class="spacer"></div>
+    <section class="prof" id="prof"></section>
+    <div class="urow" id="urow"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <main class="canvas">
+    <header class="top" id="head"></header>
+    <div id="wrap"><div id="view"></div></div>
+  </main>
+</div>
+<div id="auth"></div>
+
+<div class="modalbg" id="mbg"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const g=p=>(p<0?'−':'')+'GHS '+(Math.abs(p)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const gs=p=>`<small>GHS</small>${(Math.abs(p)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const I={megaphone:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M18 5a9 9 0 0 1 0 14",logout:"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",mail:"M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6",gear:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z",refresh:"M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5",filter:"M3 5h18l-7 8v6l-4 2v-8z",dots:"M5 12h.01M12 12h.01M19 12h.01",pencil:"M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",swap:"M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3",upright:"M7 17L17 7M8 7h9v9",downleft:"M17 7L7 17M16 17H7V8",pluscircle:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v8M8 12h8",home:"M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8",send:"M22 2L11 13M22 2l-7 20-4-9-9-4z",brief:"M3 7h18v13H3zM8 7V4h8v3",layers:"M12 2l10 5-10 5L2 7zM2 12l10 5 10-5M2 17l10 5 10-5",card:"M2 5h20v14H2zM2 10h20",pct:"M19 5L5 19M7 6.5a1.5 1.5 0 1 0 0 .01M17 17.5a1.5 1.5 0 1 0 0 .01",wallet:"M3 7h16a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2zM3 7V5a2 2 0 0 1 2-2h12v4M16 14h2",chart:"M3 3v18h18M7 15v3M12 9v9M17 5v13",chat:"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",shield:"M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z",sliders:"M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4",user:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8",bell:"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0",plus:"M12 5v14M5 12h14",arrowr:"M9 6l6 6-6 6",clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",search:"M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-5-5",menu:"M4 6h16M4 12h16M4 18h16",back:"M15 6l-6 6 6 6",x:"M6 6l12 12M18 6L6 18"};
+const ic=(n,s=20,w=1.8)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${I[n]}"/></svg>`;
+const AVC=['#D2E3C0','#C2CBAF','#FAFF7E','#EDECE1','#FEFFDA','#D2E3C0'];
+const av=(n,i=0)=>`<span class="av" style="background:${AVC[Math.abs(i)%AVC.length]}">${esc(n.split(' ').map(w=>w[0]).slice(0,2).join(''))}</span>`;
+const tag=(t,c='')=>`<span class="tag ${c}">${esc(t)}</span>`;
+const TODAY=new Date().toISOString().slice(0,10);
+const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
+const dfmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+const addBiz=(d,n)=>{const t=new Date(d+'T00:00:00');while(n>0){t.setDate(t.getDate()+1);if(t.getDay()%6)n--}return t.toISOString().slice(0,10)};
+const pct=b=>(b/100)+'%';
+/* money: strings -> whole pesewas / basis points, no floating point */
+function parseMoney(s){s=String(s||'').replace(/[,\s]/g,'').replace(/^GHS/i,'');if(!/^\d+(\.\d{1,2})?$/.test(s))return null;const[w,f='']=s.split('.');return Number(w)*100+Number(f.padEnd(2,'0'))}
+
+/* ---------- live data (Supabase) ---------- */
+const SB_URL='https://bflvfcvltkpyshnedgtf.supabase.co',SB_KEY='sb_publishable_G6saB-vGvsaXFFuP38v1sA_KmD6NzRB';
+const BOOT_HASH=location.hash,BASE=location.origin+location.pathname;
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const PST={not_started:'Not started',in_progress:'In progress',on_hold:'On hold',completed:'Completed',cancelled:'Cancelled'};
+const PM={mobile_money:'Mobile money',bank_transfer:'Bank transfer',cash:'Cash'};
+const RST={pending:'Pending review',flagged:'Flagged',approved:'Approved',rejected:'Rejected'};
+const flip=o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[v,k])),PSTr=flip(PST),PMr=flip(PM);
+const blankD=()=>({hold:5,notes:[],audit:[],adj:[],partners:[],invites:[],clients:[],projects:[],payments:[],payouts:[],refs:[],msgs:{},unreadA:{},unreadP:{},ann:[],read:{},chat:[],cs:{admin:{},partner:{}},dir:[],bal:{},newlink:null});
+const D=blankD();const resetD=()=>Object.assign(D,blankD());
+let ME=null,MEP=null,ROLE=null,BOOTED=false;
+const q=async p=>{const {data,error}=await p;if(error)throw error;return data};
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(_){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}};
+const mtime=s=>{const d=new Date(s);return (new Date().toDateString()===d.toDateString()?'Today':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}))+' '+d.toTimeString().slice(0,5)};
+const nice=e=>{const m=String((e&&e.message)||e||'');
+  if(/payments_method_ref|payouts_method_ref/.test(m))return'This transaction reference is already recorded for that method.';
+  if(/account_mask/.test(m))return'Enter only a masked account such as ****1234.';
+  if(/violates check constraint/.test(m))return'Some of these details are not valid. Check them and try again.';
+  if(/JWT|refresh token/i.test(m))return'Your session has expired. Sign in again.';
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m))return'Could not reach the server. Check your connection and try again.';
+  return m||'Something went wrong. Try again.'};
+const ENT={profiles:'partner',settings:'settings',clients:'client',projects:'project',payments:'payment',payouts:'payout',adjustments:'adjustment',referrals:'referral',announcements:'announcement',community_messages:'community message'};
+function describe(a){const n=a.new_row||{},o=a.old_row||{},r=a.action==='delete'?o:n,lab=r.full_name||r.name||r.business||r.title||r.code||r.reference||'',e=ENT[a.entity]||a.entity,L=lab?' '+lab:'';
+  if(a.action==='update'){
+    if(a.entity==='payments'&&n.reversed&&!o.reversed)return'Reversed payment'+L;
+    if(a.entity==='payments'&&n.refunded!==o.refunded)return'Refunded '+g(n.refunded-o.refunded)+' on payment'+L;
+    if(a.entity==='payouts'&&n.voided&&!o.voided)return'Voided payout'+L;
+    if(a.entity==='projects'&&n.rate_bp!==o.rate_bp)return'Changed rate on'+L+' from '+pct(o.rate_bp)+' to '+pct(n.rate_bp);
+    if(a.entity==='projects'&&n.status!==o.status)return'Set'+L+' to '+(PST[n.status]||n.status);
+    if(a.entity==='clients'&&n.partner_id!==o.partner_id)return'Reassigned'+L;
+    if(a.entity==='profiles'&&n.status!==o.status)return(n.status==='suspended'?'Suspended':'Reactivated')+L;
+    if(a.entity==='profiles'&&n.role!==o.role)return'Changed role of'+L+' to '+n.role;
+    if(a.entity==='referrals'&&n.status!==o.status)return({approved:'Approved',rejected:'Rejected',flagged:'Flagged',pending:'Moved to review'}[n.status]||'Updated')+' referral'+L;
+    if(a.entity==='settings')return'Changed settings';
+    return'Updated '+e+L}
+  if(a.action==='insert'){
+    if(a.entity==='payments')return'Recorded payment'+L+' of '+g(n.amount);
+    if(a.entity==='payouts')return'Recorded payout'+L+' of '+g(n.amount);
+    if(a.entity==='adjustments')return'Adjusted balance by '+g(n.amount);
+    if(a.entity==='profiles')return'New account'+L;
+    return'Added '+e+L}
+  return'Deleted '+e+L}
+async function loadAll(){
+  const adm=ROLE==='admin',none=Promise.resolve([]);
+  const [profiles,settings,clients,projects,payments,payouts,adj,refs,flags,msgs,ann,reads,chatm,notes,bals,dir,audit,invites]=await Promise.all([
+    q(sb.from('profiles').select('*')),
+    q(sb.from('settings').select('*').eq('id',1).maybeSingle()),
+    q(sb.from('clients').select('*').order('created_at')),
+    q(sb.from('projects').select('*').order('created_at')),
+    q(sb.from('payments').select('*').order('received_on').order('created_at')),
+    q(sb.from('payouts').select('*').order('created_at')),
+    q(sb.from('adjustments').select('*').order('created_at')),
+    q(sb.from('referrals').select('*').order('created_at',{ascending:false})),
+    adm?q(sb.from('referral_flags').select('*')):none,
+    q(sb.from('messages').select('*').order('created_at')),
+    q(sb.from('announcements').select('*').order('created_at',{ascending:false})),
+    q(sb.from('announcement_reads').select('announcement_id')),
+    q(sb.from('community_messages').select('*').order('created_at',{ascending:false}).limit(300)),
+    q(sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100)),
+    q(sb.from('partner_balances').select('*')),
+    q(sb.rpc('community_directory')),
+    adm?q(sb.from('audit_log').select('*').order('at',{ascending:false}).limit(300)):none,
+    adm?q(sb.rpc('pending_invitations')):none]);
+  const nameOf=id=>{const p=profiles.find(x=>x.id===id)||dir.find(x=>x.id===id);return p?(p.full_name||p.email||'Member'):'Former member'};
+  const roleOf=id=>{const p=dir.find(x=>x.id===id)||profiles.find(x=>x.id===id);return p&&p.role};
+  MEP=profiles.find(p=>p.id===ME)||MEP;
+  D.hold=settings?settings.hold_days:5;
+  D.dir=dir.map(x=>({id:x.id,name:x.full_name||'Member',role:x.role,st:'Active',email:'',city:'',phone:''}));
+  D.partners=profiles.filter(p=>p.role==='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,city:p.city||'',phone:p.phone||'',acct:p.account_mask||'',st:p.status==='active'?'Active':'Suspended'}));
+  D.clients=clients.map(c=>({id:c.id,name:c.name,contact:c.contact||'',email:c.email||'',p:c.partner_id}));
+  D.projects=projects.map(p=>({id:p.id,name:p.name,c:p.client_id,budget:p.budget,rate:p.rate_bp,st:PST[p.status]}));
+  D.payments=payments.map(x=>({id:x.id,d:x.received_on,pr:x.project_id,amt:x.amount,tax:x.tax,m:PM[x.method],mk:x.method,ref:x.reference,refunded:x.refunded,rev:x.reversed,p:x.partner_id,rate:x.rate_bp,cm:x.commission}));
+  D.payouts=payouts.map(x=>({id:x.code,uid:x.id,d:x.paid_on,p:x.partner_id,amt:x.amount,m:PM[x.method],ref:x.reference,void:x.voided}));
+  D.adj=adj.map(a=>({d:a.created_on,p:a.partner_id,amt:a.amount,reason:a.reason}));
+  const fl=Object.fromEntries(flags.map(f=>[f.referral_id,f.note]));
+  D.refs=refs.map(r=>({id:r.id,biz:r.business,p:r.partner_id,bud:r.budget,st:RST[r.status],d:r.created_at.slice(0,10),email:r.email||'',flag:fl[r.id]||'',note:r.decision_note||''}));
+  D.msgs={};D.unreadA={};D.unreadP={};
+  D.partners.forEach(p=>{D.msgs[p.id]=[];D.unreadA[p.id]=0;D.unreadP[p.id]=0});
+  msgs.forEach(m=>{const k=m.partner_id;(D.msgs[k]=D.msgs[k]||[]).push({id:m.id,sid:m.sender_id,f:m.sender_id===k?'p':'a',t:m.body,at:mtime(m.created_at),read:!!m.read_at});
+    if(!m.read_at){if(m.sender_id===k)D.unreadA[k]=(D.unreadA[k]||0)+1;else D.unreadP[k]=(D.unreadP[k]||0)+1}});
+  D.ann=ann.map(a=>({id:a.id,t:a.title,b:a.body,d:a.created_at.slice(0,10),pin:a.pinned}));
+  D.read=Object.fromEntries(reads.map(r=>[r.announcement_id,true]));
+  D.chat=chatm.slice().reverse().map(m=>({id:m.id,sid:m.sender_id,f:roleOf(m.sender_id)==='admin'?'admin':m.sender_id,t:m.body,at:Date.parse(m.created_at)}));
+  D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[ROLE][m.id]=true});
+  D.notes=notes.map(n=>({id:n.id,r:ROLE,t:n.text,h:n.link||(ROLE+'-dashboard'),n:!n.read_at}));
+  D.bal=Object.fromEntries(bals.map(b=>[b.partner_id,b]));
+  D.invites=invites.map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,link:null}));
+  D.audit=audit.map(a=>({t:new Date(a.at),who:a.actor_id?nameOf(a.actor_id):'System',what:describe(a),reason:a.reason||''}));
+  if(adm&&!D.partners.some(p=>p.id===S.conv))S.conv=(D.partners[0]||{}).id;
+}
+async function reload(){try{await loadAll()}catch(e){toast(nice(e))}}
+const callAdmin=async body=>{const {data,error}=await sb.functions.invoke('partner-admin',{body});
+  if(error){let m=error.message;try{const j=await error.context.json();if(j&&j.error)m=j.error}catch(_){}throw new Error(m)}
+  if(data&&data.error)throw new Error(data.error);return data};
+const rpc=(fn,args)=>q(sb.rpc(fn,args));
+const doit=async(fn,ok)=>{try{await fn()}catch(e){return nice(e)}await reload();if(ok)toast(ok);return''};
+const fire=async(fn,ok)=>{const e=await doit(fn,ok);if(e)toast(e);render()};
+const nowIso=()=>new Date().toISOString();
+const markNotesRead=()=>{const L=notesFor(role()).filter(n=>n.n);if(!L.length)return;L.forEach(n=>n.n=false);sb.from('notifications').update({read_at:nowIso()}).in('id',L.map(n=>n.id)).then(()=>{})};
+const dl=(name,t)=>{const b=new Blob(['﻿'+t],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('CSV downloaded')};
+/* lookups and derived money */
+const P=id=>D.partners.find(x=>x.id===id)||D.dir.find(x=>x.id===id)||{id,name:'Former member',email:'',city:'',phone:'',acct:'',st:'Suspended'},CL=id=>D.clients.find(x=>x.id===id)||{id,name:'Client',contact:'',email:'',p:null},PR=id=>D.projects.find(x=>x.id===id)||{id,name:'Project',c:null,budget:0,rate:0,st:'Not started'};
+const pIdx=id=>D.partners.findIndex(x=>x.id===id);
+const net=x=>x.rev?0:Math.max(0,x.amt-x.tax-x.refunded);
+const com=x=>x.cm;
+const own=x=>x.p;
+const sumBy=(arr,f)=>arr.reduce((a,x)=>a+f(x),0);
+const B=p=>D.bal[p]||{earned:0,paid:0,held:0,available:0,balance:0};
+const earned=p=>B(p).earned,paid=p=>B(p).paid,held=p=>B(p).held,avail=p=>B(p).available,bal=p=>B(p).balance;
+const role=()=>ROLE||'partner';
+const log=()=>{};
+const note=()=>{};
+
+/* ---------- building blocks ---------- */
+const stat=(l,v,f)=>`<div class="glass stat"><div class="lab">${l}</div><div class="big">${v}</div><div class="foot">${f||'&nbsp;'}</div></div>`;
+const card=(t,b,more)=>`<section class="card"><h2>${t}${more?`<a class="more" href="#${more[0]}">${more[1]}</a>`:''}</h2>${b}</section>`;
+let CUR_Q=null;
+function tbl(heads,rows,rc=[],empty){
+  const h=heads.map((x,i)=>`<th class="${rc.includes(i)?'r':''}">${x}</th>`).join('');
+  const b=rows.map(r=>`<tr ${r.href?`class="link" data-href="${r.href}"`:''}>${r.c.map((x,i)=>`<td data-l="${esc(heads[i])}" class="${i===0?'lead ':''}${heads[i]===''?'act ':''}${rc.includes(i)?'r num':''}">${x===''?'':'<div class="cv">'+x+'</div>'}</td>`).join('')}</tr>`).join('');
+  return rows.length?`<table class="rt"><thead><tr>${h}</tr></thead><tbody>${b}</tbody></table>`:`<div class="empty">${CUR_Q&&S.q[CUR_Q]?`No matches for “${esc(S.q[CUR_Q])}”. <button type="button" class="linkbtn" data-clearq="${CUR_Q}">Clear search</button>`:esc(empty||"Nothing to show yet.")}</div>`;
+}
+const who=(n,s,i)=>`<div class="who">${av(n,i)}<div><b>${esc(n)}</b>${s?`<span>${esc(s)}</span>`:''}</div></div>`;
+const act=(label,a,id='',cls='soft',extra='')=>`<button type="button" class="btn sm ${cls}" data-act="${a}" data-id="${id}" ${extra}>${label}</button>`;
+const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink'}[s]||'');
+const weekLabels=()=>[5,4,3,2,1,0].map(w=>{const d=new Date(TODAY+'T00:00:00');d.setDate(d.getDate()-w*7);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})});
+function chart(id,vals,kind){
+  const mx=Math.max(1,...vals),a=S.bar[id]!=null?S.bar[id]:vals.length-1,Lb=weekLabels();
+  return `<div class="bchart ${kind==='grey'?'grey':''}">${vals.map((v,i)=>`<button type="button" class="bcol ${i===a?'on':''}" data-bar="${id}:${i}" aria-label="Week of ${Lb[i]}: ${g(v)}"><span class="bt" style="--h:${Math.max(6,Math.round(v/mx*100))}%"><span class="tip">${g(v)}</span><i></i></span><span class="bl">${Lb[i].replace(' ',' ')}</span></button>`).join('')}</div>`}
+const delta=v=>{const a=v.slice(0,3).reduce((s,x)=>s+x,0),b=v.slice(3).reduce((s,x)=>s+x,0);if(!a&&!b)return'';if(!a)return'<span class="dl nw">new</span>';const p=Math.round((b-a)/a*100);return `<span class="dl ${p>=0?'up':'dn'}">${p>0?'+':''}${p}% vs prev</span>`};
+const weekly=(p,f=com)=>{const v=[0,0,0,0,0,0];D.payments.filter(x=>!p||own(x)===p).forEach(x=>{const w=Math.floor((new Date(TODAY)-new Date(x.d))/864e5/7);if(w>=0&&w<6)v[5-w]+=f(x)});return v};
+const field=(l,n,o={})=>`<div class="fld"><label for="f-${n}">${l}</label>${o.opts?`<select id="f-${n}" name="${n}">${o.opts.map(x=>`<option value="${esc(x[0])}" ${x[0]===o.val?'selected':''}>${esc(x[1])}</option>`).join('')}</select>`:o.area?`<textarea id="f-${n}" name="${n}" rows="3" placeholder="${esc(o.ph||'')}">${esc(o.val||'')}</textarea>`:`<input id="f-${n}" name="${n}" type="${o.type||'text'}" value="${esc(o.val||'')}" placeholder="${esc(o.ph||'')}" ${o.ro?'readonly':''} ${o.inputmode?`inputmode="${o.inputmode}"`:''} autocomplete="off">`}${o.hint?`<div class="hint">${o.hint}</div>`:''}</div>`;
+const two=(a,b)=>`<div class="two">${a}${b}</div>`;
+const reasonField=()=>field('Reason (saved in the audit log)','reason',{area:true,ph:'Why is this change needed?'});
+const needReason=f=>(f.reason||'').trim().length<3?'Enter a reason of at least a few words.':'';
+
+/* ---------- modal engine ---------- */
+let M=null;
+function modal(title,sub,body,ok,fn,okCls=''){
+  M=fn;$('#modal').innerHTML=`<form id="mform" novalidate><h2>${title}</h2>${sub?`<p class="muted">${sub}</p>`:''}${body}<div class="err" id="merr" role="alert"></div><div class="mact"><button type="button" class="btn line" data-close>Cancel</button><button class="btn ${okCls}" type="submit">${ok}</button></div></form>`;
+  $('#mbg').classList.add('open');const f=$('#mform').querySelector('input:not([readonly]),select,textarea');f&&setTimeout(()=>f.focus(),30);
+}
+function info(title,body){M=null;$('#modal').innerHTML=`<h2>${title}</h2>${body}<div class="mact"><button type="button" class="btn" data-close>Done</button></div>`;$('#mbg').classList.add('open')}
+const closeModal=()=>{$('#mbg').classList.remove('open');M=null};
+let tt;const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2800)};
+async function copy(t){try{await navigator.clipboard.writeText(t);toast('Copied');return true}catch(_){const ta=document.querySelector('#csvbox,#linkbox');if(ta){ta.focus();ta.select();try{document.execCommand('copy');toast('Copied');return true}catch(__){}}toast('Select the text and copy it');return false}}
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='mform')return;e.preventDefault();if(!M)return;
+  const f=Object.fromEntries(new FormData(e.target)),btn=e.target.querySelector('button[type=submit]');
+  if(btn)btn.disabled=true;$('#merr').textContent='';
+  let r;try{r=await M(f)}catch(err){r=nice(err)}
+  if(btn)btn.disabled=false;
+  if(typeof r==='string'&&r){$('#merr').textContent=r;return}
+  if(r&&r.keep)return;closeModal();render();
+});
+document.addEventListener('input',e=>{
+  if(e.target.name==='rate'&&$('#ratehint')){const b=parseMoney(e.target.value);$('#ratehint').textContent=b!=null&&b<=10000?`GHS 1,000.00 of revenue earns ${g(Math.floor(100000*b/10000))}.`:'Enter a rate such as 12.5.'}
+});
+
+/* ---------- actions ---------- */
+const PO=()=>D.partners.map(p=>[p.id,p.name]);
+const MAIL=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const ACT={
+ invite(){modal('Invite a Growth Partner','They get a one-time link. There is no public sign-up.',field('Full name','name')+field('Email address','email',{type:'email'})+field('How to send it','how',{opts:[['email','Email the invitation for me'],['link','Give me a link to send myself']]}),'Create invitation',async f=>{
+  const n=f.name.trim(),m=f.email.trim().toLowerCase();
+  if(!n)return'Enter the partner\'s name.';if(!MAIL.test(m))return'Enter a valid email address.';
+  if(D.partners.some(p=>p.email===m)||D.invites.some(i=>i.email===m))return'This email already has an account or a pending invitation.';
+  let d;try{d=await callAdmin({action:'invite',email:m,full_name:n,send_email:f.how!=='link'})}catch(e){return nice(e)}
+  await reload();
+  if(d&&d.link){D.newlink=d.link;info('Invitation ready',`<p class="muted">Copy this link and send it to ${esc(n)} yourself. It works once and expires in 24 hours.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(d.link)}</textarea></div><div class="mact" style="justify-content:flex-start"><button type="button" class="btn soft" data-act="copylink" data-id="new">Copy link</button></div>`);render();return{keep:true}}
+  toast('Invitation emailed to '+m);return''})},
+ copylink(id){if(id==='new'&&D.newlink)copy(D.newlink);else toast('Links are only shown when created. Revoke and invite again for a new one.')},
+ revoke(id){const i=D.invites.find(x=>x.id===id);modal('Revoke invitation',i?esc(i.name)+' · '+esc(i.email):'','','Revoke',()=>doit(()=>callAdmin({action:'revoke_invite',user_id:id}),'Invitation revoked'),'pink')},
+ suspend(id){const p=P(id),on=p.st==='Active';modal(on?'Suspend '+esc(p.name):'Reactivate '+esc(p.name),on?'They will be signed out and cannot sign in until reactivated.':'They will be able to sign in again.',reasonField(),on?'Suspend':'Reactivate',f=>{const e=needReason(f);if(e)return e;return doit(()=>callAdmin({action:on?'suspend':'reactivate',user_id:id,reason:f.reason.trim()}),p.name+' is now '+(on?'suspended':'active'))})},
+ approve(id){const r=D.refs.find(x=>x.id==id);fire(()=>rpc('approve_referral',{p_referral:id}),'Approved. '+r.biz+' is now a client of '+P(r.p).name)},
+ reject(id){const r=D.refs.find(x=>x.id==id);modal('Reject '+esc(r.biz),'The partner is told it was not accepted.',reasonField(),'Reject',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reject_referral',{p_referral:id,p_reason:f.reason.trim()}),'Referral rejected')})},
+ resolve(id){const r=D.refs.find(x=>x.id==id);modal('Resolve duplicate flag',esc(r.flag||''),field('Decision','dec',{opts:[['ok','Not a duplicate. Move to review'],['dup','It is a duplicate. Reject']]})+reasonField(),'Save decision',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('resolve_referral_flag',{p_referral:id,p_is_duplicate:f.dec==='dup',p_reason:f.reason.trim()}),'Flag resolved')})},
+ reassign(id){const c=CL(id),opts=PO().filter(x=>x[0]!==c.p);if(!opts.length){toast('Invite another partner first.');return}modal('Reassign '+esc(c.name),'Moves the client and its future commission to another partner. Commission already earned stays with the current partner.',field('New partner','p',{opts,val:''})+reasonField(),'Reassign',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reassign_client',{p_client:id,p_partner:f.p,p_reason:f.reason.trim()}),'Client reassigned')})},
+ client(){if(!D.partners.length){toast('Invite a partner first. Every client belongs to a partner.');return}modal('New client','Add a client the studio already works with.',field('Client or business name','name')+two(field('Contact person','contact'),field('Email','email',{type:'email'}))+field('Partner','p',{opts:PO()}),'Add client',f=>{
+  const n=f.name.trim();if(!n)return'Enter the client name.';const em=f.email.trim().toLowerCase();if(em&&!MAIL.test(em))return'Enter a valid email, or leave it empty.';
+  return doit(()=>q(sb.from('clients').insert({name:n,contact:f.contact.trim()||null,email:em||null,partner_id:f.p})),'Client added')})},
+ project(){if(!D.clients.length){toast('Add a client first.');return}modal('New project','The agreed commission rate is required.',field('Client','c',{opts:D.clients.map(c=>[c.id,c.name+' · '+P(c.p).name])})+field('Project name','name')+two(field('Budget (GHS)','budget',{inputmode:'decimal',ph:'15,000.00'}),field('Commission rate (%)','rate',{inputmode:'decimal',ph:'12.5'}))+`<div class="hint" id="ratehint">Enter a rate such as 12.5.</div>`,'Create project',async f=>{
+  if(!f.name.trim())return'Enter the project name.';const b=parseMoney(f.budget);if(!b)return'Enter the budget, for example 15,000.00.';const r=parseMoney(f.rate);if(r==null||r<=0||r>10000)return'Enter the agreed commission rate between 0.01 and 100.';
+  let row;try{row=await q(sb.from('projects').insert({client_id:f.c,name:f.name.trim(),budget:b,rate_bp:r,status:'not_started'}).select('id').single())}catch(e){return nice(e)}
+  await reload();toast('Project created');location.hash='admin-project-'+row.id;return''})},
+ status(id){const p=PR(id);modal('Project status',esc(p.name),field('Status','st',{opts:Object.values(PST).map(x=>[x,x]),val:p.st}),'Save',f=>doit(()=>q(sb.from('projects').update({status:PSTr[f.st]}).eq('id',id)),'Status updated'))},
+ rate(id){const p=PR(id);modal('Change commission rate','Applies to payments recorded from now on. Commission already recorded does not change.',field('New rate (%)','rate',{val:String(p.rate/100),inputmode:'decimal'})+reasonField(),'Change rate',f=>{const r=parseMoney(f.rate);if(r==null||r<=0||r>10000)return'Enter a rate between 0.01 and 100.';const e=needReason(f);if(e)return e;return doit(()=>rpc('change_project_rate',{p_project:id,p_rate_bp:r,p_reason:f.reason.trim()}),'Rate updated for new payments')})},
+ payment(id){const open=D.projects.filter(p=>p.st!=='Cancelled');if(!open.length){toast('Create a project first.');return}modal('Record a client payment','Record money that has already arrived. The portal does not move money.',field('Project','pr',{opts:open.map(p=>[p.id,p.name+' · '+CL(p.c).name]),val:id})+two(field('Amount received (GHS)','amt',{inputmode:'decimal',ph:'5,000.00'}),field('Tax included (GHS)','tax',{inputmode:'decimal',val:'0.00'}))+two(field('Date received','d',{type:'date',val:TODAY}),field('Method','m',{opts:Object.values(PM).map(x=>[x,x])}))+field('Transaction reference','ref'),'Record payment',f=>{
+  const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the amount received, for example 5,000.00.';const t=parseMoney(f.tax);if(t==null)return'Enter the tax amount, or 0.00.';if(t>a)return'Tax cannot be more than the amount received.';
+  if(!f.d||f.d>TODAY)return'Choose the date the money arrived. It cannot be in the future.';const ref=f.ref.trim();if(!ref)return'Enter the transaction reference.';
+  return doit(()=>q(sb.from('payments').insert({project_id:f.pr,received_on:f.d,amount:a,tax:t,method:PMr[f.m],reference:ref})),'Payment recorded')})},
+ refund(id){const x=D.payments.find(p=>p.id==id),left=x.amt-x.tax-x.refunded;modal('Refund '+esc(x.ref),'Up to '+g(left)+' can still be refunded.',field('Refund amount (GHS)','amt',{inputmode:'decimal'})+reasonField(),'Record refund',f=>{const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the refund amount.';if(a>left)return'That is more than the '+g(left)+' left on this payment.';const e=needReason(f);if(e)return e;return doit(()=>rpc('refund_payment',{p_payment:id,p_amount:a,p_reason:f.reason.trim()}),'Refund recorded. Commission reduced.')})},
+ reverse(id){const x=D.payments.find(p=>p.id==id);modal('Reverse '+esc(x.ref),'Use this when the payment never really arrived. Its commission is removed.',reasonField(),'Reverse payment',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reverse_payment',{p_payment:id,p_reason:f.reason.trim()}),'Payment reversed')})},
+ payout(id,amt){if(!D.partners.length){toast('Invite a partner first.');return}modal('Record a payout','Send the money outside the portal, then record it here.',field('Partner','p',{opts:PO(),val:id})+two(field('Amount paid (GHS)','amt',{inputmode:'decimal',val:amt||''}),field('Date paid','d',{type:'date',val:TODAY}))+two(field('Method','m',{opts:['Mobile money','Bank transfer'].map(x=>[x,x])}),field('Transaction reference','ref'))+field('Account (masked)','mask',{ph:'****1234',hint:'Store only a masked account. Full numbers are rejected.'}),'Record payout',f=>{
+  const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the amount paid.';const av_=avail(f.p);if(a>av_)return'That is more than '+P(f.p).name+' can be paid now ('+g(av_)+').';
+  if(!f.ref.trim())return'Enter the transaction reference.';if(/\d{5,}/.test(f.mask))return'Enter only a masked account such as ****1234.';if(!f.d||f.d>TODAY)return'Choose a valid date. It cannot be in the future.';
+  return doit(()=>rpc('record_payout',{p_partner:f.p,p_amount:a,p_paid_on:f.d,p_method:PMr[f.m],p_reference:f.ref.trim(),p_account_mask:f.mask.trim()||null}),'Payout recorded')})},
+ voidpay(id){const x=D.payouts.find(p=>p.id===id);modal('Void '+x.id,'The amount goes back to the partner\'s balance.',reasonField(),'Void payout',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('void_payout',{p_payout:x.uid,p_reason:f.reason.trim()}),'Payout voided')})},
+ adjust(){if(!D.partners.length){toast('Invite a partner first.');return}modal('Commission adjustment','A correction is a new ledger line. Use a minus sign to deduct.',field('Partner','p',{opts:PO()})+field('Amount (GHS)','amt',{inputmode:'decimal',ph:'-50.00 or 50.00'})+reasonField(),'Add adjustment',f=>{const neg=/^\s*[-−]/.test(f.amt),a=parseMoney(f.amt.replace(/^\s*[-−+]/,''));if(!a)return'Enter an amount, for example -50.00.';const e=needReason(f);if(e)return e;return doit(()=>q(sb.from('adjustments').insert({partner_id:f.p,amount:neg?-a:a,reason:f.reason.trim()})),'Adjustment added')})},
+ referral(){const me=P(ME);if(me.st!=='Active'){toast('Your account is suspended. You cannot submit referrals.');return}modal('Submit a client','The studio checks for duplicates before approving.',field('Client or business name','biz')+two(field('Business email','email',{type:'email'}),field('Estimated budget (GHS)','bud',{inputmode:'decimal'})),'Submit referral',async f=>{
+  const n=f.biz.trim();if(!n)return'Enter the client or business name.';const em=f.email.trim().toLowerCase();if(em&&!MAIL.test(em))return'Enter a valid business email, or leave it empty.';
+  let b=0;if(f.bud.trim()){b=parseMoney(f.bud);if(b==null)return'Enter the budget as a number, for example 5,000.00.'}
+  let row;try{row=await q(sb.from('referrals').insert({business:n,email:em||null,budget:b}).select('id').single())}catch(e){return nice(e)}
+  await reload();const r=D.refs.find(x=>x.id===row.id);toast(r&&r.st==='Flagged'?'Submitted. It was flagged as a possible duplicate and will be checked.':'Referral submitted for review');return''})},
+ csv(k){const q_=v=>{v=String(v);return /^[=+\-@\t\r]/.test(v)?"'"+v:v};const row=a=>a.map(v=>'"'+q_(v).replace(/"/g,'""')+'"').join(',');let rows;
+  if(k==='partners')rows=[['Partner','Email','Status','Earned (GHS)','Paid (GHS)','Balance (GHS)']].concat(D.partners.map(p=>[p.name,p.email,p.st,earned(p.id)/100,paid(p.id)/100,bal(p.id)/100]));
+  else if(k==='payments')rows=[['Date','Client','Project','Method','Reference','Received (GHS)','Tax (GHS)','Net (GHS)','Commission (GHS)']].concat(D.payments.map(x=>[x.d,CL(PR(x.pr).c).name,PR(x.pr).name,x.m,x.ref,x.amt/100,x.tax/100,net(x)/100,com(x)/100]));
+  else rows=[['Date','Partner','Entry','Amount (GHS)']].concat(ledger().map(l=>[l.d,P(l.p).name,l.t,l.a/100]));
+  dl('twelfth-space-'+k+'-'+TODAY+'.csv',rows.map(row).join('\n'))},
+ copycsv(){copy(window.__csv)},
+ announce(){modal('New announcement','Every Growth Partner sees this and gets a notification. Replies come to you as private messages.',field('Title','t',{ph:'What is this about?'})+field('Message','b',{area:true,ph:'Write the announcement'})+field('Pin to the top','pin',{opts:[['no','No'],['yes','Yes']]}),'Post announcement',f=>{
+  if(f.t.trim().length<3)return'Enter a title.';if(f.b.trim().length<10)return'Write a message of at least a few words.';
+  return doit(()=>q(sb.from('announcements').insert({title:f.t.trim(),body:f.b.trim(),pinned:f.pin==='yes'})),'Announcement posted to '+D.partners.filter(p=>p.st==='Active').length+' partners')})},
+ annpin(id){const a=D.ann.find(x=>x.id===id);fire(()=>q(sb.from('announcements').update({pinned:!a.pin}).eq('id',id)),a.pin?'Unpinned':'Pinned to the top')},
+ anndel(id){const a=D.ann.find(x=>x.id===id);modal('Delete announcement',esc(a.t),'','Delete',()=>doit(()=>q(sb.from('announcements').delete().eq('id',id)),'Announcement deleted'))},
+ readone(id){D.read[id]=true;render();sb.from('announcement_reads').upsert({announcement_id:id},{onConflict:'announcement_id,user_id',ignoreDuplicates:true}).then(()=>{})},
+ readall(){const L=D.ann.filter(a=>!D.read[a.id]);L.forEach(a=>D.read[a.id]=true);toast('All marked as read');render();if(L.length)sb.from('announcement_reads').upsert(L.map(a=>({announcement_id:a.id})),{onConflict:'announcement_id,user_id',ignoreDuplicates:true}).then(()=>{})},
+ cdel(id){fire(()=>q(sb.from('community_messages').delete().eq('id',id)),'Message deleted')},
+ signout(){sb.auth.signOut()},
+ back(){S.open=false;render()}
+};
+
+/* ---------- pages ---------- */
+const S={tab:'All',conv:'ama',open:false,q:{},bar:{},flt:'All',rm:null,fm:false,goChat:false,ctab:'chat'};
+const ledger=()=>[...D.payments.map(x=>({d:x.d,p:own(x),t:x.rev?'Reversed':'Accrual',n:PR(x.pr).name+' · '+x.ref,a:com(x),pr:x.pr,pid:x.id})),...D.payouts.filter(x=>!x.void).map(x=>({d:x.d,p:x.p,t:'Payout',n:x.id+' · '+x.ref,a:-x.amt})),...D.adj.map(a=>({d:a.d,p:a.p,t:'Adjustment',n:a.reason,a:a.amt}))].sort((a,b)=>b.d.localeCompare(a.d));
+const lTag=t=>tag(t,{Accrual:'mint',Payout:'pink',Adjustment:'sun',Reversed:''}[t]);
+const searchBox=(k,ph)=>(CUR_Q=k,'')+`<label class="search">${ic('search',16)}<input data-q="${k}" value="${esc(S.q[k]||'')}" placeholder="${ph}" aria-label="${ph}"></label>`;
+const has=(q,...v)=>!q||v.join(' ').toLowerCase().includes(q.toLowerCase());
+const PG={};
+const STC={Received:'mint','Paid out':'sun',Reversed:'pink',Voided:'pink',Earned:'mint',Paid:'sun',Adjustment:'sky'};
+const dshort=d=>{const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+(x.getFullYear()!==new Date().getFullYear()?' '+x.getFullYear():'')};
+const heroAmt=p=>`<div class="amt"><span class="cur">GHS</span> ${Math.floor(p/100).toLocaleString('en-US')}<span class="dec">.${String(p%100).padStart(2,'0')}</span></div>`;
+const mi=(h,t)=>`<a href="#${h}">${t}</a>`;
+const mb=(a,id,t)=>`<button type="button" data-act="${a}" data-id="${id}">${t}</button>`;
+const rowHtml=r=>`<div class="trow"><div class="tn">${av(r.n,r.i)}<div><b>${esc(r.n)}</b><small>#${esc(r.s)}</small></div></div><div class="td">${dshort(r.d)}</div><div class="ts">${tag(r.st,STC[r.st])}</div><div class="ta ${r.dim?'dim':''}">${r.a<0?'- ':r.a>0?'+ ':''}${g(Math.abs(r.a))}</div><div class="tm"><button type="button" class="dots" data-rm="${r.k}" aria-label="Actions for ${esc(r.n)}" aria-expanded="${S.rm===r.k}">${ic('dots',18,2.6)}</button>${S.rm===r.k?`<div class="rmenu" role="menu">${r.menu}</div>`:''}</div></div>`;
+function txCard(title,sub,rows,o){
+  const Lr=rows.filter(r=>S.flt==='All'||r.st===S.flt).slice(0,9);
+  return `<section class="card txc"><div class="tt"><div><h2>${title}</h2><p>${sub}</p></div><div class="tools"><button class="ibtn" type="button" data-refresh aria-label="Refresh">${ic('refresh',17)}</button><div class="rel"><button class="ibtn ${S.flt!=='All'?'act':''}" type="button" data-fl aria-label="Filter" aria-expanded="${S.fm}">${ic('filter',17)}</button>${S.fm?`<div class="rmenu fm" role="menu">${o.flts.map(f=>`<button type="button" data-flv="${f}" class="${S.flt===f?'on':''}">${f}</button>`).join('')}</div>`:''}</div></div></div>${S.flt!=='All'?`<div class="fchip">Showing ${S.flt}<button type="button" data-flv="All" aria-label="Clear filter">×</button></div>`:''}<div class="trow hd"><span>Name</span><span>Date</span><span>Status</span><span>Amount</span><span></span></div>${Lr.length?Lr.map(rowHtml).join(''):'<div class="empty pad">Nothing matches this filter.</div>'}<div class="vall"><a class="btn white" href="#${o.href}">${o.label}</a></div></section>`}
+const chartSec=(id,t,v,kind,href)=>`<div class="cc"><div class="ch"><h2>${t}</h2><a class="mini-link" href="#${href}" aria-label="Open ${t}">${ic('upright',15)}</a></div><div class="cn"><b>${g(sumBy(v,x=>x))}</b>${delta(v)}</div><p class="sub">Last 6 weeks</p>${chart(id,v,kind)}</div>`;
+const balCard=(avl,c1,c2)=>`<section class="card bal"><div class="bh"><div><h2>Ready to pay out</h2><small>After the ${D.hold}-day hold</small></div><span class="curp"><i class="flag"></i>GHS</span></div><div class="inner"><div class="lab">Available funds</div>${heroAmt(avl)}<div class="cells">${c1}${c2}</div></div></section>`;
+const qp=()=>{const p0=D.partners.find(p=>avail(p.id)>0)||D.partners[0];if(!p0)return `<section class="card"><div class="ch"><div><h2>Quick payout</h2><p class="sub">Pay a partner what is ready</p></div></div><div class="empty">No partners yet. Invite one to get started.</div></section>`;
+  return `<section class="card"><div class="ch"><div><h2>Quick payout</h2><p class="sub">Pay a partner what is ready</p></div></div><div class="qbox"><div class="qr"><select id="qp-p" aria-label="Partner">${D.partners.map(p=>`<option value="${p.id}" ${p.id===p0.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><input id="qp-a" inputmode="decimal" placeholder="0.00" aria-label="Amount in GHS" autocomplete="off"></div><button type="button" class="swap" data-qpmax aria-label="Fill the most this partner can be paid now">${ic('swap',16)}</button><div class="qr"><span class="muted">Available now</span><span class="v" id="qp-av">${g(avail(p0.id))}</span></div></div><div class="qfoot"><span id="qp-hold">On hold ${g(held(p0.id))}</span><span>${D.hold}-day hold</span></div><button type="button" class="btn wide" data-qp>Record payout</button></section>`};
+const adminRows=()=>{
+  const a=D.payments.map(x=>({k:'p'+x.id,n:CL(PR(x.pr).c).name,i:D.clients.indexOf(CL(PR(x.pr).c)),s:x.ref,d:x.d,st:x.rev?'Reversed':'Received',a:x.amt,dim:x.rev,menu:mi('admin-project-'+x.pr,'Open project')+mb('how',x.id,'How commission is worked out')+(x.rev?'':mb('refund',x.id,'Refund')+mb('reverse',x.id,'Reverse payment'))}));
+  const b=D.payouts.map(x=>({k:'o'+x.id,n:P(x.p).name,i:pIdx(x.p),s:x.id,d:x.d,st:x.void?'Voided':'Paid out',a:-x.amt,dim:x.void,menu:mi('admin-payouts','Open payouts')+(x.void?'':mb('voidpay',x.id,'Void payout'))}));
+  return a.concat(b).sort((u,v)=>v.d.localeCompare(u.d)||String(v.k).localeCompare(String(u.k)))};
+PG['admin-dashboard']=()=>{
+  const tA=sumBy(D.partners,p=>avail(p.id));
+  const left=balCard(tA,`<button type="button" data-act="payout">${ic('upright',16)} Payout</button>`,`<button type="button" data-act="payment">${ic('downleft',16)} Payment</button>`)
+   +`<section class="card"><div class="ch"><div><h2>Partners</h2><p class="sub">Open a chat or invite someone</p></div><a class="mini-link" href="#admin-partners" aria-label="All partners">${ic('arrowr',16)}</a></div><div class="avs">${D.partners.map((p,i)=>`<button type="button" class="avb" data-chat="${p.id}" title="${esc(p.name)}" aria-label="Message ${esc(p.name)}">${av(p.name,i)}${D.unreadA[p.id]?'<i class="rd"></i>':''}</button>`).join('')}</div><div class="ctb"><button class="btn" data-act="invite" type="button">${ic('pluscircle',16)} Invite</button><a class="btn line" href="#admin-partners">${ic('pencil',15)} Manage</a></div></section>`
+   +`<a class="dashbtn" href="#admin-reports">${ic('grid',16)} Open reports and exports</a>`;
+  const right=`<section class="card duo">${chartSec('ac','Total commission',weekly(null,com),'sand','admin-commissions')}${chartSec('an','Net revenue',weekly(null,net),'grey','admin-payments')}</section>${qp()}`;
+  return `<div class="dgrid"><div class="col">${left}</div><div class="mid">${txCard('Transactions','Client payments in and payouts out',adminRows(),{flts:['All','Received','Paid out'],href:'admin-payments',label:'View all payments'})}</div><div class="col">${right}</div></div>`};
+PG['admin-partners']=()=>{const L=D.partners.filter(p=>has(S.q.pt,p.name,p.email,p.city));
+  return `<div class="pha">${searchBox('pt','Search partners')}<span class="grow"></span><button class="btn pink" data-act="invite" type="button">${ic('plus',16)} Invite a partner</button></div><div class="stack">
+  ${card('Growth Partners',tbl(['Partner','Status','Clients','Balance',''],L.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,p.email,pIdx(p.id)),stTag(p.st),D.clients.filter(c=>c.p===p.id).length,g(bal(p.id)),act(p.st==='Active'?'Suspend':'Reactivate','suspend',p.id,'line')]})),[2,3]))}
+  ${card('Pending invitations',D.invites.length?`<div class="list">${D.invites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${act('Revoke','revoke',i.id,'line')}</div></div>`).join('')}</div>`:'<div class="empty">No pending invitations.</div>')}</div>`};
+PG['admin-referrals']=()=>{const tabs=['All','Pending review','Flagged','Approved','Rejected'],L=D.refs.filter(r=>S.tab==='All'||r.st===S.tab);
+  return `<div class="pha"><div class="tabs" role="tablist">${tabs.map(t=>`<button type="button" role="tab" data-tab="${t}" class="${S.tab===t?'on':''}">${t}${t!=='All'?' '+D.refs.filter(r=>r.st===t).length:''}</button>`).join('')}</div></div>
+  ${card(S.tab+' referrals',tbl(['Business','From','Budget','Status',''],L.map(r=>({c:[`<b>${esc(r.biz)}</b>${r.flag?`<div class="note">${esc(r.flag)}</div>`:''}${r.note?`<div class="small muted">${esc(r.note)}</div>`:''}`,esc(P(r.p).name),r.bud?g(r.bud):'—',stTag(r.st),r.st==='Pending review'?`<div class="acts">${act('Approve','approve',r.id,'pink')}${act('Reject','reject',r.id,'line')}</div>`:r.st==='Flagged'?act('Resolve flag','resolve',r.id):'']})),[2]))}`};
+PG['admin-clients']=()=>{const L=D.clients.filter(c=>has(S.q.cl,c.name,P(c.p).name));
+  return `<div class="pha">${searchBox('cl','Search clients')}<span class="grow"></span><button class="btn pink" data-act="client" type="button">${ic('plus',16)} New client</button></div>${card('Clients',tbl(['Client','Partner','Projects','Paid so far',''],L.map(c=>({href:'admin-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),esc(P(c.p).name),D.projects.filter(p=>p.c===c.id).length,g(sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),x=>x.amt)),act('Reassign','reassign',c.id,'line')]})),[2,3]))}`};
+PG['admin-projects']=()=>`<div class="pha"><span class="grow"></span><button class="btn pink" data-act="project" type="button">${ic('plus',16)} New project</button></div>${card('Projects',tbl(['Project','Partner','Budget','Rate','Status'],D.projects.map(p=>({href:'admin-project-'+p.id,c:[`<b>${esc(p.name)}</b><div class="small muted">${esc(CL(p.c).name)}</div>`,esc(P(CL(p.c).p).name),g(p.budget),pct(p.rate),stTag(p.st)]})),[2,3]))}`;
+PG.project=id=>{const p=PR(id);if(!p)return PG['admin-projects']();const c=CL(p.c),pays=D.payments.filter(x=>x.pr===id).sort((a,b)=>b.d.localeCompare(a.d));
+  return `<div class="pha"><a class="btn white" href="#admin-projects">${ic('back',16)} Projects</a><span class="grow"></span>${act('Status','status',id,'white')}${act('Change rate','rate',id,'white')}<button class="btn pink" data-act="payment" data-id="${id}" type="button">${ic('plus',16)} Record payment</button></div>
+  <div class="stack"><div class="cards">${stat('Budget',gs(p.budget),esc(c.name)+' · '+esc(P(c.p).name))}${stat('Net received',gs(sumBy(pays,net)),pays.length+' payments')}${stat('Commission at '+pct(p.rate),gs(sumBy(pays,com)),stTag(p.st))}</div>
+  ${card('Payments',tbl(['Date','Reference','Received','Commission',''],pays.map(x=>({c:[dfmt(x.d),`${esc(x.ref)}<div class="small muted">${x.m}${x.rev?' · reversed':''}${x.refunded?' · refunded '+g(x.refunded):''}</div>`,g(x.amt),g(com(x)),x.rev?tag('Reversed'):`<div class="acts">${act('How','how',x.id,'line')}${act('Refund','refund',x.id,'line')}${act('Reverse','reverse',x.id,'line')}</div>`]})),[2,3]))}</div>`};
+PG['admin-payments']=()=>{const L=[...D.payments].sort((a,b)=>b.d.localeCompare(a.d)).filter(x=>has(S.q.pm,CL(PR(x.pr).c).name,x.ref,PR(x.pr).name));
+  return `<div class="pha">${searchBox('pm','Search payments')}<span class="grow"></span><button class="btn pink" data-act="payment" type="button">${ic('plus',16)} Record payment</button></div>${card('Payments received',tbl(['Client','Date','Reference','Received','Commission'],L.map(x=>({href:'admin-project-'+x.pr,c:[who(CL(PR(x.pr).c).name,PR(x.pr).name,0),dfmt(x.d),esc(x.ref),g(x.amt),g(com(x))]})),[3,4]))}`};
+PG['admin-commissions']=()=>`<div class="pha"><span class="grow"></span><button class="btn pink" data-act="adjust" type="button">${ic('plus',16)} Adjustment</button></div><div class="stack"><div class="cards">${D.partners.map(p=>stat(esc(p.name),gs(bal(p.id)),'Earned '+g(earned(p.id)))).join('')}</div>${card('Ledger',tbl(['Date','Partner','Entry','Detail','Amount',''],ledger().map(l=>({c:[dfmt(l.d),esc(P(l.p).name),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a),l.pid&&l.t==='Accrual'?act('How','how',l.pid,'line'):'']})),[4]))}</div>`;
+PG['admin-payouts']=()=>`<div class="row2">${card('Ready to pay',`<div class="list">${D.partners.map(p=>`<div>${who(p.name,'Ready now '+g(avail(p.id))+(held(p.id)?' · '+g(held(p.id))+' on hold':''),pIdx(p.id))}<span class="grow"></span>${act('Pay','payout',p.id,avail(p.id)>0?'pink':'line',avail(p.id)>0?'':'disabled')}</div>`).join('')}</div>`)}${card('Payout history',tbl(['Date','Partner','Amount',''],[...D.payouts].reverse().map(x=>({c:[dfmt(x.d)+`<div class="small muted">${x.id} · ${esc(x.ref)}</div>`,esc(P(x.p).name),x.void?tag('Voided','pink'):g(x.amt),x.void?'':act('Void','voidpay',x.id,'line')]})),[2]))}</div>`;
+PG['admin-reports']=()=>{const rows=D.partners.map(p=>[p.name,earned(p.id)]),mx=Math.max(1,...rows.map(r=>r[1]));
+  return `<div class="pha"><span class="grow"></span>${act('Partners CSV','csv','partners','white')}${act('Payments CSV','csv','payments','white')}${act('Commissions CSV','csv','commissions','white')}</div><div class="row2">${card('Commission by week',chart('rp',weekly(),'sand'))}${card('Earned by partner',rows.map(r=>`<div class="bar"><div class="t"><b>${esc(r[0])}</b><span class="num">${g(r[1])}</span></div><div class="tr"><div class="fi" style="width:${Math.max(3,r[1]/mx*100)}%"></div></div></div>`).join(''))}</div>`};
+function chat(r){
+  const cid=r==='admin'?S.conv:ME,m=D.msgs[cid]||[],un=r==='admin'?D.unreadA:D.unreadP;un[cid]=0;
+  const convs=r==='admin'?`<div class="convs">${D.partners.map(p=>`<button class="conv ${p.id===cid?'on':''}" type="button" data-conv="${p.id}">${av(p.name,pIdx(p.id))}<div class="t"><b>${esc(p.name)}${D.unreadA[p.id]?`<span class="ub">${D.unreadA[p.id]}</span>`:''}</b><span>${esc((D.msgs[p.id].slice(-1)[0]||{t:'No messages yet'}).t)}</span></div></button>`).join('')}</div>`:'';
+  const name=r==='admin'?P(cid).name:'Twelfth Space team';
+  return `<div class="chat ${r==='admin'?(S.open?'open':''):'solo'}">${convs}<div class="thread"><div class="thead">${r==='admin'?`<button class="circ back" type="button" data-act="back" aria-label="Back to conversations" style="background:var(--wheat);color:var(--ink)">${ic('back',18)}</button>`:''}${av(name,r==='admin'?pIdx(cid):3)}<div><b>${esc(name)}</b><div class="small muted">${r==='admin'?'Growth Partner':'Studio team'}</div></div></div>
+  <div class="msgs" id="msgs">${m.length?m.map(x=>`<div class="bub ${(x.f==='a')===(r==='admin')?'me':''}">${esc(x.t)}<small>${esc(x.at)}</small></div>`).join(''):'<div class="empty">No messages yet. Say hello.</div>'}</div>
+  <form class="compose" id="cform"><input id="cin" aria-label="Message" placeholder="Write a message" autocomplete="off"><button class="btn" type="submit">Send</button></form></div></div>`}
+const annSorted=()=>[...D.ann].sort((a,b)=>(b.pin-a.pin)||b.d.localeCompare(a.d));
+const postBody=a=>`<div class="post-b">${esc(a.b)}</div>`;
+PG['admin-announcements']=()=>`<div class="pha"><span class="grow"></span><button class="btn" type="button" data-act="announce">${ic('plus',16)} New announcement</button></div><div class="stack">${annSorted().map(a=>`<section class="card post"><h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}</h2><div class="sub">${dfmt(a.d)} · Sent to ${D.partners.filter(p=>p.st==='Active').length} partners</div>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${act(a.pin?'Unpin':'Pin','annpin',a.id,'white')}${act('Delete','anndel',a.id,'line')}</div></section>`).join('')||'<div class="card empty">No announcements yet. Post the first one.</div>'}</div>`;
+PG['partner-announcements']=()=>{const un=D.ann.filter(a=>!D.read[a.id]).length;return `<div class="pha"><span class="muted">${un?un+' unread':'You are all caught up'}</span><span class="grow"></span>${un?`<button class="btn white" type="button" data-act="readall">Mark all as read</button>`:''}</div><div class="stack">${annSorted().map(a=>`<section class="card post ${D.read[a.id]?'':'unread'}"><h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}${D.read[a.id]?'':tag('New','mint')}</h2><div class="sub">${dfmt(a.d)} · From the studio</div>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${D.read[a.id]?'':act('Mark as read','readone',a.id,'soft')}<a class="btn sm line" href="#partner-messages">Reply privately</a></div></section>`).join('')||'<div class="card empty">Nothing posted yet.</div>'}</div>`};
+const vid=()=>role()==='admin'?'admin':ME;
+const hOf=p=>p.name.split(' ')[0].toLowerCase();
+const vh=()=>role()==='admin'?'studio':hOf(P(ME));
+const cname=id=>id==='admin'?'Studio':P(id).name;
+const ctext=s=>esc(s).replace(/@([A-Za-z]+)/g,(m,h)=>{const l=h.toLowerCase(),ok=l==='studio'||l==='everyone'||D.dir.some(p=>hOf(p)===l);return ok?`<span class="men ${l===vh()||l==='everyone'?'me':''}">@${h}</span>`:m});
+const ctime=ts=>{const d=new Date(ts);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toTimeString().slice(0,5)};
+const cunread=r=>D.chat.filter(m=>m.f!==(r==='admin'?'admin':ME)&&!D.cs[r][m.id]).length;
+const toks=t=>(t.match(/@([A-Za-z]+)/g)||[]).map(x=>x.slice(1).toLowerCase());
+const mentionsMe=m=>{const k=toks(m.t);return m.f!==vid()&&(k.includes(vh())||k.includes('everyone'))};
+function chatPane(){
+  const r=role();D.chat.forEach(m=>D.cs[r][m.id]=true);lsSet('ts-seen-'+ME,String(Date.now()));
+  const rows=D.chat.map(m=>`<div class="cm ${mentionsMe(m)?'ment':''}">${av(cname(m.f),m.f==='admin'?3:pIdx(m.f))}<div class="cmb"><div class="cmh"><b>${esc(cname(m.f))}</b>${m.f==='admin'?tag('Studio','sky'):''}<small class="muted">${ctime(m.at)}</small>${mentionsMe(m)?'<small class="mnote">mentioned you</small>':''}${(r==='admin'||m.f===ME)?`<button type="button" class="cdel" data-act="cdel" data-id="${m.id}">Delete</button>`:''}</div><div class="cmt">${ctext(m.t)}</div></div></div>`).join('');
+  return `<div class="cwrap"><div class="rules">Be kind. Please do not share commission rates, client contracts or account details here. Type @ to ping someone.</div><div id="cmsgs">${rows||'<div class="empty">No messages yet. Say hello.</div>'}</div><form class="compose rel" id="xform"><div class="sug" id="sug" role="listbox"></div><input id="xin" aria-label="Message the community" placeholder="Message everyone. Type @ to ping someone" autocomplete="off" maxlength="1000"><button class="btn" type="submit">Send</button></form></div>`}
+const ctabs=()=>{const un=role()==='partner'?D.ann.filter(a=>!D.read[a.id]).length:0;return `<div class="pha"><div class="tabs" role="tablist"><button type="button" role="tab" data-ctab="chat" class="${S.ctab==='chat'?'on':''}">Chat</button><button type="button" role="tab" data-ctab="news" class="${S.ctab==='news'?'on':''}">Announcements${un?' '+un:''}</button></div></div>`};
+PG['admin-community']=()=>ctabs()+(S.ctab==='news'?PG['admin-announcements']():chatPane());
+PG['partner-community']=()=>ctabs()+(S.ctab==='news'?PG['partner-announcements']():chatPane());
+/* ---------- sign-in screens (preview only: no real accounts) ---------- */
+const AUTH_TITLES={'signin':'Sign in','forgot':'Forgot password','reset':'Reset password','suspended':'Account suspended','accept-invite':'Accept invitation','accept-invite-expired':'Invitation expired'};
+const isAuth=r=>Object.prototype.hasOwnProperty.call(AUTH_TITLES,r);
+const pw=(l,n,hint)=>`<div class="fld"><label for="f-${n}">${l}</label><div class="pw"><input id="f-${n}" name="${n}" type="password" autocomplete="${n==='cur'?'current-password':'new-password'}"><button type="button" data-showpw="f-${n}" aria-label="Show password">Show</button></div>${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+const pwRules=v=>[['At least 8 characters',v.length>=8],['A letter and a number',/[A-Za-z]/.test(v)&&/[0-9]/.test(v)]];
+const rulesHtml=v=>`<ul class="rl-list" id="pwrules">${pwRules(v).map(r=>`<li class="rl ${r[1]?'ok':''}"><span>${r[1]?'✓':'○'}</span>${r[0]}</li>`).join('')}</ul>`;
+const AUTHCFG={
+ 'signin':{h:'Welcome back',d:'Sign in to see your clients and commission.',s:['Track your clients','See every commission','Get paid on time'],a:-1},
+ 'accept-invite':{h:'Get started with us',d:'Complete these easy steps to register your account.',s:['Accept your invitation','Complete your profile','Submit your first client'],a:0},
+ 'forgot':{h:'Let us get you back in',d:'Reset links work once and expire in 1 hour.',s:['Enter your email','Check your inbox','Choose a new password'],a:0},
+ 'reset':{h:'Nearly there',d:'Choose a strong password you have not used before.',s:['Enter your email','Check your inbox','Choose a new password'],a:2},
+ 'accept-invite-expired':{h:'Need a new link?',d:'Invitation links work once, so ask the studio for another.',s:['Tell us your email','The studio approves','A new link arrives'],a:0},
+ 'suspended':{h:'Your account is paused',d:'Your records and earnings are safe while it is.',s:['Ask for a review','The studio replies','Back to work'],a:0}};
+const authCard=(h,sub,body)=>{const c=AUTHCFG[AS.r]||AUTHCFG.signin;return `<div class="aw"><section class="al"><div class="alogo"><img src="${document.querySelector('.logo-full').src}" alt="Twelfth Space"></div><div class="al-b"><div class="al-t"><h2>${c.h}</h2><p>${c.d}</p></div><ol class="steps">${c.s.map((x,k)=>`<li class="${k===c.a?'on':''}"><span>${k+1}</span>${x}</li>`).join('')}</ol></div></section><section class="ar"><div class="acard"><h1>${h}</h1>${sub?`<p class="muted">${sub}</p>`:''}${body}</div></section></div>`};
+const toSignin='<div class="alinks"><a href="#signin">Back to sign in</a></div>';
+let AS={};
+const OPEN_ROUTES=['signin','forgot','suspended','accept-invite-expired'];
+function authShow(r){
+  if(!isAuth(r)){document.body.classList.remove('authmode');return false}
+  if(AS.r!==r)AS={r};
+  document.body.classList.add('authmode');closeRail();
+  const dash=`<a class="btn wide" href="#${role()}-dashboard" style="margin-top:16px">Go to my dashboard</a>`;
+  let h='';
+  if(r==='signin')h=authCard('Sign in','Use the email your invitation was sent to. There is no public sign-up.',`<form id="signinform" novalidate>${field('Email address','email',{type:'email',ph:'you@example.com'})}${pw('Password','cur')}<div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Sign in</button></form><div class="alinks"><a href="#forgot">Forgot password?</a></div>`);
+  else if(r==='forgot')h=AS.sent?authCard('Check your email','If that address has an account, a reset link is on its way. It works once and expires in 1 hour.',toSignin):authCard('Forgot password','Enter your email and we will send a reset link.',`<form id="forgotform" novalidate>${field('Email address','email',{type:'email',ph:'you@example.com'})}<div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Send reset link</button></form>${toSignin}`);
+  else if(r==='reset')h=AS.done?authCard('Password changed','You are signed in with your new password.',dash):authCard('Choose a new password','Pick something you do not use anywhere else.',`<form id="resetform" novalidate>${pw('New password','new')}${rulesHtml('')}${pw('Confirm new password','new2')}<div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Change password</button></form>`);
+  else if(r==='suspended')h=authCard('Account suspended','Your Growth Partner account is paused, so you cannot sign in right now. Your records are safe and your earnings are not affected. Contact the studio to ask for a review.',toSignin);
+  else if(r==='accept-invite-expired')h=authCard('This invitation is no longer valid','The link has expired or was already used. Invitation links work once and expire after 24 hours. Ask the studio to send you a new one.',toSignin);
+  else{
+    if(AS.done)h=authCard('Welcome, '+esc(AS.done),'Your account is ready.',dash);
+    else if(!MEP)h=authCard('This invitation is no longer valid','The link has expired or was already used.',toSignin);
+    else{const pp=(MEP.full_name||'').split(' ');h=authCard('Set up your account','Choose a password to finish. Your email comes from the invitation.',`<form id="acceptform" novalidate>${two(field('First name','fn',{val:pp[0]||''}),field('Last name','ln',{val:pp.slice(1).join(' ')}))}${field('Email address','e',{val:MEP.email,ro:true,hint:'This is the email the studio invited. It cannot be changed.'})}${pw('Password','new','Must be at least 8 characters, with a letter and a number.')}<label class="chk"><input type="checkbox" id="f-terms" name="terms"><span>I agree to the studio's terms and to my details being stored to run my partner account.</span></label><div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Finish setup</button></form>`)}}
+  $('#auth').innerHTML=h;window.scrollTo(0,0);
+  return true}
+const aerr=m=>{const e=$('#aerr');if(e)e.textContent=m};
+async function startSession(){
+  const {data:{user}}=await sb.auth.getUser();if(!user)return false;
+  const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+  if(error||!p){await sb.auth.signOut();toast('This account is not set up for the portal.');return false}
+  if(p.status!=='active'){location.hash='suspended';await sb.auth.signOut();return false}
+  ME=user.id;MEP=p;ROLE=p.role;
+  try{await loadAll()}catch(e){toast(nice(e))}
+  return true}
+document.addEventListener('submit',async e=>{
+  const id=e.target.id;if(!['signinform','forgotform','resetform','acceptform'].includes(id))return;e.preventDefault();
+  const f=Object.fromEntries(new FormData(e.target)),btn=e.target.querySelector('button[type=submit]'),busy=v=>{if(btn)btn.disabled=v};
+  if(id==='signinform'){const em=(f.email||'').trim().toLowerCase();
+    if(!MAIL.test(em))return aerr('Enter a valid email address.');
+    if(!(f.cur||''))return aerr('Enter your password.');
+    busy(true);const {error}=await sb.auth.signInWithPassword({email:em,password:f.cur});
+    if(error){busy(false);if(/banned/i.test(error.message)){location.hash='suspended';return}return aerr(/invalid login/i.test(error.message)?'That email and password do not match.':nice(error))}
+    const ok=await startSession();busy(false);if(ok)location.hash=ROLE+'-dashboard';return}
+  if(id==='forgotform'){const em=(f.email||'').trim().toLowerCase();if(!MAIL.test(em))return aerr('Enter a valid email address.');
+    busy(true);await sb.auth.resetPasswordForEmail(em,{redirectTo:BASE});busy(false);AS.sent=true;authShow('forgot');return}
+  if(id==='acceptform'&&(!(f.fn||'').trim()||!(f.ln||'').trim()))return aerr('Enter your first and last name.');
+  const bad=pwRules(f.new||'').find(x=>!x[1]);
+  if(bad)return aerr('Your password needs: '+bad[0].toLowerCase()+'.');
+  if(f.new2!==undefined&&f.new!==f.new2)return aerr('The two passwords do not match.');
+  if(id==='resetform'){busy(true);const {error}=await sb.auth.updateUser({password:f.new});busy(false);if(error)return aerr(nice(error));AS.done=true;authShow('reset');return}
+  if(!f.terms)return aerr('Please agree to the terms to continue.');
+  const full=((f.fn||'').trim()+' '+(f.ln||'').trim()).trim();busy(true);
+  const {error}=await sb.auth.updateUser({password:f.new,data:{full_name:full}});
+  if(error){busy(false);return aerr(nice(error))}
+  await sb.from('profiles').update({full_name:full}).eq('id',ME);await reload();busy(false);
+  AS.done=full.split(' ')[0];authShow('accept-invite')});
+document.addEventListener('input',e=>{if(e.target.id==='f-new'&&$('#pwrules'))$('#pwrules').outerHTML=rulesHtml(e.target.value)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-showpw]');if(!b)return;const i=document.getElementById(b.dataset.showpw),s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'Hide':'Show';b.setAttribute('aria-label',s?'Hide password':'Show password')});
+
+/* ---------- how a commission is worked out ---------- */
+ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),exact=n*x.rate/10000,c=com(x),rel=addBiz(x.d,D.hold),isHeld=rel>TODAY;
+  const row=(l,v,s)=>`<div class="bk ${s||''}"><span>${l}</span><b>${v}</b></div>`;
+  info('How this commission is worked out',`<p class="muted">${esc(CL(pr.c).name)} · ${esc(pr.name)} · ${esc(x.ref)}</p><div class="bks">${row('Payment received',g(x.amt))}${row('Less tax','− '+g(x.tax))}${x.refunded?row('Less refunds','− '+g(x.refunded)):''}${row('Net revenue',g(n),'sum')}${row('Agreed rate',pct(x.rate))}${row('Net × rate','GHS '+(exact/100).toFixed(4))}${row('Rounded down to the pesewa',g(c),'sum')}</div><p class="hint">Money is held in whole pesewas and always rounded down, so the studio never overpays.</p><div class="banner" style="margin-top:12px">${x.rev?'This payment was reversed, so no commission is due.':isHeld?`On hold until ${dfmt(rel)} (${D.hold} business days after the payment). Then it can be paid out.`:`The hold finished on ${dfmt(rel)}. This commission can be paid out.`}</div>`)};
+
+
+PG['admin-messages']=()=>chat('admin');
+PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
+PG['admin-settings']=()=>`<div class="stack form" style="max-width:640px">${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
+
+/* partner */
+const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);
+const susp=()=>P(ME).st!=='Active'?`<div class="banner">Your account is suspended. You can read your records but cannot submit referrals.</div>`:'';
+const partnerRows=()=>{
+  const m=D.payments.filter(x=>own(x)===ME).map(x=>({k:'p'+x.id,n:CL(PR(x.pr).c).name,i:D.clients.indexOf(CL(PR(x.pr).c)),s:x.ref,d:x.d,st:x.rev?'Reversed':'Earned',a:x.rev?Math.floor(Math.max(0,x.amt-x.tax-x.refunded)*x.rate/10000):com(x),dim:x.rev,menu:mb('how',x.id,'How this was worked out')+mi('partner-projects','Open projects')+mi('partner-commissions','Open ledger')}));
+  const o=D.payouts.filter(x=>x.p===ME).map(x=>({k:'o'+x.id,n:'Payout to you',i:3,s:x.id,d:x.d,st:x.void?'Voided':'Paid',a:-x.amt,dim:x.void,menu:mi('partner-payments','Open payouts')}));
+  const j=D.adj.filter(a=>a.p===ME).map((a,n)=>({k:'a'+n,n:'Adjustment',i:4,s:(a.reason||'adjustment').slice(0,18),d:a.d,st:'Adjustment',a:a.amt,menu:mi('partner-commissions','Open ledger')}));
+  return m.concat(o,j).sort((u,v)=>v.d.localeCompare(u.d)||String(v.k).localeCompare(String(u.k)))};
+PG['partner-dashboard']=()=>{
+  const rc=s=>D.refs.filter(r=>r.p===ME&&r.st===s).length,cl=mineC();
+  const left=balCard(avail(ME),`<button type="button" data-act="referral">${ic('pluscircle',16)} Submit client</button>`,`<a href="#partner-messages">${ic('chat',16)} Messages</a>`)
+   +`<section class="card"><div class="ch"><div><h2>My clients</h2><p class="sub">${cl.length} client${cl.length===1?'':'s'} attributed to you</p></div><a class="mini-link" href="#partner-clients" aria-label="All clients">${ic('arrowr',16)}</a></div><div class="avs">${cl.map(c=>`<a class="avb" href="#partner-clients" title="${esc(c.name)}" aria-label="${esc(c.name)}">${av(c.name,D.clients.indexOf(c))}</a>`).join('')||'<span class="muted small">No clients yet.</span>'}</div><div class="ctb"><button class="btn" data-act="referral" type="button">${ic('pluscircle',16)} Add new</button><a class="btn line" href="#partner-clients">${ic('pencil',15)} Manage</a></div></section>`
+   +`<a class="dashbtn" href="#partner-commissions">${ic('grid',16)} Open my commission ledger</a>`;
+  const right=`<section class="card duo">${chartSec('pc','Total earned',weekly(ME,com),'sand','partner-commissions')}${chartSec('pn','Client revenue',weekly(ME,net),'grey','partner-projects')}</section>`
+   +`<section class="card"><div class="ch"><div><h2>Referral status</h2><p class="sub">Where your clients are</p></div></div><div class="qbox">${[['Approved',rc('Approved')],['Under review',rc('Pending review')+rc('Flagged')],['Not accepted',rc('Rejected')]].map(x=>`<a class="qr" href="#partner-referrals"><span>${x[0]}</span><span class="v">${x[1]}</span></a>`).join('')}</div><div class="qfoot"><span>${D.refs.filter(r=>r.p===ME).length} submitted</span><span>Reviewed within a day</span></div><button type="button" class="btn wide" data-act="referral">Submit a client</button></section>`;
+  const unA=D.ann.filter(a=>!D.read[a.id]).length;return `${susp()}${unA?`<a class="banner" style="display:block" href="#partner-announcements">You have ${unA} new announcement${unA>1?'s':''} from the studio. Read now</a>`:''}<div class="dgrid"><div class="col">${left}</div><div class="mid">${txCard('Activity','Your commission, payouts and corrections',partnerRows(),{flts:['All','Earned','Paid'],href:'partner-commissions',label:'View all activity'})}</div><div class="col">${right}</div></div>`};
+PG['partner-referrals']=()=>`${susp()}<div class="pha"><span class="grow"></span><button class="btn pink" data-act="referral" type="button">${ic('plus',16)} Submit a client</button></div>${card('My referrals',tbl(['Business','Budget','Status','Submitted'],D.refs.filter(r=>r.p===ME).map(r=>({c:[`<b>${esc(r.biz)}</b>${r.flag?`<div class="note">${esc(r.flag)}</div>`:''}`,r.bud?g(r.bud):'—',stTag(r.st),dfmt(r.d)]})),[1]))}`;
+PG['partner-clients']=()=>card('My clients',tbl(['Client','Projects','Earned'],mineC().map(c=>({href:'partner-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),D.projects.filter(p=>p.c===c.id).length,g(sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),com))]})),[1,2]));
+PG['partner-projects']=()=>card('My projects',tbl(['Project','Client','Rate','Status','Earned'],mineP().map(p=>({c:[`<b>${esc(p.name)}</b>`,esc(CL(p.c).name),pct(p.rate),stTag(p.st),g(sumBy(D.payments.filter(x=>x.pr===p.id),com))]})),[2,4]));
+PG['partner-commissions']=()=>`<div class="stack"><div class="cards">${stat('Earned',gs(earned(ME)),'')}${stat('Paid',gs(paid(ME)),'')}${stat('Balance',gs(bal(ME)),'')}</div>${card('My ledger',tbl(['Date','Entry','Detail','Amount',''],ledger().filter(l=>l.p===ME).map(l=>({c:[dfmt(l.d),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a),l.pid&&l.t==='Accrual'?act('How','how',l.pid,'line'):'']})),[3]))}</div>`;
+PG['partner-payments']=()=>card('Payouts to me',tbl(['Date','Method','Reference','Amount'],D.payouts.filter(x=>x.p===ME).map(x=>({c:[dfmt(x.d),x.m,esc(x.ref),x.void?tag('Voided','pink'):g(x.amt)]})),[3]));
+PG['partner-messages']=()=>chat('partner');
+PG['partner-profile']=()=>{const p=P(ME);return `<div class="stack form">${card('My details',`<form id="pform" novalidate><div class="who">${av(p.name,0)}<div><b>${esc(p.name)}</b><span>${esc(p.email)}</span></div></div>${field('Phone','phone',{val:p.phone})}${field('City','city',{val:p.city})}${field('Payout account (masked)','acct',{val:p.acct||'',ph:'****1234',hint:'Only a masked number. Full account numbers are rejected.'})}<div class="hint">Name, email, role and status can only be changed by an administrator.</div><div class="err" id="perr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">Save changes</button></div></form>`)}</div>`};
+
+/* ---------- router + shell ---------- */
+const NAV={admin:[['dashboard','Dashboard','home'],['referrals','Referrals','send'],['clients','Clients','brief'],['projects','Projects','layers'],['payments','Payments','card'],['commissions','Commissions','pct'],['payouts','Payouts','wallet'],['partners','Partners','users'],['messages','Messages','chat'],['community','Community','megaphone'],['reports','Reports','chart'],['audit','Audit log','shield']],
+ partner:[['dashboard','Dashboard','home'],['referrals','Referrals','send'],['clients','Clients','brief'],['projects','Projects','layers'],['commissions','Commissions','pct'],['payments','Payouts','wallet'],['messages','Messages','chat'],['community','Community','megaphone']]};
+const TITLE={dashboard:'Dashboard',partners:'Partners',referrals:'Referrals',clients:'Clients',projects:'Projects',payments:'Payments',commissions:'Commissions',payouts:'Payouts',reports:'Reports',messages:'Messages',announcements:'Announcements',community:'Community',audit:'Audit log',settings:'Settings',profile:'Profile',notifications:'Notifications',statement:'Statement'};
+let route='admin-dashboard';
+const ttl=(r,k)=>r==='partner'&&k==='payments'?'Payouts':TITLE[k]||k;
+const pageName=()=>{const k=route.split('-').slice(1).join('-');return (role()==='admin'?'Admin · ':'Partner · ')+(k.startsWith('project-')?'Project':ttl(role(),k))};
+const notesFor=r=>D.notes.filter(n=>n.r===r);
+const openRail=()=>{$('#rail').classList.add('open');$('#scrim').classList.add('open')};
+function sIndex(){const r=role(),o=[];
+  if(r==='admin'){D.partners.forEach(p=>o.push({t:p.name,s:'Partner · '+p.email,h:'admin-partners'}));D.clients.forEach(c=>o.push({t:c.name,s:'Client · '+P(c.p).name,h:'admin-clients'}));D.projects.forEach(p=>o.push({t:p.name,s:'Project · '+CL(p.c).name,h:'admin-project-'+p.id}));D.payments.forEach(x=>o.push({t:x.ref,s:'Payment · '+CL(PR(x.pr).c).name+' · '+g(x.amt),h:'admin-project-'+x.pr}));D.refs.forEach(x=>o.push({t:x.biz,s:'Referral · '+x.st,h:'admin-referrals'}))}
+  else{mineC().forEach(c=>o.push({t:c.name,s:'Client',h:'partner-clients'}));mineP().forEach(p=>o.push({t:p.name,s:'Project · '+CL(p.c).name,h:'partner-projects'}));D.refs.filter(x=>x.p===ME).forEach(x=>o.push({t:x.biz,s:'Referral · '+x.st,h:'partner-referrals'}));D.payouts.filter(x=>x.p===ME).forEach(x=>o.push({t:x.id,s:'Payout · '+g(x.amt),h:'partner-payments'}))}
+  D.ann.forEach(a=>o.push({t:a.t,s:'Announcement',h:r+'-announcements'}));return o}
+function profCard(r){
+  if(r==='admin'){const a=D.partners.filter(p=>p.st==='Active').length,pe=D.invites.length,pc=Math.round(a/((a+pe)||1)*100);
+    return `<div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>Team joined</b><p>${pe?pe+' invitation'+(pe>1?'s':'')+' waiting to be accepted.':'Everyone invited has joined.'}</p></div><button class="btn soft wide" type="button" data-act="invite">Invite a partner</button>`}
+  const p=P(ME),st=[true,!!p.phone,!!p.city,!!p.acct,D.refs.some(x=>x.p===ME)],pc=Math.round(st.filter(Boolean).length/st.length*100);
+  return `<div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>${pc===100?'Profile complete':'Complete profile'}</b><p>${pc===100?'You are ready to be paid.':'Add the missing details to be ready for payouts.'}</p></div><a class="btn soft wide" href="#partner-profile">${pc===100?'View profile':'Complete profile'}</a>`}
+const back=(h,l)=>`<a class="btn white" href="#${h}">${ic('back',16)} ${l}</a>`;
+const kv=rows=>`<div class="kv">${rows.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`;
+const cPaid=c=>sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),x=>x.amt);
+const cCom=c=>sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),com);
+function payRows(list,admin){return tbl(['Date','Reference','Received','Commission',''],list.map(x=>({c:[dfmt(x.d),`${esc(x.ref)}<div class="small muted">${esc(CL(PR(x.pr).c).name)} · ${esc(x.m)}${x.rev?' · reversed':''}</div>`,g(x.amt),g(com(x)),x.rev?tag('Reversed'):act('How','how',x.id,'line')]})),[2,3])}
+PG.partnerD=id=>{const p=P(id);if(!p)return PG['admin-partners']();
+  const cs=D.clients.filter(c=>c.p===id),prs=D.projects.filter(x=>CL(x.c).p===id),po=D.payouts.filter(x=>x.p===id).sort((a,b)=>b.d.localeCompare(a.d)),rf=D.refs.filter(x=>x.p===id);
+  return `<div class="pha">${back('admin-partners','Partners')}<span class="grow"></span><a class="btn white" href="#admin-messages">${ic('chat',16)} Message</a>${act(p.st==='Active'?'Suspend':'Reactivate','suspend',id,'white')}<button class="btn pink" data-act="payout" data-id="${id}" type="button">${ic('plus',16)} Record payout</button></div>
+  <div class="stack"><div class="cards">${stat('Earned so far',gs(earned(id)),pluralize(cs.length,'client'))}${stat('Paid out',gs(paid(id)),pluralize(po.filter(x=>!x.void).length,'payout'))}${stat('Balance',gs(bal(id)),'Available now '+g(avail(id)))}</div>
+  ${card('Details',kv([['Status',stTag(p.st)],['Email',esc(p.email)],['Phone',esc(p.phone)],['City',esc(p.city)]]))}
+  ${card('Clients',tbl(['Client','Projects','Paid so far','Commission'],cs.map(c=>({href:'admin-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),D.projects.filter(x=>x.c===c.id).length,g(cPaid(c)),g(cCom(c))]})),[2,3]))}
+  ${card('Projects',tbl(['Project','Client','Rate','Status'],prs.map(x=>({href:'admin-project-'+x.id,c:[`<b>${esc(x.name)}</b>`,esc(CL(x.c).name),pct(x.rate),stTag(x.st)]})),[2]))}
+  ${card('Payouts',tbl(['Date','Reference','Method','Amount'],po.map(x=>({c:[dfmt(x.d),esc(x.id)+'<div class="small muted">'+esc(x.ref)+'</div>',esc(x.m),x.void?tag('Voided'):g(x.amt)]})),[3]))}
+  ${card('Referrals sent',tbl(['Business','Budget','Status'],rf.map(r=>({c:[`<b>${esc(r.biz)}</b>`,r.bud?g(r.bud):'—',stTag(r.st)]})),[1]))}</div>`};
+const pluralize=(n,w)=>n+' '+w+(n===1?'':'s');
+PG.clientD=(id,adm)=>{const c=CL(id);if(!c||(!adm&&c.p!==ME))return adm?PG['admin-clients']():PG['partner-clients']();
+  const prs=D.projects.filter(x=>x.c===id),pays=D.payments.filter(x=>CL(PR(x.pr).c).id===id).sort((a,b)=>b.d.localeCompare(a.d)),pa=P(c.p);
+  const top=adm?`<div class="pha">${back('admin-clients','Clients')}<span class="grow"></span>${act('Reassign','reassign',id,'white')}<button class="btn pink" data-act="project" type="button">${ic('plus',16)} New project</button></div>`:`<div class="pha">${back('partner-clients','My clients')}</div>`;
+  return `${top}<div class="stack"><div class="cards">${stat('Paid so far',gs(cPaid(c)),pluralize(pays.length,'payment'))}${stat(adm?'Commission':'You earned',gs(cCom(c)),pluralize(prs.length,'project'))}${adm?stat('Partner',esc(pa.name),stTag(pa.st)):''}</div>
+  ${card('Details',kv([['Contact',esc(c.contact)],...(adm?[['Partner',`<a href="#admin-partner-${pa.id}">${esc(pa.name)}</a>`]]:[])]))}
+  ${card('Projects',tbl(['Project','Budget','Rate','Status'],prs.map(x=>({href:adm?'admin-project-'+x.id:null,c:[`<b>${esc(x.name)}</b>`,g(x.budget),pct(x.rate),stTag(x.st)]})).map(r=>{if(!r.href)delete r.href;return r}),[1,2]))}
+  ${card('Payments',payRows(pays))}</div>`};
+const pdash=PG['partner-dashboard'];
+PG['partner-dashboard']=()=>{if(!(mineC().length===0&&earned(ME)===0&&D.payments.filter(x=>own(x)===ME).length===0))return pdash();
+  const me=P(ME),first=me.name.split(' ')[0],s1=!!(me.phone&&me.city),s2=D.refs.some(r=>r.p===ME),s3=false;
+  const steps=[[s1,'Complete your profile','Add your phone number and city so the studio can reach you.',s1?'':'<a class="btn sm pink" href="#partner-profile">Add details</a>'],
+   [s2,'Refer your first client','Tell us about a business you know. The studio reviews it, usually within a day.',s2?'<a class="btn sm line" href="#partner-referrals">See my referrals</a>':'<button class="btn sm pink" type="button" data-act="referral">Refer a client</button>'],
+   [s3,'See your first commission','It shows up here once your client pays and the hold period ends.','']];
+  const done=steps.filter(x=>x[0]).length;
+  return `<div class="stack fr"><section class="card frhero"><div><p class="eyebrow">Welcome</p><h2>Hi ${esc(first)}, let's get you started</h2><p>You earn a share of what each client you bring in pays the studio. Three small steps and you're set.</p></div><div class="ring" style="--p:${Math.round(done/3*100)}"><span>${done}/3</span></div></section>
+  <section class="card"><h2>Your first steps</h2><ol class="fsteps">${steps.map((x,i)=>`<li class="${x[0]?'done':''}"><span class="tick" aria-hidden="true">${x[0]?'&#10003;':i+1}</span><div><b>${x[1]}</b><p class="muted small">${x[2]}</p></div><div class="facts">${x[3]}</div></li>`).join('')}</ol></section>
+  <section class="card"><h2>How you get paid</h2><div class="kv"><div><span>1. You refer</span><b>A business you know</b></div><div><span>2. Client pays</span><b>The studio records it</b></div><div><span>3. You earn</span><b>A percentage of what was paid</b></div><div><span>4. You're paid</span><b>After a ${D.hold}-day hold</b></div></div><div class="acts" style="margin-top:14px"><button class="btn sm line" type="button" data-act="howto">${ic('clock',14)} See an example</button><a class="btn sm line" href="#partner-messages">${ic('chat',14)} Ask the studio</a><a class="btn sm line" href="#partner-community">${ic('megaphone',14)} Community</a></div></section></div>`};
+ACT.howto=function(){const ex=100000,r=1500,c=Math.floor(ex*r/10000);info('An example',`<p class="muted">Say a client pays the studio ${g(ex)} for a project agreed at ${pct(r)}.</p><div class="bks"><div class="bk"><span>Client pays</span><b>${g(ex)}</b></div><div class="bk"><span>Your rate</span><b>${pct(r)}</b></div><div class="bk sum"><span>You earn</span><b>${g(c)}</b></div></div><p class="muted small">The rate is agreed per project. Money is paid out after the ${D.hold}-day hold. Every commission has a "How" button showing its exact working.</p>`)};
+/* ---- filters, sorting, paging ---- */
+S.f={};const FS_=k=>S.f[k]||(S.f[k]={per:'all',sort:'new',n:10});
+const inPer=(d,per)=>{if(per==='all')return true;if(per==='month')return d.slice(0,7)===TODAY.slice(0,7);const days=+per,c=new Date(TODAY+'T00:00:00');c.setDate(c.getDate()-days);return d>=c.toISOString().slice(0,10)};
+const PERS=[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['month','This month']],SORTS=[['new','Newest first'],['old','Oldest first'],['big','Largest amount']];
+const sel=(k,f,opts,label)=>`<label class="fsel"><span class="sr">${label}</span><select data-fs="${k}:${f}" aria-label="${label}">${opts.map(o=>`<option value="${o[0]}" ${FS_(k)[f]===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label>`;
+const fbar=k=>sel(k,'per',PERS,'Period')+sel(k,'sort',SORTS,'Sort by');
+const pick=(k,list,get)=>{const f=FS_(k);let L=list.filter(x=>inPer(x.d,f.per));L.sort((a,b)=>f.sort==='old'?a.d.localeCompare(b.d):f.sort==='big'?Math.abs(get(b))-Math.abs(get(a)):b.d.localeCompare(a.d));return L};
+const paged=(k,L,render_,heads,rc,emptyMsg)=>{const f=FS_(k),sh=L.slice(0,f.n),left=L.length-sh.length;
+  return tbl(heads,sh.map(render_),rc,emptyMsg||(f.per!=='all'?'Nothing in this period. Try a wider range.':null))+(left>0?`<div class="more-row"><button class="btn line" type="button" data-act="more" data-id="${k}">Show ${Math.min(10,left)} more <span class="muted">(${left} left)</span></button></div>`:(L.length>10?`<div class="more-row muted small">Showing all ${L.length}</div>`:''))};
+ACT.more=function(k){FS_(k).n+=10;const y=scrollY;render();scrollTo(0,y)};
+document.addEventListener('change',e=>{const s=e.target.closest('[data-fs]');if(!s)return;const [k,f]=s.dataset.fs.split(':');FS_(k)[f]=s.value;FS_(k).n=10;const y=scrollY;render();scrollTo(0,y)});
+PG['admin-payments']=()=>{const L=pick('pm',D.payments.filter(x=>has(S.q.pm,CL(PR(x.pr).c).name,x.ref,PR(x.pr).name)),x=>x.amt);
+  return `<div class="pha">${searchBox('pm','Search payments')}${fbar('pm')}<span class="grow"></span><button class="btn pink" data-act="payment" type="button">${ic('plus',16)} Record payment</button></div>${card('Payments received',paged('pm',L,x=>({href:'admin-project-'+x.pr,c:[who(CL(PR(x.pr).c).name,PR(x.pr).name,0),dfmt(x.d),esc(x.ref),g(x.amt),g(com(x))]}),['Client','Date','Reference','Received','Commission'],[3,4],D.payments.length?null:'No payments yet. Record the first one when a client pays.'))}`};
+const ledRow=(l,adm)=>({c:[dfmt(l.d),...(adm?[esc(P(l.p).name)]:[]),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a),l.pid&&l.t==='Accrual'?act('How','how',l.pid,'line'):'']});
+PG['admin-commissions']=()=>{const L=pick('lg',ledger(),l=>l.a);return `<div class="pha">${fbar('lg')}<span class="grow"></span><button class="btn pink" data-act="adjust" type="button">${ic('plus',16)} Adjustment</button></div><div class="stack"><div class="cards">${D.partners.map(p=>stat(esc(p.name),gs(bal(p.id)),'Earned '+g(earned(p.id)))).join('')}</div>${card('Ledger',paged('lg',L,l=>ledRow(l,1),['Date','Partner','Entry','Detail','Amount',''],[4]))}</div>`};
+PG['admin-payouts']=()=>{const L=pick('po',D.payouts,x=>x.amt);return `<div class="row2">${card('Ready to pay',`<div class="list">${D.partners.map(p=>`<div>${who(p.name,'Ready now '+g(avail(p.id))+(held(p.id)?' · '+g(held(p.id))+' on hold':''),pIdx(p.id))}<span class="grow"></span>${act('Pay','payout',p.id,avail(p.id)>0?'pink':'line',avail(p.id)>0?'':'disabled')}</div>`).join('')}</div>`)}${card('Payout history',`<div class="pha" style="margin-bottom:8px">${fbar('po')}</div>`+paged('po',L,x=>({c:[dfmt(x.d)+`<div class="small muted">${x.id} · ${esc(x.ref)}</div>`,esc(P(x.p).name),x.void?tag('Voided','pink'):g(x.amt),x.void?'':act('Void','voidpay',x.id,'line')]}),['Date','Partner','Amount',''],[2],D.payouts.length?null:'No payouts yet. They appear here once you record one.'))}</div>`};
+PG['partner-commissions']=()=>{const L=pick('pl',ledger().filter(l=>l.p===ME),l=>l.a);return `<div class="pha">${fbar('pl')}<span class="grow"></span><button class="btn white" type="button" data-act="pcsv">${ic('upright',16)} Export CSV</button><a class="btn white" href="#partner-statement">${ic('card',16)} Statement</a></div><div class="stack"><div class="cards">${stat('Earned',gs(earned(ME)),'')}${stat('Paid',gs(paid(ME)),'')}${stat('Balance',gs(bal(ME)),'')}</div>${card('My ledger',paged('pl',L,l=>ledRow(l,0),['Date','Entry','Detail','Amount',''],[3],'Nothing here yet. Commission appears after a client you referred pays.'))}</div>`};
+PG['partner-payments']=()=>{const L=pick('pp',D.payouts.filter(x=>x.p===ME),x=>x.amt);return `<div class="pha">${fbar('pp')}</div>`+card('Payouts to me',paged('pp',L,x=>({c:[dfmt(x.d),x.m,esc(x.ref),x.void?tag('Voided','pink'):g(x.amt)]}),['Date','Method','Reference','Amount'],[3],'No payouts yet. You will see each one here when the studio sends it.'))};
+/* ---- partner export + statement ---- */
+const csvq=v=>{v=String(v);return /^[=+\-@\t\r]/.test(v)?"'"+v:v},csvrow=a=>a.map(v=>'"'+csvq(v).replace(/"/g,'""')+'"').join(',');
+ACT.pcsv=function(){const rows=[['Date','Entry','Detail','Amount (GHS)']].concat(ledger().filter(l=>l.p===ME).sort((a,b)=>a.d.localeCompare(b.d)).map(l=>[l.d,l.t,l.n,(l.a/100).toFixed(2)])),t=rows.map(csvrow).join('\n');dl('my-commission-ledger-'+TODAY+'.csv',t)};
+ACT.print=function(){window.print()};
+PG['partner-statement']=()=>{const me=P(ME),f=FS_('st'),L=pick('st',ledger().filter(l=>l.p===ME),l=>l.a).sort((a,b)=>a.d.localeCompare(b.d)),inc=sumBy(L.filter(l=>l.a>0),l=>l.a),out=sumBy(L.filter(l=>l.a<0),l=>l.a);
+  return `<div class="pha noprint">${back('partner-commissions','Commissions')}${sel('st','per',PERS,'Period')}<span class="grow"></span><button class="btn pink" type="button" data-act="print">Print or save as PDF</button></div>
+  <section class="card statement"><div class="sthead"><div><p class="eyebrow">Commission statement</p><h2>${esc(me.name)}</h2><p class="muted">${esc(me.email)}</p></div><div class="stmeta"><span>Period</span><b>${PERS.find(x=>x[0]===f.per)[1]}</b><span>Issued</span><b>${dfmt(TODAY)}</b></div></div>
+  <div class="kv" style="margin:14px 0"><div><span>Commission earned</span><b>${g(inc)}</b></div><div><span>Paid out and deductions</span><b>${g(out)}</b></div><div><span>Net for the period</span><b>${g(inc+out)}</b></div><div><span>Current balance</span><b>${g(bal(ME))}</b></div></div>
+  ${tbl(['Date','Entry','Detail','Amount'],L.map(l=>({c:[dfmt(l.d),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a)]})),[3],'Nothing in this period.')}<p class="muted small" style="margin-top:14px">Amounts are in Ghana cedis (GHS). Commission is paid after the ${D.hold}-business-day hold. Payouts are made outside the portal.</p></section>`};
+/* ---- notifications page ---- */
+ACT.noteall=function(){markNotesRead();toast('All marked as read');render()};
+ACT.noteopen=function(i){const n=notesFor(role())[+i];if(n){n.n=false;sb.from('notifications').update({read_at:nowIso()}).eq('id',n.id).then(()=>{});location.hash=n.h}};
+const notesPage=()=>{const L=notesFor(role()),un=L.filter(n=>n.n).length;return `<div class="pha"><span class="muted">${un?un+' unread':'You are all caught up'}</span><span class="grow"></span>${un?`<button class="btn white" type="button" data-act="noteall">Mark all as read</button>`:''}</div>${card('Notifications',L.length?`<div class="notes">${L.map((n,i)=>`<button type="button" class="nrow ${n.n?'new':''}" data-act="noteopen" data-id="${i}"><span class="dot" aria-hidden="true"></span><span class="nt">${esc(n.t)}</span><span class="go">${ic('arrowr',14)}</span></button>`).join('')}</div>`:'<div class="empty">Nothing yet. Updates from the studio will show up here.</div>')}`};
+PG['admin-notifications']=notesPage;PG['partner-notifications']=notesPage;
+function render_(){
+  CUR_Q=null;if(!BOOTED)return;route=location.hash.slice(1);
+  if(!ME){if(!OPEN_ROUTES.includes(route)){location.replace('#signin');return}authShow(route);return}
+  if(!(route.startsWith(ROLE+'-')||route==='reset'||route==='accept-invite')){location.replace('#'+ROLE+'-dashboard');return}
+  if(/^(admin|partner)-announcements$/.test(route)){S.ctab='news';location.replace('#'+route.split('-')[0]+'-community');return}
+  if(authShow(route))return;
+  let r=role(),key=route.split('-').slice(1).join('-'),html,title;
+  if(route.startsWith('admin-project-')){html=PG.project(route.slice(14));title=(PR(route.slice(14))||{name:'Projects'}).name}
+  else if(route.startsWith('admin-partner-')){html=PG.partnerD(route.slice(14));title=(P(route.slice(14))||{name:'Partners'}).name}
+  else if(route.startsWith('admin-client-')){html=PG.clientD(route.slice(13),1);title=(CL(route.slice(13))||{name:'Clients'}).name}
+  else if(route.startsWith('partner-client-')){html=PG.clientD(route.slice(15),0);title=((CL(route.slice(15))&&CL(route.slice(15)).p===ME)?CL(route.slice(15)):{name:'My clients'}).name}
+  else if(PG[route]){html=PG[route]();title=ttl(r,key)}
+  else{html=notFound(r);title='Page not found';key='404'}
+  const nk=route.startsWith('admin-project-')?'projects':/^admin-partner-/.test(route)?'partners':/^(admin|partner)-client-/.test(route)?'clients':key;
+  const um=r==='admin'?sumBy(D.partners,p=>D.unreadA[p.id]||0):(D.unreadP[ME]||0);
+  const badge={referrals:r==='admin'?D.refs.filter(x=>x.st==='Pending review'||x.st==='Flagged').length:0,messages:um,community:(r==='partner'?D.ann.filter(a=>!D.read[a.id]).length:0)+cunread(r)};
+  $('#nav').innerHTML=NAV[r].map(n=>`<a href="#${r}-${n[0]}" class="ni ${n[0]===nk?'on':''}"><span class="ico">${ic(n[2],17)}</span><span>${n[1]}</span>${badge[n[0]]?`<span class="cnt">${badge[n[0]]}</span>`:''}</a>`).join('');
+  $('#prof').innerHTML=profCard(r);
+  const me=P(ME);
+  $('#urow').innerHTML=r==='admin'?`<span class="uav">TS</span><div class="uinfo"><b>${esc(MEP.full_name||'Studio admin')}</b><small>${esc(MEP.email)}</small></div><a class="ibtn dk" href="#admin-settings" aria-label="Settings">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`:`<span class="uav">${esc(me.name.split(' ').map(w=>w[0]).join(''))}</span><div class="uinfo"><b>${esc(me.name)}</b><small>${esc(me.email)}</small></div><a class="ibtn dk" href="#partner-profile" aria-label="My profile">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`;
+  const nn=notesFor(r),un=nn.filter(n=>n.n).length;
+  $('#head').innerHTML=`<button class="ibtn menu" type="button" id="menubtn" aria-label="Open menu">${ic('menu',18)}</button><div class="gsearch"><label>${ic('search',17)}<input id="gs" type="text" placeholder="${innerWidth<560?'Search…':'Search anything…'}" autocomplete="off" aria-label="Search"><kbd>/</kbd></label><div class="sres" id="sres" role="listbox"></div></div><span class="grow"></span><div class="rel"><button class="ibtn" type="button" id="bell" aria-label="Notifications">${ic('bell',18)}${un?'<i class="rd"></i>':''}</button><div class="pop" id="pop"><h3>Notifications</h3>${nn.slice(0,6).map(n=>`<a href="#${n.h}" class="${n.n?'new':''}">${esc(n.t)}</a>`).join('')||'<div class="empty">All caught up.</div>'}<a class="pall" href="#${r}-notifications">View all notifications</a></div></div><a class="ibtn" href="#${r}-messages" aria-label="Messages">${ic('mail',18)}${um?'<i class="rd"></i>':''}</a>`;
+  $('#view').innerHTML=(key==='dashboard'?'<h1 class="sr">Dashboard</h1>':`<h1 class="ptitle">${esc(title)}</h1>`)+html;
+  closeRail();drawPins();renderFb();
+  const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;if(route===ROLE+'-messages'){const cid=ROLE==='admin'?S.conv:ME,un=(D.msgs[cid]||[]).filter(x=>!x.read&&x.sid!==ME);if(un.length){un.forEach(x=>x.read=true);sb.from('messages').update({read_at:nowIso()}).in('id',un.map(x=>x.id)).then(()=>{})}}const cm=$('#cmsgs');if(cm)cm.scrollTop=cm.scrollHeight;
+}
+function render(){try{render_()}catch(e){console.error(e);const v=$('#view');if(v)v.innerHTML=`<section class="card errstate"><h2>Something went wrong</h2><p class="muted">This page could not be shown. Your data is safe. Try again, or go back to the dashboard.</p><div class="acts" style="justify-content:flex-start"><button class="btn pink" type="button" data-act="retry">Try again</button><a class="btn line" href="#${role()}-dashboard">Go to dashboard</a></div></section>`}}
+const notFound=r=>`<section class="card errstate"><h2>We could not find that page</h2><p class="muted">The link may be old, or the page may have moved.</p><div class="acts" style="justify-content:flex-start"><a class="btn pink" href="#${r}-dashboard">Go to dashboard</a></div></section>`;
+ACT.retry=function(){render()};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-clearq]');if(!b)return;S.q[b.dataset.clearq]='';render()});
+function closeRail(){$('#rail').classList.remove('open');$('#scrim').classList.remove('open')}
+function closeRail(){$('#rail').classList.remove('open');$('#scrim').classList.remove('open')}
+window.addEventListener('hashchange',()=>{S.pend=null;S.open=!!S.goChat;S.goChat=false;S.flt='All';S.rm=null;S.fm=false;render();window.scrollTo(0,0)});
+
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t===$('#mbg'))return closeModal();
+  if(t.closest('[data-close]'))return closeModal();
+  if((S.rm||S.fm)&&!t.closest('[data-rm],[data-fl],[data-flv]')){S.rm=null;S.fm=false;render()}
+  const sres=$('#sres');
+  if(t.closest('#sres a')){sres.classList.remove('open');const gi=$('#gs');if(gi)gi.value=''}
+  else if(sres&&sres.classList.contains('open')&&!t.closest('.gsearch'))sres.classList.remove('open');
+  const bell=t.closest('#bell');
+  if(bell){const pop=$('#pop');const open=pop.classList.toggle('open');if(!open){markNotesRead();render()}return}
+  if(t.closest('#pop a')){markNotesRead()}
+  if(!t.closest('#pop')){const pop=$('#pop');if(pop&&pop.classList.contains('open')){pop.classList.remove('open');markNotesRead();render()}}
+  if(t.closest('#menubtn')){openRail();return}
+  if(t.closest('#scrim')||t.closest('#railx'))return closeRail();
+  if(t.closest('[data-qp]')){ACT.payout($('#qp-p').value,$('#qp-a').value);return}
+  if(t.closest('[data-qpmax]')){const p=$('#qp-p').value;$('#qp-a').value=(avail(p)/100).toFixed(2);return}
+  if(t.closest('[data-refresh]')){reload().then(()=>{toast('Up to date');render()});return}
+  if(t.closest('[data-fl]')){S.fm=!S.fm;S.rm=null;render();return}
+  const fv=t.closest('[data-flv]');if(fv){S.flt=fv.dataset.flv;S.fm=false;render();return}
+  const rm=t.closest('[data-rm]');if(rm){S.rm=S.rm===rm.dataset.rm?null:rm.dataset.rm;S.fm=false;render();return}
+  const bc=t.closest('[data-bar]');if(bc){const x=bc.dataset.bar.split(':');S.bar[x[0]]=Number(x[1]);render();return}
+  const ch=t.closest('[data-chat]');if(ch){S.conv=ch.dataset.chat;if(location.hash==='#admin-messages'){S.open=true;render()}else{S.goChat=true;location.hash='admin-messages'}return}
+  const a=t.closest('[data-act]');if(a&&ACT[a.dataset.act]){e.preventDefault();ACT[a.dataset.act](a.dataset.id);return}
+  const sg=t.closest('[data-sug]');if(sg){const i=$('#xin'),pos=i.selectionStart==null?i.value.length:i.selectionStart,bf=i.value.slice(0,pos).replace(/@([A-Za-z]*)$/,'@'+sg.dataset.sug+' ');i.value=bf+i.value.slice(pos);$('#sug').classList.remove('open');i.focus();i.setSelectionRange(bf.length,bf.length);return}
+  const ct=t.closest('[data-ctab]');if(ct){S.ctab=ct.dataset.ctab;render();return}
+  const tb=t.closest('[data-tab]');if(tb){S.tab=tb.dataset.tab;render();return}
+  const cv=t.closest('[data-conv]');if(cv){S.conv=cv.dataset.conv;S.open=true;render();return}
+  const h=t.closest('[data-href]');if(h&&!t.closest('a,button')){location.hash=h.dataset.href}
+});
+document.addEventListener('input',e=>{if(e.target.id!=='gs')return;const q=e.target.value.trim().toLowerCase(),b=$('#sres');if(!q){b.classList.remove('open');return}
+  const res=sIndex().filter(x=>(x.t+' '+x.s).toLowerCase().includes(q)).slice(0,7);
+  b.innerHTML=res.length?res.map(x=>`<a href="#${x.h}" role="option"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></a>`).join(''):'<div class="empty pad">No matches</div>';b.classList.add('open')});
+document.addEventListener('input',e=>{if(e.target.id!=='xin')return;const v=e.target.value.slice(0,e.target.selectionStart),m=v.match(/(?:^|\s)@([A-Za-z]*)$/),box=$('#sug');if(!m){box.classList.remove('open');return}const q=m[1].toLowerCase();
+  const o=D.dir.filter(p=>p.role==='partner'&&p.id!==vid()).map(p=>({h:p.name.split(' ')[0],n:p.name,i:pIdx(p.id)})).concat(role()==='admin'?[{h:'everyone',n:'Everyone',i:3}]:[{h:'Studio',n:'Studio team',i:3}]).filter(x=>x.h.toLowerCase().startsWith(q));
+  box.innerHTML=o.map(x=>`<button type="button" data-sug="${x.h}">${av(x.n,x.i)}<span><b>@${x.h}</b><small class="muted"> ${esc(x.n)}</small></span></button>`).join('');box.classList.toggle('open',o.length>0)});
+document.addEventListener('change',e=>{if(e.target.id==='qp-p'){const p=e.target.value;$('#qp-av').textContent=g(avail(p));$('#qp-hold').textContent='On hold '+g(held(p));$('#qp-a').value=''}});
+document.addEventListener('input',e=>{const q=e.target.dataset&&e.target.dataset.q;if(q){S.q[q]=e.target.value;const pos=e.target.selectionStart;render();const n=document.querySelector(`[data-q="${q}"]`);if(n){n.focus();n.setSelectionRange(pos,pos)}}});
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.set;if(k==='hold'){fire(()=>q(sb.from('settings').update({hold_days:Number(e.target.value)}).eq('id',1)),'Setting saved')}});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='xform'){e.preventDefault();const v=$('#xin').value.trim();if(!v)return;$('#xin').value='';fire(()=>q(sb.from('community_messages').insert({body:v}))).then(()=>{const x=$('#xin');x&&x.focus()});return}
+  if(e.target.id==='cform'){e.preventDefault();const v=$('#cin').value.trim();if(!v)return;const cid=role()==='admin'?S.conv:ME;if(!cid)return;$('#cin').value='';fire(()=>q(sb.from('messages').insert({partner_id:cid,body:v}))).then(()=>{$('#cin')&&$('#cin').focus()});return}
+  if(e.target.id==='pform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!f.phone.trim()||!f.city.trim()){$('#perr').textContent='Enter your phone number and city.';return}if(!/^[0-9+\s]{9,16}$/.test(f.phone.trim())){$('#perr').textContent='Enter a valid phone number.';return}const ac=(f.acct||'').trim();if(/\d{5,}/.test(ac)){$('#perr').textContent='Enter only a masked account such as ****1234.';return}fire(()=>q(sb.from('profiles').update({phone:f.phone.trim(),city:f.city.trim(),account_mask:ac||null}).eq('id',ME)),'Profile saved')}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeFb();closeRail();const s=$('#sres');s&&s.classList.remove('open');if(S.rm||S.fm){S.rm=null;S.fm=false;render()}return}
+  const tn=(document.activeElement||{}).tagName||'';
+  if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(tn)&&!$('#mbg').classList.contains('open')){const gi=$('#gs');if(gi){e.preventDefault();gi.focus()}}
+  if(e.key==='Enter'&&e.target.id==='gs'){const f=document.querySelector('#sres a');if(f){e.preventDefault();location.hash=f.getAttribute('href').slice(1);$('#sres').classList.remove('open');e.target.value=''}}
+});
+
+const FS={pinning:false};
+function drawPins(){}function renderFb(){}function closeFb(){}
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){ME=null;MEP=null;ROLE=null;resetD();render()}});
+setInterval(()=>{if(!ME||document.hidden||$('#mbg').classList.contains('open'))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;reload().then(render)},60000);
+async function boot(){
+  document.body.classList.add('authmode');
+  $('#auth').innerHTML='<div class="aw"><section class="ar" style="grid-column:1/-1"><div class="acard"><p class="muted">Loading the portal…</p></div></section></div>';
+  const lt=(/[#&]type=([a-z]+)/.exec(BOOT_HASH)||[])[1],le=/[#&]error(_code)?=/.test(BOOT_HASH);
+  let sess=null;try{sess=(await sb.auth.getSession()).data.session}catch(_){}
+  BOOTED=true;S.open=false;
+  if(sess&&await startSession()){if(lt==='invite')location.replace('#accept-invite');else if(lt==='recovery')location.replace('#reset')}
+  else if(le)location.replace('#'+(lt==='recovery'?'forgot':'accept-invite-expired'));
+  render();
+}
+boot();
+})();
+</script>
+
+</body></html>
