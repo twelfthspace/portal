@@ -92,7 +92,7 @@ async function run(who) {
     await page.evaluate(r => { location.hash = r }, r); await page.waitForTimeout(150);
     const txt = await page.textContent('#view');
     if (/Something went wrong|could not find that page/.test(txt)) bad.push(r);
-    if (r.endsWith('-dashboard') || r === 'admin-referrals' || r === 'partner-commissions') await page.screenshot({ path: path.join(outdir, r + '.png'), fullPage: false });
+    if (r.endsWith('-dashboard') || r === 'admin-referrals' || r === 'admin-partners' || r === 'partner-commissions') await page.screenshot({ path: path.join(outdir, r + '.png'), fullPage: false });
   }
   const finalHash = await page.evaluate(() => location.hash);
   // exercise a few writes
