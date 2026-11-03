@@ -3,6 +3,7 @@
 //   revoke_invite  { user_id }                         -> deletes an invited user who never signed in
 //   suspend        { user_id, reason }                 -> marks the partner suspended and blocks sign-in
 //   reactivate     { user_id, reason }                 -> reverses a suspension
+//   remove         { user_id, reason }                 -> partner has left: closes the login, keeps money history
 // The caller must be signed in as an active admin. Deploy with verify_jwt = false; auth is checked below.
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
@@ -92,6 +93,24 @@ Deno.serve(async (req) => {
       const ban = await admin.auth.admin.updateUserById(id, { ban_duration: action === "suspend" ? FOREVER : "none" });
       if (ban.error) throw ban.error;
       return json({ ok: true });
+    }
+
+    if (action === "remove") {
+      // For a partner who has left. Money history stays; the login and personal details go.
+      const id = String(body.user_id ?? "");
+      const reason = String(body.reason ?? "");
+      if (id === who.user.id) return json({ error: "You cannot remove yourself." }, 400);
+      const { data: oldPhoto, error } = await asAdmin.rpc("remove_partner", { p_partner: id, p_reason: reason });
+      if (error) return json({ error: error.message }, 400);
+      // Free the email so the person could be invited again one day, and block the login for good.
+      const ban = await admin.auth.admin.updateUserById(id, { ban_duration: FOREVER, user_metadata: {} });
+      if (ban.error) throw ban.error;
+      const freed = await admin.auth.admin.updateUserById(id, {
+        email: `removed-${id}@removed.twelfthspace.invalid`, email_confirm: true,
+      });
+      if (freed.error) console.error("could not free email", freed.error);
+      if (oldPhoto) await admin.storage.from("avatars").remove([String(oldPhoto)]);
+      return json({ removed: true, email_freed: !freed.error });
     }
 
     return json({ error: "Unknown action." }, 400);

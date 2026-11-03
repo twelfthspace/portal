@@ -58,6 +58,7 @@ async function run(who) {
     if (u.pathname === '/auth/v1/user') return json(user);
     if (u.hostname === 'bflvfcvltkpyshnedgtf.supabase.co' && u.pathname.startsWith('/storage/v1/object/sign/avatars/') && m === 'GET') return r.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') });
     if (u.pathname === '/auth/v1/logout') return r.fulfill({ status: 204, body: '' });
+    if (u.pathname.startsWith('/functions/v1/')) { writes.push('function ' + r.request().postData()); return json({ removed: true }); }
     if (u.pathname.startsWith('/rest/v1/rpc/')) {
       const fn = u.pathname.split('/').pop();
       if (fn === 'community_directory') return json(profiles.map(p => ({ id: p.id, full_name: p.full_name, role: p.role, avatar_path: p.id === AMA ? AMA + '/avatar-1.jpg' : null })));
@@ -105,6 +106,26 @@ async function run(who) {
     await page.click('#mform button[type=submit]'); await page.waitForTimeout(200);
     writes.push('overpay msg: ' + await page.textContent('#merr'));
     await page.click('[data-close]');
+    // view as partner (read-only)
+    await page.evaluate(id => { location.hash = 'admin-partner-' + id }, AMA); await page.waitForTimeout(200);
+    await page.click('[data-act=viewas]'); await page.waitForTimeout(300);
+    const va = await page.evaluate(() => ({ hash: location.hash, banner: !!document.querySelector('[data-act=exitview]'), nav: [...document.querySelectorAll('#nav a')].length, who: document.querySelector('#urow b').textContent }));
+    writes.push('view-as: ' + JSON.stringify(va));
+    const before = writes.length;
+    await page.click('button[data-act=referral]'); await page.waitForTimeout(150);
+    writes.push('view-as blocked write: modal open=' + await page.evaluate(() => document.querySelector('#mbg').classList.contains('open')) + ' toast=' + await page.textContent('#toast'));
+    await page.evaluate(() => { location.hash = 'admin-payouts' }); await page.waitForTimeout(250);
+    writes.push('view-as admin url sends to: ' + await page.evaluate(() => location.hash));
+    await page.screenshot({ path: path.join(outdir, 'view-as.png') });
+    await page.click('[data-act=exitview]'); await page.waitForTimeout(300);
+    writes.push('after exit: ' + await page.evaluate(() => location.hash + ' nav=' + document.querySelectorAll('#nav a').length));
+    // remove partner
+    await page.click('[data-act=remove]'); await page.waitForTimeout(150);
+    await page.screenshot({ path: path.join(outdir, 'remove-modal.png') });
+    await page.fill('#f-reason', 'Resigned in November'); await page.click('#mform button[type=submit]'); await page.waitForTimeout(150);
+    writes.push('remove without confirm: ' + await page.textContent('#merr'));
+    await page.fill('#f-confirm', 'remove'); await page.click('#mform button[type=submit]'); await page.waitForTimeout(500);
+    writes.push('after remove: ' + await page.evaluate(() => location.hash));
   } else {
     await page.evaluate(() => { location.hash = 'partner-profile' }); await page.waitForTimeout(200);
     writes.push('photo shown: ' + await page.evaluate(() => !!document.querySelector('.photo .ph img')));

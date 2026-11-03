@@ -1,5 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Twelfth Space Portal</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#24282C">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 /* Layout recreated from the Payflow dashboard reference: dark docked sidebar with a nav card, off-white rounded canvas, white cards with hairline borders, dark gradient balance card, dot status pills, sand and grey bar charts. No shadows. One colour scheme, all colours are tokens below so the brand palette can be swapped in later. */
@@ -659,10 +662,10 @@ async function loadAll(){
   if(withPic.length){try{const {data:urls}=await sb.storage.from('avatars').createSignedUrls(withPic.map(x=>x.avatar_path),3600);(urls||[]).forEach((u,k)=>{if(u&&u.signedUrl){const x=withPic[k];D.avById[x.id]=u.signedUrl;if(x.full_name)D.avByName[x.full_name]=u.signedUrl}})}catch(_){}}
   const nameOf=id=>{const p=profiles.find(x=>x.id===id)||dir.find(x=>x.id===id);return p?(p.full_name||p.email||'Member'):'Former member'};
   const roleOf=id=>{const p=dir.find(x=>x.id===id)||profiles.find(x=>x.id===id);return p&&p.role};
-  MEP=profiles.find(p=>p.id===ME)||MEP;
+  MEP=profiles.find(p=>p.id===realMe())||MEP;
   D.hold=settings?settings.hold_days:5;
   D.dir=dir.map(x=>({id:x.id,name:x.full_name||'Member',role:x.role,st:'Active',email:'',city:'',phone:''}));
-  D.partners=profiles.filter(p=>p.role==='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,city:p.city||'',phone:p.phone||'',acct:p.account_mask||'',st:p.status==='active'?'Active':'Suspended'}));
+  D.partners=profiles.filter(p=>p.role==='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,city:p.city||'',phone:p.phone||'',acct:p.account_mask||'',st:{active:'Active',suspended:'Suspended',removed:'Removed'}[p.status]||'Suspended'}));
   D.clients=clients.map(c=>({id:c.id,name:c.name,contact:c.contact||'',email:c.email||'',p:c.partner_id}));
   D.projects=projects.map(p=>({id:p.id,name:p.name,c:p.client_id,budget:p.budget,rate:p.rate_bp,st:PST[p.status]}));
   D.payments=payments.map(x=>({id:x.id,d:x.received_on,pr:x.project_id,amt:x.amount,tax:x.tax,m:PM[x.method],mk:x.method,ref:x.reference,refunded:x.refunded,rev:x.reversed,p:x.partner_id,rate:x.rate_bp,cm:x.commission}));
@@ -677,7 +680,7 @@ async function loadAll(){
   D.ann=ann.map(a=>({id:a.id,t:a.title,b:a.body,d:a.created_at.slice(0,10),pin:a.pinned}));
   D.read=Object.fromEntries(reads.map(r=>[r.announcement_id,true]));
   D.chat=chatm.slice().reverse().map(m=>({id:m.id,sid:m.sender_id,f:roleOf(m.sender_id)==='admin'?'admin':m.sender_id,t:m.body,at:Date.parse(m.created_at)}));
-  D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[ROLE][m.id]=true});
+  D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[role()][m.id]=true});
   D.notes=notes.map(n=>({id:n.id,r:ROLE,t:n.text,h:n.link||(ROLE+'-dashboard'),n:!n.read_at}));
   D.bal=Object.fromEntries(bals.map(b=>[b.partner_id,b]));
   D.invites=invites.map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,link:null}));
@@ -712,7 +715,7 @@ async function uploadPhoto(file){
     await q(sb.from('profiles').update({avatar_path:path}).eq('id',ME));
     if(old)sb.storage.from('avatars').remove([old]).then(()=>{});
     await reload();toast('Photo updated');render()}catch(e){toast(nice(e))}}
-const photoCard=()=>{const n=MEP?MEP.full_name||MEP.email:'',u=meAv();return card('Profile photo',`<div class="photo"><span class="ph" style="background:${AVC[0]}">${u?`<img src="${esc(u)}" alt="Your profile photo">`:inits(n)}</span><div><p class="muted small" style="margin-bottom:10px">A clear photo of your face helps the studio and other partners recognise you. JPG, PNG or WebP.</p><div class="acts"><label class="btn sm pink" for="photo-in" style="cursor:pointer">${u?'Change photo':'Upload photo'}</label><input type="file" id="photo-in" accept="image/jpeg,image/png,image/webp">${u?act('Remove','photodel','','line'):''}</div></div></div>`)};
+const photoCard=()=>{const n=S.viewAs?P(ME).name:(MEP?MEP.full_name||MEP.email:''),u=meAv();return card('Profile photo',`<div class="photo"><span class="ph" style="background:${AVC[0]}">${u?`<img src="${esc(u)}" alt="Your profile photo">`:inits(n)}</span><div><p class="muted small" style="margin-bottom:10px">A clear photo of your face helps the studio and other partners recognise you. JPG, PNG or WebP.</p><div class="acts"><label class="btn sm pink" for="photo-in" style="cursor:pointer">${u?'Change photo':'Upload photo'}</label><input type="file" id="photo-in" accept="image/jpeg,image/png,image/webp">${u?act('Remove','photodel','','line'):''}</div></div></div>`)};
 const dl=(name,t)=>{const b=new Blob(['﻿'+t],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('CSV downloaded')};
 /* lookups and derived money */
 const P=id=>D.partners.find(x=>x.id===id)||D.dir.find(x=>x.id===id)||{id,name:'Former member',email:'',city:'',phone:'',acct:'',st:'Suspended'},CL=id=>D.clients.find(x=>x.id===id)||{id,name:'Client',contact:'',email:'',p:null},PR=id=>D.projects.find(x=>x.id===id)||{id,name:'Project',c:null,budget:0,rate:0,st:'Not started'};
@@ -723,7 +726,8 @@ const own=x=>x.p;
 const sumBy=(arr,f)=>arr.reduce((a,x)=>a+f(x),0);
 const B=p=>D.bal[p]||{earned:0,paid:0,held:0,available:0,balance:0};
 const earned=p=>B(p).earned,paid=p=>B(p).paid,held=p=>B(p).held,avail=p=>B(p).available,bal=p=>B(p).balance;
-const role=()=>ROLE||'partner';
+const role=()=>(typeof S!=='undefined'&&S.viewAs)?'partner':(ROLE||'partner');
+const realMe=()=>(typeof S!=='undefined'&&S.viewAs)?S.realMe:ME;
 const log=()=>{};
 const note=()=>{};
 
@@ -738,7 +742,7 @@ function tbl(heads,rows,rc=[],empty){
 }
 const who=(n,s,i)=>`<div class="who">${av(n,i)}<div><b>${esc(n)}</b>${s?`<span>${esc(s)}</span>`:''}</div></div>`;
 const act=(label,a,id='',cls='soft',extra='')=>`<button type="button" class="btn sm ${cls}" data-act="${a}" data-id="${id}" ${extra}>${label}</button>`;
-const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink'}[s]||'');
+const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink',Removed:''}[s]||'');
 const weekLabels=()=>[5,4,3,2,1,0].map(w=>{const d=new Date(TODAY+'T00:00:00');d.setDate(d.getDate()-w*7);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})});
 function chart(id,vals,kind){
   const mx=Math.max(1,...vals),a=S.bar[id]!=null?S.bar[id]:vals.length-1,Lb=weekLabels();
@@ -774,7 +778,8 @@ document.addEventListener('input',e=>{
 });
 
 /* ---------- actions ---------- */
-const PO=()=>D.partners.map(p=>[p.id,p.name]);
+const PO=()=>D.partners.filter(p=>p.st!=='Removed').map(p=>[p.id,p.name]);
+const POall=()=>D.partners.map(p=>[p.id,p.st==='Removed'?p.name+' (former partner)':p.name]);
 const MAIL=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const ACT={
  invite(){modal('Invite a Growth Partner','They get a one-time link. There is no public sign-up.',field('Full name','name')+field('Email address','email',{type:'email'})+field('How to send it','how',{opts:[['email','Email the invitation for me'],['link','Give me a link to send myself']]}),'Create invitation',async f=>{
@@ -807,12 +812,12 @@ const ACT={
   return doit(()=>q(sb.from('payments').insert({project_id:f.pr,received_on:f.d,amount:a,tax:t,method:PMr[f.m],reference:ref})),'Payment recorded')})},
  refund(id){const x=D.payments.find(p=>p.id==id),left=x.amt-x.tax-x.refunded;modal('Refund '+esc(x.ref),'Up to '+g(left)+' can still be refunded.',field('Refund amount (GHS)','amt',{inputmode:'decimal'})+reasonField(),'Record refund',f=>{const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the refund amount.';if(a>left)return'That is more than the '+g(left)+' left on this payment.';const e=needReason(f);if(e)return e;return doit(()=>rpc('refund_payment',{p_payment:id,p_amount:a,p_reason:f.reason.trim()}),'Refund recorded. Commission reduced.')})},
  reverse(id){const x=D.payments.find(p=>p.id==id);modal('Reverse '+esc(x.ref),'Use this when the payment never really arrived. Its commission is removed.',reasonField(),'Reverse payment',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reverse_payment',{p_payment:id,p_reason:f.reason.trim()}),'Payment reversed')})},
- payout(id,amt){if(!D.partners.length){toast('Invite a partner first.');return}modal('Record a payout','Send the money outside the portal, then record it here.',field('Partner','p',{opts:PO(),val:id})+two(field('Amount paid (GHS)','amt',{inputmode:'decimal',val:amt||''}),field('Date paid','d',{type:'date',val:TODAY}))+two(field('Method','m',{opts:['Mobile money','Bank transfer'].map(x=>[x,x])}),field('Transaction reference','ref'))+field('Account (masked)','mask',{ph:'****1234',val:D.pay[id]?'****'+D.pay[id].account_number.slice(-4):'',hint:D.pay[id]?'Pay to '+payLine(D.pay[id],true):'This partner has not added payout details yet.'}),'Record payout',f=>{
+ payout(id,amt){if(!D.partners.length){toast('Invite a partner first.');return}modal('Record a payout','Send the money outside the portal, then record it here.',field('Partner','p',{opts:POall(),val:id})+two(field('Amount paid (GHS)','amt',{inputmode:'decimal',val:amt||''}),field('Date paid','d',{type:'date',val:TODAY}))+two(field('Method','m',{opts:['Mobile money','Bank transfer'].map(x=>[x,x])}),field('Transaction reference','ref'))+field('Account (masked)','mask',{ph:'****1234',val:D.pay[id]?'****'+D.pay[id].account_number.slice(-4):'',hint:D.pay[id]?'Pay to '+payLine(D.pay[id],true):'This partner has not added payout details yet.'}),'Record payout',f=>{
   const a=parseMoney(f.amt);if(!a||a<=0)return'Enter the amount paid.';const av_=avail(f.p);if(a>av_)return'That is more than '+P(f.p).name+' can be paid now ('+g(av_)+').';
   if(!f.ref.trim())return'Enter the transaction reference.';if(/\d{5,}/.test(f.mask))return'Enter only a masked account such as ****1234.';if(!f.d||f.d>TODAY)return'Choose a valid date. It cannot be in the future.';
   return doit(()=>rpc('record_payout',{p_partner:f.p,p_amount:a,p_paid_on:f.d,p_method:PMr[f.m],p_reference:f.ref.trim(),p_account_mask:f.mask.trim()||null}),'Payout recorded')})},
  voidpay(id){const x=D.payouts.find(p=>p.id===id);modal('Void '+x.id,'The amount goes back to the partner\'s balance.',reasonField(),'Void payout',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('void_payout',{p_payout:x.uid,p_reason:f.reason.trim()}),'Payout voided')})},
- adjust(){if(!D.partners.length){toast('Invite a partner first.');return}modal('Commission adjustment','A correction is a new ledger line. Use a minus sign to deduct.',field('Partner','p',{opts:PO()})+field('Amount (GHS)','amt',{inputmode:'decimal',ph:'-50.00 or 50.00'})+reasonField(),'Add adjustment',f=>{const neg=/^\s*[-−]/.test(f.amt),a=parseMoney(f.amt.replace(/^\s*[-−+]/,''));if(!a)return'Enter an amount, for example -50.00.';const e=needReason(f);if(e)return e;return doit(()=>q(sb.from('adjustments').insert({partner_id:f.p,amount:neg?-a:a,reason:f.reason.trim()})),'Adjustment added')})},
+ adjust(){if(!D.partners.length){toast('Invite a partner first.');return}modal('Commission adjustment','A correction is a new ledger line. Use a minus sign to deduct.',field('Partner','p',{opts:POall()})+field('Amount (GHS)','amt',{inputmode:'decimal',ph:'-50.00 or 50.00'})+reasonField(),'Add adjustment',f=>{const neg=/^\s*[-−]/.test(f.amt),a=parseMoney(f.amt.replace(/^\s*[-−+]/,''));if(!a)return'Enter an amount, for example -50.00.';const e=needReason(f);if(e)return e;return doit(()=>q(sb.from('adjustments').insert({partner_id:f.p,amount:neg?-a:a,reason:f.reason.trim()})),'Adjustment added')})},
  referral(){const me=P(ME);if(me.st!=='Active'){toast('Your account is suspended. You cannot submit referrals.');return}modal('Submit a client','The studio checks for duplicates before approving.',field('Client or business name','biz')+two(field('Business email','email',{type:'email'}),field('Estimated budget (GHS)','bud',{inputmode:'decimal'})),'Submit referral',async f=>{
   const n=f.biz.trim();if(!n)return'Enter the client or business name.';const em=f.email.trim().toLowerCase();if(em&&!MAIL.test(em))return'Enter a valid business email, or leave it empty.';
   let b=0;if(f.bud.trim()){b=parseMoney(f.bud);if(b==null)return'Enter the budget as a number, for example 5,000.00.'}
@@ -833,12 +838,21 @@ const ACT={
  readall(){const L=D.ann.filter(a=>!D.read[a.id]);L.forEach(a=>D.read[a.id]=true);toast('All marked as read');render();if(L.length)sb.from('announcement_reads').upsert(L.map(a=>({announcement_id:a.id})),{onConflict:'announcement_id,user_id',ignoreDuplicates:true}).then(()=>{})},
  cdel(id){fire(()=>q(sb.from('community_messages').delete().eq('id',id)),'Message deleted')},
  signout(){sb.auth.signOut()},
+ remove(id){const p=P(id),cs=D.clients.filter(c=>c.p===id).length,b=bal(id);
+  modal('Remove '+esc(p.name),'For someone who has left. Use Suspend instead if they might come back.',
+   `<div class="bks">${b>0?`<div class="banner" style="margin-bottom:10px">${esc(p.name)} still has <b>${g(b)}</b> unpaid. Pay it out first, or record an adjustment, so nothing is left owing.</div>`:''}<ul class="small" style="margin:0 0 12px 18px;list-style:disc;line-height:1.7"><li>Their login is closed for good and their email is freed.</li><li>Their phone, payout details and photo are deleted.</li><li>Past payments, payouts and commission stay in your books under their name.</li>${cs?`<li>Their ${cs} client${cs>1?'s stay':' stays'} with them until you reassign ${cs>1?'them':'it'}.</li>`:''}</ul></div>`+reasonField()+field('Type REMOVE to confirm','confirm',{ph:'REMOVE'}),
+   'Remove partner',f=>{const e=needReason(f);if(e)return e;if((f.confirm||'').trim().toUpperCase()!=='REMOVE')return'Type REMOVE to confirm.';
+    return doit(()=>callAdmin({action:'remove',user_id:id,reason:f.reason.trim()}),p.name+' has been removed').then(r=>{if(!r)location.hash='admin-partners';return r})},'pink')},
+ viewas(id){S.viewAs=id;S.realMe=ME;ME=id;S.goChat=false;location.hash='partner-dashboard';toast('Viewing as '+P(id).name+'. Read-only.')},
+ exitview(){const id=S.viewAs;if(!id)return;ME=S.realMe;S.viewAs=null;S.realMe=null;location.hash='admin-partner-'+id},
  photodel(){const old=MEP&&MEP.avatar_path;if(!old)return;fire(async()=>{await q(sb.from('profiles').update({avatar_path:null}).eq('id',ME));await sb.storage.from('avatars').remove([old])},'Photo removed')},
  back(){S.open=false;render()}
 };
 
 /* ---------- pages ---------- */
-const S={tab:'All',conv:'ama',open:false,q:{},bar:{},flt:'All',rm:null,fm:false,goChat:false,ctab:'chat'};
+const VIEW_OK=new Set(['exitview','signout','how','howto','more','print','pcsv','copycsv','back','retry','noteall','noteopen']);
+document.addEventListener('submit',e=>{if(S.viewAs&&e.target.closest('form')){e.preventDefault();e.stopImmediatePropagation();toast('Read-only while viewing as a partner.')}},true);
+const S={viewAs:null,realMe:null,tab:'All',conv:'ama',open:false,q:{},bar:{},flt:'All',rm:null,fm:false,goChat:false,ctab:'chat'};
 const ledger=()=>[...D.payments.map(x=>({d:x.d,p:own(x),t:x.rev?'Reversed':'Accrual',n:PR(x.pr).name+' · '+x.ref,a:com(x),pr:x.pr,pid:x.id})),...D.payouts.filter(x=>!x.void).map(x=>({d:x.d,p:x.p,t:'Payout',n:x.id+' · '+x.ref,a:-x.amt})),...D.adj.map(a=>({d:a.d,p:a.p,t:'Adjustment',n:a.reason,a:a.amt}))].sort((a,b)=>b.d.localeCompare(a.d));
 const lTag=t=>tag(t,{Accrual:'mint',Payout:'pink',Adjustment:'sun',Reversed:''}[t]);
 const searchBox=(k,ph)=>(CUR_Q=k,'')+`<label class="search">${ic('search',16)}<input data-q="${k}" value="${esc(S.q[k]||'')}" placeholder="${ph}" aria-label="${ph}"></label>`;
@@ -868,10 +882,11 @@ PG['admin-dashboard']=()=>{
    +`<a class="dashbtn" href="#admin-reports">${ic('grid',16)} Open reports and exports</a>`;
   const right=`<section class="card duo">${chartSec('ac','Total commission',weekly(null,com),'sand','admin-commissions')}${chartSec('an','Net revenue',weekly(null,net),'grey','admin-payments')}</section>${qp()}`;
   return `<div class="dgrid"><div class="col">${left}</div><div class="mid">${txCard('Transactions','Client payments in and payouts out',adminRows(),{flts:['All','Received','Paid out'],href:'admin-payments',label:'View all payments',none:'No transactions yet. Record a payment when a client pays, and payouts will show here too.'})}</div><div class="col">${right}</div></div>`};
-PG['admin-partners']=()=>{const L=D.partners.filter(p=>has(S.q.pt,p.name,p.email,p.city));
+PG['admin-partners']=()=>{const L=D.partners.filter(p=>p.st!=='Removed'&&has(S.q.pt,p.name,p.email,p.city)),F=D.partners.filter(p=>p.st==='Removed');
   return `<div class="pha">${searchBox('pt','Search partners')}<span class="grow"></span><button class="btn pink" data-act="invite" type="button">${ic('plus',16)} Invite a partner</button></div><div class="stack">
-  ${card('Growth Partners',tbl(['Partner','Status','Clients','Balance',''],L.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,p.email,pIdx(p.id)),stTag(p.st),D.clients.filter(c=>c.p===p.id).length,g(bal(p.id)),act(p.st==='Active'?'Suspend':'Reactivate','suspend',p.id,'line')]})),[2,3]))}
-  ${card('Pending invitations',D.invites.length?`<div class="list">${D.invites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${act('Revoke','revoke',i.id,'line')}</div></div>`).join('')}</div>`:'<div class="empty">No pending invitations.</div>')}</div>`};
+  ${card('Growth Partners',tbl(['Partner','Status','Clients','Balance',''],L.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,p.email,pIdx(p.id)),stTag(p.st),D.clients.filter(c=>c.p===p.id).length,g(bal(p.id)),act(p.st==='Active'?'Suspend':'Reactivate','suspend',p.id,'line')]})),[2,3],'No partners yet. Invite your first one.'))}
+  ${card('Pending invitations',D.invites.length?`<div class="list">${D.invites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${act('Revoke','revoke',i.id,'line')}</div></div>`).join('')}</div>`:'<div class="empty">No pending invitations.</div>')}
+  ${F.length?card('Former partners',`<p class="muted small" style="margin-bottom:10px">People who have left. Their past commission and payouts stay in your books.</p>`+tbl(['Partner','Clients','Earned','Balance'],F.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,'Former partner',pIdx(p.id)),D.clients.filter(c=>c.p===p.id).length,g(earned(p.id)),g(bal(p.id))]})),[1,2,3])):''}</div>`};
 PG['admin-referrals']=()=>{const tabs=['All','Pending review','Flagged','Approved','Rejected'],L=D.refs.filter(r=>S.tab==='All'||r.st===S.tab);
   return `<div class="pha"><div class="tabs" role="tablist">${tabs.map(t=>`<button type="button" role="tab" data-tab="${t}" class="${S.tab===t?'on':''}">${t}${t!=='All'?' '+D.refs.filter(r=>r.st===t).length:''}</button>`).join('')}</div></div>
   ${card(S.tab+' referrals',tbl(['Business','From','Budget','Status',''],L.map(r=>({c:[`<b>${esc(r.biz)}</b>${r.flag?`<div class="note">${esc(r.flag)}</div>`:''}${r.note?`<div class="small muted">${esc(r.note)}</div>`:''}`,esc(P(r.p).name),r.bud?g(r.bud):'—',stTag(r.st),r.st==='Pending review'?`<div class="acts">${act('Approve','approve',r.id,'pink')}${act('Reject','reject',r.id,'line')}</div>`:r.st==='Flagged'?act('Resolve flag','resolve',r.id):'']})),[2]))}`};
@@ -1046,7 +1061,7 @@ const cCom=c=>sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),com);
 function payRows(list,admin){return tbl(['Date','Reference','Received','Commission',''],list.map(x=>({c:[dfmt(x.d),`${esc(x.ref)}<div class="small muted">${esc(CL(PR(x.pr).c).name)} · ${esc(x.m)}${x.rev?' · reversed':''}</div>`,g(x.amt),g(com(x)),x.rev?tag('Reversed'):act('How','how',x.id,'line')]})),[2,3])}
 PG.partnerD=id=>{const p=P(id);if(!p)return PG['admin-partners']();
   const cs=D.clients.filter(c=>c.p===id),prs=D.projects.filter(x=>CL(x.c).p===id),po=D.payouts.filter(x=>x.p===id).sort((a,b)=>b.d.localeCompare(a.d)),rf=D.refs.filter(x=>x.p===id);
-  return `<div class="pha">${back('admin-partners','Partners')}<span class="grow"></span><a class="btn white" href="#admin-messages">${ic('chat',16)} Message</a>${act(p.st==='Active'?'Suspend':'Reactivate','suspend',id,'white')}<button class="btn pink" data-act="payout" data-id="${id}" type="button">${ic('plus',16)} Record payout</button></div>
+  return `<div class="pha">${back('admin-partners','Partners')}<span class="grow"></span><a class="btn white" href="#admin-messages">${ic('chat',16)} Message</a>${p.st==='Removed'?'':act('View as partner','viewas',id,'white')+act(p.st==='Active'?'Suspend':'Reactivate','suspend',id,'white')+act('Remove partner','remove',id,'line')}<button class="btn pink" data-act="payout" data-id="${id}" type="button">${ic('plus',16)} Record payout</button></div>
   <div class="stack"><div class="cards">${stat('Earned so far',gs(earned(id)),pluralize(cs.length,'client'))}${stat('Paid out',gs(paid(id)),pluralize(po.filter(x=>!x.void).length,'payout'))}${stat('Balance',gs(bal(id)),'Available now '+g(avail(id)))}</div>
   ${card('Details',kv([['Status',stTag(p.st)],['Email',esc(p.email)],['Phone',esc(p.phone)],['City',esc(p.city)],['Payout to',D.pay[id]?esc(KINDS[D.pay[id].kind])+' · '+payLine(D.pay[id],true):'<span class="muted">Not added yet</span>']]))}
   ${card('Clients',tbl(['Client','Projects','Paid so far','Commission'],cs.map(c=>({href:'admin-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),D.projects.filter(x=>x.c===c.id).length,g(cPaid(c)),g(cCom(c))]})),[2,3]))}
@@ -1107,7 +1122,7 @@ PG['admin-notifications']=notesPage;PG['partner-notifications']=notesPage;
 function render_(){
   CUR_Q=null;if(!BOOTED)return;route=location.hash.slice(1);
   if(!ME){if(!OPEN_ROUTES.includes(route)){location.replace('#signin');return}authShow(route);return}
-  if(!(route.startsWith(ROLE+'-')||route==='reset'||route==='accept-invite')){location.replace('#'+ROLE+'-dashboard');return}
+  if(!(route.startsWith(role()+'-')||route==='reset'||route==='accept-invite')){location.replace('#'+role()+'-dashboard');return}
   if(/^(admin|partner)-announcements$/.test(route)){S.ctab='news';location.replace('#'+route.split('-')[0]+'-community');return}
   if(authShow(route))return;
   let r=role(),key=route.split('-').slice(1).join('-'),html,title;
@@ -1126,9 +1141,9 @@ function render_(){
   $('#urow').innerHTML=r==='admin'?`<span class="uav">${meAv()?`<img src="${esc(meAv())}" alt="">`:inits(MEP.full_name||'TS')}</span><div class="uinfo"><b>${esc(MEP.full_name||'Studio admin')}</b><small>${esc(MEP.email)}</small></div><a class="ibtn dk" href="#admin-settings" aria-label="Settings">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`:`<span class="uav">${meAv()?`<img src="${esc(meAv())}" alt="">`:inits(me.name)}</span><div class="uinfo"><b>${esc(me.name)}</b><small>${esc(me.email)}</small></div><a class="ibtn dk" href="#partner-profile" aria-label="My profile">${ic('gear',18)}</a><button type="button" class="ibtn dk" data-act="signout" aria-label="Sign out">${ic('logout',18)}</button>`;
   const nn=notesFor(r),un=nn.filter(n=>n.n).length;
   $('#head').innerHTML=`<button class="ibtn menu" type="button" id="menubtn" aria-label="Open menu">${ic('menu',18)}</button><div class="gsearch"><label>${ic('search',17)}<input id="gs" type="text" placeholder="${innerWidth<560?'Search…':'Search anything…'}" autocomplete="off" aria-label="Search"><kbd>/</kbd></label><div class="sres" id="sres" role="listbox"></div></div><span class="grow"></span><div class="rel"><button class="ibtn" type="button" id="bell" aria-label="Notifications">${ic('bell',18)}${un?'<i class="rd"></i>':''}</button><div class="pop" id="pop"><h3>Notifications</h3>${nn.slice(0,6).map(n=>`<a href="#${n.h}" class="${n.n?'new':''}">${esc(n.t)}</a>`).join('')||'<div class="empty">All caught up.</div>'}<a class="pall" href="#${r}-notifications">View all notifications</a></div></div><a class="ibtn" href="#${r}-messages" aria-label="Messages">${ic('mail',18)}${um?'<i class="rd"></i>':''}</a>`;
-  $('#view').innerHTML=(key==='dashboard'?'<h1 class="sr">Dashboard</h1>':`<h1 class="ptitle">${esc(title)}</h1>`)+html;
+  $('#view').innerHTML=(S.viewAs?`<div class="banner" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span>You are viewing the portal as <b>${esc(P(ME).name)}</b>. Read-only.</span><span class="grow"></span><button type="button" class="btn sm" data-act="exitview">Back to admin</button></div>`:'')+(key==='dashboard'?'<h1 class="sr">Dashboard</h1>':`<h1 class="ptitle">${esc(title)}</h1>`)+html;
   closeRail();drawPins();renderFb();
-  const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;if(route===ROLE+'-messages'){const cid=ROLE==='admin'?S.conv:ME,un=(D.msgs[cid]||[]).filter(x=>!x.read&&x.sid!==ME);if(un.length){un.forEach(x=>x.read=true);sb.from('messages').update({read_at:nowIso()}).in('id',un.map(x=>x.id)).then(()=>{})}}const cm=$('#cmsgs');if(cm)cm.scrollTop=cm.scrollHeight;
+  const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;if(!S.viewAs&&route===ROLE+'-messages'){const cid=ROLE==='admin'?S.conv:ME,un=(D.msgs[cid]||[]).filter(x=>!x.read&&x.sid!==ME);if(un.length){un.forEach(x=>x.read=true);sb.from('messages').update({read_at:nowIso()}).in('id',un.map(x=>x.id)).then(()=>{})}}const cm=$('#cmsgs');if(cm)cm.scrollTop=cm.scrollHeight;
 }
 function render(){try{render_()}catch(e){console.error(e);const v=$('#view');if(v)v.innerHTML=`<section class="card errstate"><h2>Something went wrong</h2><p class="muted">This page could not be shown. Your data is safe. Try again, or go back to the dashboard.</p><div class="acts" style="justify-content:flex-start"><button class="btn pink" type="button" data-act="retry">Try again</button><a class="btn line" href="#${role()}-dashboard">Go to dashboard</a></div></section>`}}
 const notFound=r=>`<section class="card errstate"><h2>We could not find that page</h2><p class="muted">The link may be old, or the page may have moved.</p><div class="acts" style="justify-content:flex-start"><a class="btn pink" href="#${r}-dashboard">Go to dashboard</a></div></section>`;
@@ -1160,7 +1175,7 @@ document.addEventListener('click',e=>{
   const rm=t.closest('[data-rm]');if(rm){S.rm=S.rm===rm.dataset.rm?null:rm.dataset.rm;S.fm=false;render();return}
   const bc=t.closest('[data-bar]');if(bc){const x=bc.dataset.bar.split(':');S.bar[x[0]]=Number(x[1]);render();return}
   const ch=t.closest('[data-chat]');if(ch){S.conv=ch.dataset.chat;if(location.hash==='#admin-messages'){S.open=true;render()}else{S.goChat=true;location.hash='admin-messages'}return}
-  const a=t.closest('[data-act]');if(a&&ACT[a.dataset.act]){e.preventDefault();ACT[a.dataset.act](a.dataset.id);return}
+  const a=t.closest('[data-act]');if(a&&ACT[a.dataset.act]){e.preventDefault();if(S.viewAs&&!VIEW_OK.has(a.dataset.act)){toast('Read-only while viewing as a partner.');return}ACT[a.dataset.act](a.dataset.id);return}
   const sg=t.closest('[data-sug]');if(sg){const i=$('#xin'),pos=i.selectionStart==null?i.value.length:i.selectionStart,bf=i.value.slice(0,pos).replace(/@([A-Za-z]*)$/,'@'+sg.dataset.sug+' ');i.value=bf+i.value.slice(pos);$('#sug').classList.remove('open');i.focus();i.setSelectionRange(bf.length,bf.length);return}
   const ct=t.closest('[data-ctab]');if(ct){S.ctab=ct.dataset.ctab;render();return}
   const tb=t.closest('[data-tab]');if(tb){S.tab=tb.dataset.tab;render();return}
@@ -1173,7 +1188,8 @@ document.addEventListener('input',e=>{if(e.target.id!=='gs')return;const q=e.tar
 document.addEventListener('input',e=>{if(e.target.id!=='xin')return;const v=e.target.value.slice(0,e.target.selectionStart),m=v.match(/(?:^|\s)@([A-Za-z]*)$/),box=$('#sug');if(!m){box.classList.remove('open');return}const q=m[1].toLowerCase();
   const o=D.dir.filter(p=>p.role==='partner'&&p.id!==vid()).map(p=>({h:p.name.split(' ')[0],n:p.name,i:pIdx(p.id)})).concat(role()==='admin'?[{h:'everyone',n:'Everyone',i:3}]:[{h:'Studio',n:'Studio team',i:3}]).filter(x=>x.h.toLowerCase().startsWith(q));
   box.innerHTML=o.map(x=>`<button type="button" data-sug="${x.h}">${av(x.n,x.i)}<span><b>@${x.h}</b><small class="muted"> ${esc(x.n)}</small></span></button>`).join('');box.classList.toggle('open',o.length>0)});
-document.addEventListener('change',e=>{if(e.target.id==='photo-in'&&e.target.files&&e.target.files[0]){uploadPhoto(e.target.files[0]);e.target.value='';return}
+document.addEventListener('change',e=>{if(S.viewAs&&e.target.id==='photo-in'){e.target.value='';toast('Read-only while viewing as a partner.');return}
+  if(e.target.id==='photo-in'&&e.target.files&&e.target.files[0]){uploadPhoto(e.target.files[0]);e.target.value='';return}
   if(e.target.closest('#payform')&&e.target.name==='kind'){S.payKind=e.target.value;const y=scrollY;render();scrollTo(0,y);return}
   if(e.target.id==='qp-p'){const p=e.target.value;$('#qp-av').textContent=g(avail(p));$('#qp-hold').textContent='On hold '+g(held(p));$('#qp-a').value=''}});
 document.addEventListener('input',e=>{const q=e.target.dataset&&e.target.dataset.q;if(q){S.q[q]=e.target.value;const pos=e.target.selectionStart;render();const n=document.querySelector(`[data-q="${q}"]`);if(n){n.focus();n.setSelectionRange(pos,pos)}}});
@@ -1208,7 +1224,7 @@ document.addEventListener('keydown',e=>{
 
 const FS={pinning:false};
 function drawPins(){}function renderFb(){}function closeFb(){}
-sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){ME=null;MEP=null;ROLE=null;resetD();render()}});
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){S.viewAs=null;S.realMe=null;ME=null;MEP=null;ROLE=null;resetD();render()}});
 setInterval(()=>{if(!ME||document.hidden||$('#mbg').classList.contains('open'))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;reload().then(render)},60000);
 async function boot(){
   document.body.classList.add('authmode');
