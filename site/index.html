@@ -593,11 +593,15 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .pstats b{font-size:clamp(14px,1.45vw,18px)}
 @media (max-width:720px){.pstats b{font-size:clamp(14px,4.2vw,17px)}}
 @media (max-width:400px){.pstats{grid-template-columns:minmax(0,1fr)}.pstats>div,.pstats>div:nth-child(3){padding-left:0;border-left:0}}
-/* one dropdown arrow for every select, sitting inside the padding */
-select{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a7360' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:16px 16px!important;padding-right:42px!important;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
+/* dropdowns: the portal's own round arrow button, inset the same as the text */
+select{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%23E9EADC'/%3E%3Cpath d='M9.6 12.2l4.4 4.4 4.4-4.4' fill='none' stroke='%233E4631' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 8px center!important;background-size:28px 28px!important;padding-right:46px!important;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
 select::-ms-expand{display:none}
-.qr select{background-position:right 0 center!important;padding-right:24px!important}
-.ar select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9cfbf' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important}
+select:hover{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%23DDDFCC'/%3E%3Cpath d='M9.6 12.2l4.4 4.4 4.4-4.4' fill='none' stroke='%2324282C' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%23FFFFFF'/%3E%3Cpath d='M9.6 12.2l4.4 4.4 4.4-4.4' fill='none' stroke='%233E4631' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+.fld select:hover,.fld select:focus{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%23E9EADC'/%3E%3Cpath d='M9.6 12.2l4.4 4.4 4.4-4.4' fill='none' stroke='%2324282C' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+.qr select{background-position:right 0 center!important;background-size:24px 24px!important;padding-right:32px!important}
+.ar select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%232C3235'/%3E%3Cpath d='M9.6 12.2l4.4 4.4 4.4-4.4' fill='none' stroke='%23C9CFBF' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+.fsel select,.pha select{padding-left:18px!important}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
