@@ -149,6 +149,15 @@ const MEASURE = () => {
     const rows = {}; ctrls.forEach((c, i) => { (rows[tops[i]] = rows[tops[i]] || []).push(hs[i]) });
     if (hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 2 && new Set(tops).size < hs.length) out.push(`toolbar controls uneven heights: ${hs.join('/')}px`);
   }
+  // every dropdown uses the portal's own arrow, inside the padding, not the browser's
+  for (const sel of [...root.querySelectorAll('select')].concat([...document.querySelectorAll('#mbg.open select')]).filter(visible)) {
+    const cs = getComputedStyle(sel);
+    if (cs.appearance !== 'none' && cs.webkitAppearance !== 'none') { out.push('native dropdown arrow: ' + name(sel).slice(0, 50)); continue; }
+    if (!/url\(/.test(cs.backgroundImage)) out.push('dropdown has no arrow: ' + name(sel).slice(0, 50));
+    if (parseFloat(cs.paddingRight) < 22) out.push('dropdown arrow has no room: ' + name(sel).slice(0, 50));
+  }
+  // empty cards: a card with a heading and nothing else
+  for (const c of [...root.querySelectorAll('.card')].filter(visible)) { const t = c.textContent.replace(/\s+/g, ' ').trim(), h = c.querySelector('h2'); if (h && t === h.textContent.replace(/\s+/g, ' ').trim()) out.push('card is empty apart from its heading: "' + t.slice(0, 40) + '"'); }
   // the page content should use the width beside the sidebar
   { const cv = document.querySelector('.canvas'), view = document.querySelector('#view');
     if (cv && view && !document.body.classList.contains('authmode') && innerWidth >= 1000) {
