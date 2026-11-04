@@ -634,7 +634,7 @@ select:hover{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .hmeta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);padding:0 6px;white-space:nowrap}
 .hback{display:none;width:36px;height:36px;border-radius:50%;place-items:center;flex:none}.hback:hover{background:#EEEFE3}
 .hscroll{flex:1;overflow-y:auto;min-height:0;padding:8px 0 10px;overscroll-behavior:contain}
-.hann{padding:16px 20px}.card.empty{padding:20px 24px}.hann .pha{display:flex!important}
+.hann{padding:16px 20px}.pauth{display:flex;align-items:center;gap:12px;margin-bottom:12px}.pauth .hava .av{width:40px;height:40px}.pauth-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pauth-n b{font-size:14px}.pauth .sub{margin:2px 0 0}.post h2{margin-top:2px}.card.empty{padding:20px 24px}.hann .pha{display:flex!important}
 .hwel{padding:22px 20px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}.hwel h3{font-size:18px;font-weight:700}.hwel p{color:var(--muted);font-size:13.5px;max-width:64ch}
 .hwel-i{width:44px;height:44px;border-radius:14px;background:var(--sand-2);display:grid;place-items:center;color:var(--dark);font-size:22px;font-weight:700}
 .hday{display:flex;align-items:center;gap:10px;margin:10px 20px;color:var(--muted);font-size:12px;font-weight:600}.hday:before,.hday:after{content:'';flex:1;height:1px;background:var(--line)}
@@ -784,6 +784,7 @@ function describe(a){const n=a.new_row||{},o=a.old_row||{},r=a.action==='delete'
     if(a.entity==='profiles')return'New account'+L;
     return'Added '+e+L}
   return'Deleted '+e+L}
+const AV_CACHE={};
 async function loadAll(){
   const adm=ROLE==='admin',none=Promise.resolve([]);
   const [profiles,settings,clients,projects,payments,payouts,adj,refs,flags,msgs,ann,reads,chatm,notes,bals,dir,audit,invites]=await Promise.all([
@@ -808,7 +809,9 @@ async function loadAll(){
   const payAcc=await q(sb.from('payout_accounts').select('*'));
   D.pay=Object.fromEntries(payAcc.map(a=>[a.partner_id,a]));
   const withPic=dir.filter(x=>x.avatar_path);D.avByName={};D.avById={};
-  if(withPic.length){try{const {data:urls}=await sb.storage.from('avatars').createSignedUrls(withPic.map(x=>x.avatar_path),3600);(urls||[]).forEach((u,k)=>{if(u&&u.signedUrl){const x=withPic[k];D.avById[x.id]=u.signedUrl;if(x.full_name)D.avByName[x.full_name]=u.signedUrl}})}catch(_){}}
+  const _now=Date.now(),_need=withPic.filter(x=>!AV_CACHE[x.avatar_path]||_now-AV_CACHE[x.avatar_path].t>3e6);
+  if(_need.length){try{const {data:urls}=await sb.storage.from('avatars').createSignedUrls(_need.map(x=>x.avatar_path),3600);(urls||[]).forEach((u,k)=>{if(u&&u.signedUrl)AV_CACHE[_need[k].avatar_path]={u:u.signedUrl,t:_now}})}catch(_){}}
+  withPic.forEach(x=>{const c=AV_CACHE[x.avatar_path];if(c){D.avById[x.id]=c.u;if(x.full_name)D.avByName[x.full_name]=c.u}});
   const nameOf=id=>{const p=profiles.find(x=>x.id===id)||dir.find(x=>x.id===id);return p?(p.full_name||p.email||'Member'):'Former member'};
   const roleOf=id=>{const p=dir.find(x=>x.id===id)||profiles.find(x=>x.id===id);return p&&p.role};
   MEP=profiles.find(p=>p.id===realMe())||MEP;
@@ -826,7 +829,7 @@ async function loadAll(){
   D.partners.forEach(p=>{D.msgs[p.id]=[];D.unreadA[p.id]=0;D.unreadP[p.id]=0});
   msgs.forEach(m=>{const k=m.partner_id;(D.msgs[k]=D.msgs[k]||[]).push({id:m.id,sid:m.sender_id,f:m.sender_id===k?'p':'a',t:m.body,at:mtime(m.created_at),read:!!m.read_at});
     if(!m.read_at){if(m.sender_id===k)D.unreadA[k]=(D.unreadA[k]||0)+1;else D.unreadP[k]=(D.unreadP[k]||0)+1}});
-  D.ann=ann.map(a=>({id:a.id,t:a.title,b:a.body,d:a.created_at.slice(0,10),pin:a.pinned}));
+  D.ann=ann.map(a=>({id:a.id,t:a.title,b:a.body,d:a.created_at.slice(0,10),at:a.created_at,pin:a.pinned,by:a.created_by}));
   D.read=Object.fromEntries(reads.map(r=>[r.announcement_id,true]));
   D.chat=chatm.slice().reverse().map(m=>({id:m.id,sid:m.sender_id,f:roleOf(m.sender_id)==='admin'?'admin':m.sender_id,t:m.body,at:Date.parse(m.created_at)}));
   D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[role()][m.id]=true});
@@ -1071,9 +1074,12 @@ function chat(r){
   <div class="msgs" id="msgs">${m.length?m.map(x=>`<div class="bub ${(x.f==='a')===(r==='admin')?'me':''}">${esc(x.t)}<small>${esc(x.at)}</small></div>`).join(''):'<div class="empty">No messages yet. Say hello.</div>'}</div>
   <form class="compose" id="cform"><input id="cin" aria-label="Message" placeholder="Write a message" autocomplete="off"><button class="btn" type="submit">Send</button></form></div></div>`}
 const annSorted=()=>[...D.ann].sort((a,b)=>(b.pin-a.pin)||b.d.localeCompare(a.d));
+const studioId=()=>(D.dir.find(p=>p.role==='admin'&&D.avById[p.id])||D.dir.find(p=>p.role==='admin')||{}).id;
+const postAuthor=(a,extra)=>{const id=a.by&&(D.dir.some(p=>p.id===a.by)||D.partners.some(p=>p.id===a.by))?a.by:studioId();const nm=id?nameOfId(id):'Twelfth Space';
+  return `<div class="pauth">${id?hav(id):`<span class="hava"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span>`}<div><div class="pauth-n"><b>${esc(nm)}</b>${tag('Studio','sky')}</div><div class="sub">${dfmt(a.d)}${a.at?' at '+hhmm(Date.parse(a.at)):''} · ${extra}</div></div></div>`};
 const postBody=a=>`<div class="post-b">${esc(a.b)}</div>`;
-PG['admin-announcements']=()=>`<div class="pha"><span class="grow"></span><button class="btn" type="button" data-act="announce">${ic('plus',16)} New announcement</button></div><div class="stack">${annSorted().map(a=>`<section class="card post"><h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}</h2><div class="sub">${dfmt(a.d)} · Sent to ${D.partners.filter(p=>p.st==='Active').length} partners</div>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${act(a.pin?'Unpin':'Pin','annpin',a.id,'white')}${act('Delete','anndel',a.id,'line')}</div></section>`).join('')||'<div class="card empty">No announcements yet. Post the first one.</div>'}</div>`;
-PG['partner-announcements']=()=>{const un=D.ann.filter(a=>!D.read[a.id]).length;return `<div class="pha"><span class="muted">${un?un+' unread':'You are all caught up'}</span><span class="grow"></span>${un?`<button class="btn white" type="button" data-act="readall">Mark all as read</button>`:''}</div><div class="stack">${annSorted().map(a=>`<section class="card post ${D.read[a.id]?'':'unread'}"><h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}${D.read[a.id]?'':tag('New','mint')}</h2><div class="sub">${dfmt(a.d)} · From the studio</div>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${D.read[a.id]?'':act('Mark as read','readone',a.id,'soft')}<a class="btn sm line" href="#partner-messages">Reply privately</a></div></section>`).join('')||'<div class="card empty">Nothing posted yet.</div>'}</div>`};
+PG['admin-announcements']=()=>`<div class="pha"><span class="grow"></span><button class="btn" type="button" data-act="announce">${ic('plus',16)} New announcement</button></div><div class="stack">${annSorted().map(a=>`<section class="card post">${postAuthor(a,'Sent to '+D.partners.filter(p=>p.st==='Active').length+' partners')}<h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}</h2>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${act(a.pin?'Unpin':'Pin','annpin',a.id,'white')}${act('Delete','anndel',a.id,'line')}</div></section>`).join('')||'<div class="card empty">No announcements yet. Post the first one.</div>'}</div>`;
+PG['partner-announcements']=()=>{const un=D.ann.filter(a=>!D.read[a.id]).length;return `<div class="pha"><span class="muted">${un?un+' unread':'You are all caught up'}</span><span class="grow"></span>${un?`<button class="btn white" type="button" data-act="readall">Mark all as read</button>`:''}</div><div class="stack">${annSorted().map(a=>`<section class="card post ${D.read[a.id]?'':'unread'}">${postAuthor(a,'From the studio')}<h2>${esc(a.t)}${a.pin?tag('Pinned','sun'):''}${D.read[a.id]?'':tag('New','mint')}</h2>${postBody(a)}<div class="acts" style="justify-content:flex-start;margin-top:14px">${D.read[a.id]?'':act('Mark as read','readone',a.id,'soft')}<a class="btn sm line" href="#partner-messages">Reply privately</a></div></section>`).join('')||'<div class="card empty">Nothing posted yet.</div>'}</div>`};
 const vid=()=>role()==='admin'?'admin':ME;
 const hOf=p=>p.name.split(' ')[0].toLowerCase();
 const vh=()=>role()==='admin'?'studio':hOf(P(ME));
@@ -1329,7 +1335,7 @@ function composer(ctx,ph,can,why){
 function hubSide(){const adm=role()==='admin',k=hubKey(),au=actUnread(),an=annUnread();
   const it=(key,inner,n,extra)=>`<button type="button" class="hsi ${k===key?'on':''} ${n?'un':''} ${extra||''}" data-hub="${key}">${inner}${n?`<span class="hcnt">${cap(n)}</span>`:''}</button>`;
   const dms=adm?D.partners.filter(p=>p.st!=='Removed'||(D.dmByP[p.id]||[]).length).map(p=>it('dm:'+p.id,`${hav(p.id,1)}<span class="nm">${esc(p.name)}</span>`,dmUnread(p.id),p.st!=='Active'?'dim':'')).join('')||'<div class="hs-empty">No partners yet.</div>'
-             :it('dm:'+ME,`<span class="hava sm"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span><span class="nm">Twelfth Space studio</span>`,dmUnread(ME));
+             :it('dm:'+ME,`${studioId()?hav(studioId(),1):'<span class="hava sm"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span>'}<span class="nm">Twelfth Space studio</span>`,dmUnread(ME));
   return `<div class="hs-top">${it('act',`<span class="hsi-i">${ic('bell',16)}</span><span class="nm">Activity</span>`,au)}${it('ann',`<span class="hsi-i">${ic('megaphone',16)}</span><span class="nm">Announcements</span>`,an)}</div>
   <div class="hs-h"><span>Channels</span>${adm?`<button type="button" data-act="chnew" aria-label="Add a channel" title="Add a channel">${ic('plus',15)}</button>`:''}</div>
   ${D.channels.map(c=>it('ch:'+c.id,`<span class="hsi-i hash">#</span><span class="nm">${esc(c.name)}</span>${c.admin_only?`<span class="hlk" title="Only the studio starts posts">${ic('lock',12)}</span>`:''}`,chUnread(c.id))).join('')}
@@ -1355,7 +1361,7 @@ function hubMain(){const adm=role()==='admin',t=S.hub.t;
     const sub=adm?(p.st==='Active'?'Growth Partner':p.st+' partner')+(D.online.has(pid)?' · online now':''):'Private to you and the studio';
     const right=adm?`<a class="btn sm line" href="#admin-partner-${pid}">View partner</a>`:'';
     const can=adm?p.st!=='Removed':true;
-    return hubHead(title,sub,right)+`<div class="hscroll" id="hmsgs"><div class="hwel">${adm?hav(pid):`<span class="hwel-i">${ic('chat',22)}</span>`}<h3>${adm?'Your conversation with '+esc(p.name):'Your conversation with the studio'}</h3><p>Only ${adm?esc(p.name.split(' ')[0])+' and the studio':'you and the studio'} can see these messages.</p></div>${msgList(list,'dm')}</div>
+    return hubHead(title,sub,right)+`<div class="hscroll" id="hmsgs"><div class="hwel">${adm?hav(pid):(studioId()?hav(studioId()):`<span class="hwel-i">${ic('chat',22)}</span>`)}<h3>${adm?'Your conversation with '+esc(p.name):'Your conversation with the studio'}</h3><p>Only ${adm?esc(p.name.split(' ')[0])+' and the studio':'you and the studio'} can see these messages.</p></div>${msgList(list,'dm')}</div>
      <div class="htyping" data-ctx="dm:${pid}"></div>${composer('dm:'+pid,adm?'Message '+p.name.split(' ')[0]:'Message the studio',can,'This partner has left. Messages are kept for your records.')}`}
   return''}
 

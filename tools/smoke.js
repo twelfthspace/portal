@@ -64,7 +64,7 @@ async function run(who) {
     if (u.pathname.startsWith('/functions/v1/')) { writes.push('function ' + r.request().postData()); return json({ removed: true }); }
     if (u.pathname.startsWith('/rest/v1/rpc/')) {
       const fn = u.pathname.split('/').pop();
-      if (fn === 'community_directory') return json(profiles.map(p => ({ id: p.id, full_name: p.full_name, role: p.role, avatar_path: p.id === AMA ? AMA + '/avatar-1.jpg' : null })));
+      if (fn === 'community_directory') return json(profiles.map(p => ({ id: p.id, full_name: p.full_name, role: p.role, avatar_path: p.id === AMA ? AMA + '/avatar-1.jpg' : p.id === ADM ? ADM + '/avatar-1.jpg' : null })));
       if (fn === 'pending_invitations') return json([{ id: 'i1', email: 'nii@studio.test', full_name: 'Nii Lamptey', invited_at: T }]);
       writes.push(m + ' rpc ' + fn + ' ' + r.request().postData()); return json(null);
     }
@@ -165,6 +165,17 @@ async function run(who) {
     writes.push('studio-only composer locked: ' + await page.evaluate(() => !!document.querySelector('.hcmp-off') && !document.querySelector('.hmain .hin')));
     await page.evaluate(() => { location.hash = 'partner-messages~dm' }); await page.waitForTimeout(300);
     await page.fill('.hin[data-ctx^="dm:"]', 'Private hello'); await page.focus('.hin[data-ctx^="dm:"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
+    writes.push('photos: ' + JSON.stringify(await page.evaluate(async () => {
+      const r = {}; r.dmListStudio = !!document.querySelector('.hside [data-hub^="dm:"] .hava img');
+      r.dmMine = !!document.querySelector('#hmsgs .hmsg .hava img');
+      location.hash = 'partner-messages~general'; await new Promise(z => setTimeout(z, 300));
+      r.channelStudioMsg = !!document.querySelector('#m-c1 .hava img');
+      location.hash = 'partner-messages~ann'; await new Promise(z => setTimeout(z, 300));
+      r.announcementAuthor = !!document.querySelector('.hann .pauth .hava img');
+      location.hash = 'partner-messages~dm'; await new Promise(z => setTimeout(z, 300)); return r; })));
+    await page.screenshot({ path: path.join(outdir, 'hub-dm-photos.png') });
+    await page.evaluate(() => { location.hash = 'partner-messages~ann' }); await page.waitForTimeout(400); await page.screenshot({ path: path.join(outdir, 'hub-ann-photos.png') });
+    await page.evaluate(() => { location.hash = 'partner-messages~dm' }); await page.waitForTimeout(300);
     const xss = await page.evaluate(() => document.querySelector('#hmsgs').innerHTML);
     await page.screenshot({ path: path.join(outdir, 'hub-partner.png') });
     writes.push('message html: ' + xss.slice(0, 120));
