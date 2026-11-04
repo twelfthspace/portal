@@ -31,7 +31,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .sub{font-size:12.5px;color:var(--muted);font-weight:400}
 
 /* ---- shell ---- */
-.app{display:flex;align-items:flex-start;min-height:100vh;max-width:1760px;margin:0 auto}
+.app{display:flex;align-items:flex-start;min-height:100vh}
 .side{position:sticky;top:0;height:100vh;height:100dvh;width:262px;flex:none;display:flex;flex-direction:column;gap:12px;padding:16px 14px 14px;color:#f3f1ee;z-index:60;background:var(--side-2)}
 .brand{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;flex:none}
 .logo-full{height:30px;width:auto;display:block}
@@ -273,7 +273,7 @@ td.act{text-align:right}
 .mact{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--dark-2);color:#fff;padding:12px 20px;border-radius:999px;z-index:120;display:none;max-width:calc(100vw - 32px);text-align:center;font-weight:500}
 .toast.on{display:block}
-.form{max-width:560px}
+.form{max-width:none}
 
 /* feedback board */
 .fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:70;background:var(--dark-2);color:#fff;border-radius:999px;padding:0 16px;min-height:46px;display:flex;gap:10px;align-items:center;font-weight:600;border:2px solid #fff}
@@ -551,7 +551,7 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .big .bigtxt{display:block;white-space:normal;overflow-wrap:anywhere;font-size:clamp(17px,1.6vw,21px);line-height:1.25}
 .glass.stat,.card{min-width:0}
 @media (max-width:1199px){.row2{grid-template-columns:minmax(0,1fr)}}
-.pcard{background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden;max-width:900px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden}
 .pcover{height:150px;position:relative;background:radial-gradient(120% 160% at 15% 0%,#FEFFDA 0%,#D2E3C0 38%,#C2CBAF 62%,#3E4631 100%)}
 .pcover:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.35))}
 .phead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 32px;margin-top:-58px;position:relative;flex-wrap:wrap}
@@ -1065,7 +1065,12 @@ ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),e
 
 PG['admin-messages']=()=>chat('admin');
 PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
-PG['admin-settings']=()=>profilePage(true)+`<div class="stack form" style="max-width:900px;margin-top:16px">${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
+PG['admin-settings']=()=>profilePage(true)+`<section class="pcard" style="margin-top:16px">
+  <div class="prow"><div class="pl"><h3>Commission rules</h3><p>How long new commission waits after a client payment before it can be paid out.</p></div>
+   <div class="pf"><div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div><div class="hint">Changes apply straight away to commission that is still on hold.</div></div></div>
+  <div class="prow"><div class="pl"><h3>Access</h3><p>Who can get into the portal.</p></div>
+   <div class="pf">${kv([['Invitation links','Work once and expire after 24 hours'],['Public sign-up','Off. Invitation only.']])}</div></div>
+  </section>`;
 
 /* partner */
 const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);

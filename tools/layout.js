@@ -149,12 +149,18 @@ const MEASURE = () => {
     const rows = {}; ctrls.forEach((c, i) => { (rows[tops[i]] = rows[tops[i]] || []).push(hs[i]) });
     if (hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 2 && new Set(tops).size < hs.length) out.push(`toolbar controls uneven heights: ${hs.join('/')}px`);
   }
+  // the page content should use the width beside the sidebar
+  { const cv = document.querySelector('.canvas'), view = document.querySelector('#view');
+    if (cv && view && !document.body.classList.contains('authmode') && innerWidth >= 1000) {
+      const cr = view.getBoundingClientRect();
+      for (const blk of [...view.children].filter(visible)) { const r = blk.getBoundingClientRect(); if (r.height > 40 && r.right < cr.right - 40) out.push(`block stops short of the page width: ${name(blk).slice(0, 50)} [ends ${Math.round(r.right)} of ${Math.round(cr.right)}]`); }
+      const sc = cv.getBoundingClientRect(); if (sc.right < innerWidth - 24) out.push(`page area stops short of the window: [${Math.round(sc.right)} of ${innerWidth}]`); } }
   const sw = document.documentElement.scrollWidth;
   if (sw > vw + 1) out.unshift(`PAGE SCROLLS SIDEWAYS: ${sw}px wide on a ${vw}px screen`);
   return [...new Set(out)].slice(0, 12);
 };
 
-const SIZES = [[360, 740, 'phone-s'], [390, 844, 'phone'], [768, 1024, 'tablet'], [1000, 760, 'yours'], [1024, 768, 'laptop-s'], [1280, 800, 'laptop'], [1440, 900, 'mac'], [1536, 900, 'wide']];
+const SIZES = [[360, 740, 'phone-s'], [390, 844, 'phone'], [768, 1024, 'tablet'], [1000, 760, 'yours'], [1024, 768, 'laptop-s'], [1280, 800, 'laptop'], [1440, 900, 'mac'], [1536, 900, 'wide'], [2200, 1100, 'xwide']];
 
 async function run(who, extra) {
   const me = profiles.find(p => p.id === who), report = {};
