@@ -158,6 +158,17 @@ const MEASURE = () => {
   }
   // empty cards: a card with a heading and nothing else
   for (const c of [...root.querySelectorAll('.card')].filter(visible)) { const t = c.textContent.replace(/\s+/g, ' ').trim(), h = c.querySelector('h2'); if (h && t === h.textContent.replace(/\s+/g, ' ').trim()) out.push('card is empty apart from its heading: "' + t.slice(0, 40) + '"'); }
+  // settings-style sections: the save bar is the last thing in its card, and each section's heading lines up with its first field
+  for (const pc of [...root.querySelectorAll('.pcard')].filter(visible)) {
+    const ft = pc.querySelector('.pfoot'); if (ft) { const fr = ft.getBoundingClientRect(), cr = pc.getBoundingClientRect(); if (cr.bottom - fr.bottom > 2) out.push('save bar is not at the bottom of its card [' + Math.round(cr.bottom - fr.bottom) + 'px below it]'); }
+    for (const row of [...pc.querySelectorAll('.prow')].filter(visible)) {
+      if (innerWidth <= 720) continue;
+      const h3 = row.querySelector('.pl h3'), pf = row.querySelector('.pf'); if (!h3 || !pf) continue;
+      const first = [...pf.querySelectorAll('.paybox,label,b,button,.btn,input,select')].filter(visible)[0]; if (!first) continue;
+      const d = Math.abs(first.getBoundingClientRect().top - h3.getBoundingClientRect().top);
+      if (d > 8 && !pf.classList.contains('pr')) out.push(`section heading not level with its first field: "${h3.textContent}" [${Math.round(d)}px]`);
+    }
+  }
   // the page content should use the width beside the sidebar
   { const cv = document.querySelector('.canvas'), view = document.querySelector('#view');
     if (cv && view && !document.body.classList.contains('authmode') && innerWidth >= 1000) {

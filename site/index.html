@@ -576,10 +576,19 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .sw input:checked+i{background:var(--ink)}.sw input:checked+i:after{transform:translateX(20px)}
 .sw input:focus-visible+i{outline:2px solid var(--ink);outline-offset:2px}
 .deskrow{padding-top:6px}
-.pfoot{display:flex;justify-content:flex-end;gap:10px;padding:20px 32px;border-bottom:1px solid var(--line)}
-#pform .err{padding:0 32px}
+.pfoot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:20px 32px;background:#FAFAF3;border-top:1px solid var(--line);margin-top:-1px}
+#pform .pfoot .err{padding:0;margin:0 auto 0 0;flex:1;min-width:0}
 .prow:last-child{border-bottom:0}
-@media (max-width:720px){.phead,.pid{padding-left:20px;padding-right:20px}.pstats{grid-template-columns:repeat(2,minmax(0,1fr));margin:18px 20px 0;row-gap:16px}.pstats>div:nth-child(3){padding-left:0;border-left:0}.prow{grid-template-columns:minmax(0,1fr);gap:12px;padding:20px}.pfoot{padding:16px 20px}.pcover{height:110px}.pav{width:96px;height:96px;font-size:30px}.phead{margin-top:-48px}.pid h2{font-size:22px}.prow .pf.pr{justify-content:flex-start}#pform .err{padding:0 20px}}
+.prow .pf>.prow-t:first-child{padding-top:0}.prow .pf>.two:first-child .fld,.prow .pf>.two:first-child>.fld{margin-top:0}
+.prow .pf.pr{align-self:center}
+.rov{min-height:44px;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px dashed var(--grey-1);border-radius:14px;font-size:14.5px;color:var(--ink);background:transparent}
+.rov svg{color:var(--muted);flex:none}
+.pcard+.pcard{margin-top:16px}
+.prow .pf>#payform>.fld:first-child,.prow .pf>.paybox+#payform>.fld:first-child{margin-top:0}.prow .pf>.paybox:first-child{margin-top:0;margin-bottom:16px}
+.pcard>.ptitle2{padding:24px 32px 0;font-size:18px;font-weight:600}
+.pfoot .err:empty{display:none}
+@media (max-width:720px){.pfoot{flex-wrap:wrap}.pfoot .btn{flex:1 1 0;width:auto;min-width:0}.pfoot .err{flex:1 1 100%}.pcard>.ptitle2{padding:20px 20px 0}.prow .pf.pr .btn{width:100%}}
+@media (max-width:720px){.phead,.pid{padding-left:20px;padding-right:20px}.pstats{grid-template-columns:repeat(2,minmax(0,1fr));margin:18px 20px 0;row-gap:16px}.pstats>div:nth-child(3){padding-left:0;border-left:0}.prow{grid-template-columns:minmax(0,1fr);gap:12px;padding:20px}.pfoot{padding:16px 20px}.pcover{height:110px}.pav{width:96px;height:96px;font-size:30px}.phead{margin-top:-48px}.pid h2{font-size:22px}.prow .pf.pr{justify-content:flex-start}#pform .pfoot .err{padding:0}}
 @media (prefers-reduced-motion:reduce){.sw i,.sw i:after{transition:none}}
 .pha .search{min-height:44px}
 .pha .fsel select,.pha>select,.pha>label>select{height:44px;min-height:44px}
@@ -1074,12 +1083,7 @@ ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),e
 
 PG['admin-messages']=()=>chat('admin');
 PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
-PG['admin-settings']=()=>profilePage(true)+`<section class="pcard" style="margin-top:16px">
-  <div class="prow"><div class="pl"><h3>Commission rules</h3><p>How long new commission waits after a client payment before it can be paid out.</p></div>
-   <div class="pf"><div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div><div class="hint">Changes apply straight away to commission that is still on hold.</div></div></div>
-  <div class="prow"><div class="pl"><h3>Access</h3><p>Who can get into the portal.</p></div>
-   <div class="pf">${kv([['Invitation links','Work once and expire after 24 hours'],['Public sign-up','Off. Invitation only.']])}</div></div>
-  </section>`;
+PG['admin-settings']=()=>profilePage(true);
 
 /* partner */
 const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);
@@ -1118,6 +1122,8 @@ function profilePage(adm){
   const sw=(nm,on,lab,sub)=>`<label class="prow-t"><span><b>${lab}</b><small>${sub}</small></span><span class="sw"><input type="checkbox" name="${nm}" ${on?'checked':''} aria-label="${lab}"><i></i></span></label>`;
   const hasN='Notification' in window,perm=hasN?Notification.permission:'unsupported';
   const desk=!hasN?'<small class="muted">This browser does not support desktop alerts.</small>':perm==='granted'?'<small class="muted">Desktop alerts are on for this browser.</small>':perm==='denied'?'<small class="muted">Desktop alerts are blocked in this browser. Allow them in the browser\'s site settings.</small>':`<button type="button" class="btn sm line" data-act="deskalerts">Allow desktop alerts</button>`;
+  const lock=ic('shield',15);
+  const ro=(lab,val)=>`<div class="fld"><label>${lab}</label><div class="rov">${lock}<span>${val}</span></div></div>`;
   return `<section class="pcard">
   <div class="pcover"></div>
   <div class="phead"><label class="pav" for="photo-in" title="Change photo">${u?`<img src="${esc(u)}" alt="Profile photo">`:`<span>${inits(name||email)}</span>`}<span class="pcam">${ic('pencil',14)}</span></label><input type="file" id="photo-in" class="vh" accept="image/jpeg,image/png,image/webp"><div class="pacts">${u?act('Remove photo','photodel','','line'):''}<label class="btn sm white" for="photo-in">${u?'Change photo':'Upload photo'}</label></div></div>
@@ -1128,12 +1134,14 @@ function profilePage(adm){
     <div class="pf">${field('Full name','fullname',{val:name,ac:'name'})}${two(field('Phone number','phone',{val:phone,type:'tel',ac:'tel',inputmode:'tel',ph:'024 123 4567'}),field('City or town','city',{val:city,ac:'address-level2',ph:'Accra'}))}<div class="hint">Your email can only be changed by the studio.</div></div></div>
    <div class="prow"><div class="pl"><h3>Notifications</h3><p>How you hear about payments, payouts, referrals and messages.</p></div>
     <div class="pf">${sw('notify_email',ne,'Email me','Each notification is also sent to '+esc(email)+'.')}${sw('notify_alerts',na,'Pop-up alerts','Show new notifications straight away while the portal is open.')}<div class="deskrow">${desk}</div></div></div>
-   <div class="err" id="perr" role="alert"></div>
-   <div class="pfoot"><button type="button" class="btn line" data-act="pcancel">Cancel</button><button class="btn" type="submit">Save changes</button></div>
+   ${adm?`<div class="prow"><div class="pl"><h3>Commission rules</h3><p>How long new commission waits after a client payment before it can be paid out.</p></div>
+    <div class="pf">${field('Hold before a commission can be paid out','hold',{opts:[0,3,5,7,10].map(n=>[String(n),n+' business days']),val:String(D.hold)})}<div class="hint">Applies straight away to commission that is still on hold.</div></div></div>
+   <div class="prow"><div class="pl"><h3>Access</h3><p>Who can get into the portal.</p></div>
+    <div class="pf">${two(ro('Invitation links','Work once and expire after 24 hours'),ro('Public sign-up','Off. Invitation only'))}</div></div>`:''}
+   <div class="prow"><div class="pl"><h3>Log out of all devices</h3><p>Sign out on every phone and computer, including this one.</p></div><div class="pf pr"><button type="button" class="btn line" data-act="signoutall">Log out everywhere</button></div></div>
+   <div class="pfoot"><div class="err" id="perr" role="alert"></div><button type="button" class="btn line" data-act="pcancel">Cancel</button><button class="btn" type="submit">Save changes</button></div>
   </form>
-  ${adm?'':`<div class="prow"><div class="pl"><h3>How you get paid</h3><p>Mobile Money or a bank account. Only you and the studio can see the full number.</p></div><div class="pf">${payoutInner()}</div></div>`}
-  <div class="prow"><div class="pl"><h3>Log out of all devices</h3><p>Sign out everywhere, including phones and other computers. Use this if you think someone else knows your password.</p></div><div class="pf pr"><button type="button" class="btn line" data-act="signoutall">Log out everywhere</button></div></div>
-  </section>`}
+  </section>${adm?'':`<section class="pcard"><h2 class="ptitle2">How you get paid</h2><div class="prow"><div class="pl"><h3>Payout details</h3><p>Mobile Money or a bank account. Only you and the studio can see the full number.</p></div><div class="pf">${payoutInner()}</div></div></section>`}`}
 PG['partner-profile']=()=>profilePage(false);
 
 /* ---------- router + shell ---------- */
@@ -1303,7 +1311,7 @@ document.addEventListener('submit',e=>{
     if(!ph&&!adm)return er('Enter your phone number.');
     if(ph&&!/^\+?\d{9,15}$/.test(digits))return er('Enter a phone number using digits only, like 024 123 4567 or +233 24 123 4567.');
     if(!ct&&!adm)return er('Enter your city or town.');
-    fire(()=>q(sb.from('profiles').update({full_name:nm,phone:ph||null,city:ct||null,notify_email:!!f.notify_email,notify_alerts:!!f.notify_alerts}).eq('id',ME)),'Changes saved')}
+    fire(async()=>{await q(sb.from('profiles').update({full_name:nm,phone:ph||null,city:ct||null,notify_email:!!f.notify_email,notify_alerts:!!f.notify_alerts}).eq('id',ME));if(adm&&f.hold!==undefined&&Number(f.hold)!==D.hold)await q(sb.from('settings').update({hold_days:Number(f.hold)}).eq('id',1))},'Changes saved')}
   if(e.target.id==='payform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#payerr').textContent=t};
     let n=(f.acct||'').replace(/[\s\-]/g,''),n2=(f.acct2||'').replace(/[\s\-]/g,'');
     if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n))n='0'+n.replace(/^\+?233/,'');if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n2))n2='0'+n2.replace(/^\+?233/,'');
