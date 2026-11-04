@@ -11,7 +11,8 @@ Private portal for the studio and its invited Growth Partners. The page itself i
 | Path | What it does |
 | --- | --- |
 | `supabase/migrations/` | Tables, access rules (RLS), money functions, audit log, notifications. Already applied to the project. |
-| `supabase/functions/partner-admin/` | Edge Function for invite, revoke invite, suspend, reactivate. Already deployed. |
+| `supabase/functions/partner-admin/` | Edge Function for invite, revoke invite, suspend, reactivate, remove. Already deployed. |
+| `supabase/functions/send-notification-email/` | Emails each portal notification through Resend. Called by the database when a notification is created. Needs the `RESEND_API_KEY` and `EMAIL_FROM` secrets. |
 | `supabase/tests/rls_smoke_test.sql` | Access-rule test. Run it in the SQL editor; it always rolls back and prints results as an error. |
 | `site/index.html` | The live portal page. Published by `.github/workflows/pages.yml` on every push to `main`. |
 | `tools/make_live.py` | One-time conversion of the design preview into the first live page. `site/index.html` is now edited directly. |

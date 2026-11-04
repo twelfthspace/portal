@@ -128,10 +128,10 @@ async function run(who) {
     writes.push('after remove: ' + await page.evaluate(() => location.hash));
   } else {
     await page.evaluate(() => { location.hash = 'partner-profile' }); await page.waitForTimeout(200);
-    writes.push('photo shown: ' + await page.evaluate(() => !!document.querySelector('.photo .ph img')));
+    writes.push('photo shown: ' + await page.evaluate(() => !!document.querySelector('.pav img')));
     await page.fill('#f-phone', 'Raymond Kwabla'); await page.click('#pform button[type=submit]'); await page.waitForTimeout(100);
     writes.push('bad phone msg: ' + await page.textContent('#perr'));
-    await page.fill('#f-phone', '+233 24 031-2264'); await page.click('#pform button[type=submit]'); await page.waitForTimeout(300);
+    await page.fill('#f-phone', '+233 24 031-2264'); await page.click('#pform .sw input[name=notify_email]'); await page.click('#pform button[type=submit]'); await page.waitForTimeout(300);
     await page.fill('#f-acct', '024 031 2264'); await page.fill('#f-acct2', '0240312265'); await page.click('#payform button[type=submit]'); await page.waitForTimeout(100);
     writes.push('mismatch msg: ' + await page.textContent('#payerr'));
     await page.fill('#f-acct2', '+233240312264'); await page.click('#payform button[type=submit]'); await page.waitForTimeout(300);

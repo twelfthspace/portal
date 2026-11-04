@@ -551,6 +551,36 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .big .bigtxt{display:block;white-space:normal;overflow-wrap:anywhere;font-size:clamp(17px,1.6vw,21px);line-height:1.25}
 .glass.stat,.card{min-width:0}
 @media (max-width:1199px){.row2{grid-template-columns:minmax(0,1fr)}}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden;max-width:900px}
+.pcover{height:150px;position:relative;background:radial-gradient(120% 160% at 15% 0%,#FEFFDA 0%,#D2E3C0 38%,#C2CBAF 62%,#3E4631 100%)}
+.pcover:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.35))}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 32px;margin-top:-58px;position:relative;flex-wrap:wrap}
+.pav{width:116px;height:116px;border-radius:50%;border:5px solid var(--card);background:var(--grey-2);display:grid;place-items:center;overflow:hidden;cursor:pointer;position:relative;font-size:36px;font-weight:600;color:var(--dark);box-shadow:0 0 0 1px var(--line);flex:none}
+.pav img{width:100%;height:100%;object-fit:cover;display:block}
+.pcam{position:absolute;right:6px;bottom:6px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;border:2px solid var(--card)}
+.pacts{display:flex;gap:8px;padding-bottom:6px;flex-wrap:wrap}.pacts label{cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.pid{padding:14px 32px 0;min-width:0}.pid h2{font-size:26px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}.pid p{color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.pver{color:var(--info);flex:none}
+.pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 32px 0;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.pstats>div{padding:0 18px;border-left:1px solid var(--line);min-width:0}.pstats>div:first-child{padding-left:0;border-left:0}
+.pstats span{display:block;font-size:13px;color:var(--muted)}.pstats b{display:block;font-size:18px;font-weight:600;margin-top:6px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.prow{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:24px;padding:24px 32px;border-bottom:1px solid var(--line)}
+.prow .pl h3{font-size:16px;font-weight:600}.prow .pl p{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.prow .pf{min-width:0}.prow .pf.pr{display:flex;justify-content:flex-end;align-items:center}.prow .pf>.fld:first-child{margin-top:0}
+.prow-t{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;cursor:pointer}
+.prow-t b{display:block;font-weight:600;font-size:14px}.prow-t small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;overflow-wrap:anywhere}
+.sw{position:relative;flex:none;width:48px;height:28px}.sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;border-radius:999px;background:var(--grey-1);transition:background .2s}
+.sw i:after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw input:checked+i{background:var(--ink)}.sw input:checked+i:after{transform:translateX(20px)}
+.sw input:focus-visible+i{outline:2px solid var(--ink);outline-offset:2px}
+.deskrow{padding-top:6px}
+.pfoot{display:flex;justify-content:flex-end;gap:10px;padding:20px 32px;border-bottom:1px solid var(--line)}
+#pform .err{padding:0 32px}
+.prow:last-child{border-bottom:0}
+@media (max-width:720px){.phead,.pid{padding-left:20px;padding-right:20px}.pstats{grid-template-columns:repeat(2,minmax(0,1fr));margin:18px 20px 0;row-gap:16px}.pstats>div:nth-child(3){padding-left:0;border-left:0}.prow{grid-template-columns:minmax(0,1fr);gap:12px;padding:20px}.pfoot{padding:16px 20px}.pcover{height:110px}.pav{width:96px;height:96px;font-size:30px}.phead{margin-top:-48px}.pid h2{font-size:22px}.prow .pf.pr{justify-content:flex-start}#pform .err{padding:0 20px}}
+@media (prefers-reduced-motion:reduce){.sw i,.sw i:after{transition:none}}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
@@ -671,7 +701,7 @@ async function loadAll(){
   MEP=profiles.find(p=>p.id===realMe())||MEP;
   D.hold=settings?settings.hold_days:5;
   D.dir=dir.map(x=>({id:x.id,name:x.full_name||'Member',role:x.role,st:'Active',email:'',city:'',phone:''}));
-  D.partners=profiles.filter(p=>p.role==='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,city:p.city||'',phone:p.phone||'',acct:p.account_mask||'',st:{active:'Active',suspended:'Suspended',removed:'Removed'}[p.status]||'Suspended'}));
+  D.partners=profiles.filter(p=>p.role==='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,city:p.city||'',phone:p.phone||'',acct:p.account_mask||'',joined:p.created_at,ne:p.notify_email,na:p.notify_alerts,st:{active:'Active',suspended:'Suspended',removed:'Removed'}[p.status]||'Suspended'}));
   D.clients=clients.map(c=>({id:c.id,name:c.name,contact:c.contact||'',email:c.email||'',p:c.partner_id}));
   D.projects=projects.map(p=>({id:p.id,name:p.name,c:p.client_id,budget:p.budget,rate:p.rate_bp,st:PST[p.status]}));
   D.payments=payments.map(x=>({id:x.id,d:x.received_on,pr:x.project_id,amt:x.amount,tax:x.tax,m:PM[x.method],mk:x.method,ref:x.reference,refunded:x.refunded,rev:x.reversed,p:x.partner_id,rate:x.rate_bp,cm:x.commission}));
@@ -722,6 +752,13 @@ async function uploadPhoto(file){
     if(old)sb.storage.from('avatars').remove([old]).then(()=>{});
     await reload();toast('Photo updated');render()}catch(e){toast(nice(e))}}
 const photoCard=()=>{const n=S.viewAs?P(ME).name:(MEP?MEP.full_name||MEP.email:''),u=meAv();return card('Profile photo',`<div class="photo"><span class="ph" style="background:${AVC[0]}">${u?`<img src="${esc(u)}" alt="Your profile photo">`:inits(n)}</span><div><p class="muted small" style="margin-bottom:10px">A clear photo of your face helps the studio and other partners recognise you. JPG, PNG or WebP.</p><div class="acts"><label class="btn sm pink" for="photo-in" style="cursor:pointer">${u?'Change photo':'Upload photo'}</label><input type="file" id="photo-in" accept="image/jpeg,image/png,image/webp">${u?act('Remove','photodel','','line'):''}</div></div></div>`)};
+let RT=null;
+function alertMe(t,link){toast(t);try{if('Notification' in window&&Notification.permission==='granted'&&document.hidden){const n=new Notification('Twelfth Space',{body:t,icon:'favicon.png',tag:'ts-'+Date.now()});n.onclick=()=>{window.focus();if(link)location.hash=link;n.close()}}}catch(_){}}
+function startAlerts(){if(RT||!ME)return;const me=ME;
+  RT=sb.channel('alerts-'+me).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+me},pl=>{const n=pl&&pl.new;if(!n)return;
+    if(!MEP||MEP.notify_alerts!==false)alertMe(n.text,n.link);
+    reload().then(render)}).subscribe()}
+function stopAlerts(){if(RT){try{sb.removeChannel(RT)}catch(_){}RT=null}}
 const dl=(name,t)=>{const b=new Blob(['﻿'+t],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('CSV downloaded')};
 /* lookups and derived money */
 const P=id=>D.partners.find(x=>x.id===id)||D.dir.find(x=>x.id===id)||{id,name:'Former member',email:'',city:'',phone:'',acct:'',st:'Suspended'},CL=id=>D.clients.find(x=>x.id===id)||{id,name:'Client',contact:'',email:'',p:null},PR=id=>D.projects.find(x=>x.id===id)||{id,name:'Project',c:null,budget:0,rate:0,st:'Not started'};
@@ -844,6 +881,9 @@ const ACT={
  readall(){const L=D.ann.filter(a=>!D.read[a.id]);L.forEach(a=>D.read[a.id]=true);toast('All marked as read');render();if(L.length)sb.from('announcement_reads').upsert(L.map(a=>({announcement_id:a.id})),{onConflict:'announcement_id,user_id',ignoreDuplicates:true}).then(()=>{})},
  cdel(id){fire(()=>q(sb.from('community_messages').delete().eq('id',id)),'Message deleted')},
  signout(){sb.auth.signOut()},
+ pcancel(){render();toast('Changes discarded')},
+ signoutall(){modal('Log out of all devices','You will be signed out here and on every other phone or computer.','','Log out everywhere',async()=>{const {error}=await sb.auth.signOut({scope:'global'});if(error)return nice(error);return''},'pink')},
+ deskalerts(){if(!('Notification' in window)){toast('This browser does not support desktop alerts.');return}Notification.requestPermission().then(r=>{toast(r==='granted'?'Desktop alerts are on for this browser.':'Desktop alerts were not allowed.');render()})},
  remove(id){const p=P(id),cs=D.clients.filter(c=>c.p===id).length,b=bal(id);
   modal('Remove '+esc(p.name),'For someone who has left. Use Suspend instead if they might come back.',
    `<div class="bks">${b>0?`<div class="banner" style="margin-bottom:10px">${esc(p.name)} still has <b>${g(b)}</b> unpaid. Pay it out first, or record an adjustment, so nothing is left owing.</div>`:''}<ul class="small" style="margin:0 0 12px 18px;list-style:disc;line-height:1.7"><li>Their login is closed for good and their email is freed.</li><li>Their phone, payout details and photo are deleted.</li><li>Past payments, payouts and commission stay in your books under their name.</li>${cs?`<li>Their ${cs} client${cs>1?'s stay':' stays'} with them until you reassign ${cs>1?'them':'it'}.</li>`:''}</ul></div>`+reasonField()+field('Type REMOVE to confirm','confirm',{ph:'REMOVE'}),
@@ -978,6 +1018,7 @@ async function startSession(){
   if(p.status!=='active'){location.hash='suspended';await sb.auth.signOut();return false}
   ME=user.id;MEP=p;ROLE=p.role;
   try{await loadAll()}catch(e){toast(nice(e))}
+  startAlerts();
   return true}
 document.addEventListener('submit',async e=>{
   const id=e.target.id;if(!['signinform','forgotform','resetform','acceptform'].includes(id))return;e.preventDefault();
@@ -1012,7 +1053,7 @@ ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),e
 
 PG['admin-messages']=()=>chat('admin');
 PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
-PG['admin-settings']=()=>`<div class="stack form" style="max-width:640px">${photoCard()}${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
+PG['admin-settings']=()=>profilePage(true)+`<div class="stack form" style="max-width:900px;margin-top:16px">${card('Commission rules',`<div class="fld"><label for="s-hold">Hold before a commission can be paid out</label><select id="s-hold" data-set="hold">${[0,3,5,7,10].map(n=>`<option value="${n}" ${D.hold===n?'selected':''}>${n} business days</option>`).join('')}</select></div>`)}${card('Access',`<div class="fld"><label>Invitation links</label><input value="Work once and expire after 24 hours" readonly></div><div class="fld"><label>Public sign-up</label><input value="Off. Invitation only." readonly></div>`)}</div>`;
 
 /* partner */
 const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);
@@ -1036,11 +1077,38 @@ PG['partner-projects']=()=>card('My projects',tbl(['Project','Client','Rate','St
 PG['partner-commissions']=()=>`<div class="stack"><div class="cards">${stat('Earned',gs(earned(ME)),'')}${stat('Paid',gs(paid(ME)),'')}${stat('Balance',gs(bal(ME)),'')}</div>${card('My ledger',tbl(['Date','Entry','Detail','Amount',''],ledger().filter(l=>l.p===ME).map(l=>({c:[dfmt(l.d),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a),l.pid&&l.t==='Accrual'?act('How','how',l.pid,'line'):'']})),[3]))}</div>`;
 PG['partner-payments']=()=>card('Payouts to me',tbl(['Date','Method','Reference','Amount'],D.payouts.filter(x=>x.p===ME).map(x=>({c:[dfmt(x.d),x.m,esc(x.ref),x.void?tag('Voided','pink'):g(x.amt)]})),[3]));
 PG['partner-messages']=()=>chat('partner');
-PG['partner-profile']=()=>{const p=P(ME),a=D.pay[ME]||{},k=S.payKind||a.kind||'momo';
-  const provOpts=k==='momo'?MOMO_NETS:GH_BANKS;
-  return `<div class="stack form">${photoCard()}
-  ${card('My details',`<form id="pform" novalidate><div class="who">${av(p.name,0)}<div><b>${esc(p.name)}</b><span>${esc(p.email)}</span></div></div>${field('Phone number','phone',{val:p.phone,type:'tel',ac:'tel',inputmode:'tel',ph:'024 123 4567',hint:'The number the studio can call you on.'})}${field('City or town','city',{val:p.city,ac:'address-level2',ph:'Accra'})}<div class="hint">Your name and email can only be changed by the studio.</div><div class="err" id="perr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">Save details</button></div></form>`)}
-  ${card('How you get paid',`${D.pay[ME]?`<div class="paybox"><div class="small muted">Currently paid to</div><b>${esc(KINDS[a.kind])}</b><div>${payLine(a,true)}</div><div class="small muted" style="margin-top:4px">Last changed ${dfmt(String(a.updated_at).slice(0,10))}</div></div>`:''}<form id="payform" novalidate>${field('Payment method','kind',{opts:[['momo','Mobile Money'],['bank','Bank account']],val:k})}${field(k==='momo'?'Network':'Bank','provider',{val:a.kind===k?a.provider:'',ph:k==='momo'?'MTN MoMo':'GCB Bank',ac:'off'})}<datalist id="provlist">${provOpts.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${two(field(k==='momo'?'Mobile Money number':'Account number','acct',{val:'',inputmode:'numeric',ph:k==='momo'?'024 123 4567':'Account number',ac:'off'}),field('Type the number again','acct2',{val:'',inputmode:'numeric',ac:'off'}))}${field(k==='momo'?'Name on the Mobile Money account':'Account name','aname',{val:a.kind===k?a.account_name:p.name,ac:'off'})}${k==='bank'?field('Branch (optional)','branch',{val:a.branch||'',ac:'off'}):''}<div class="hint">Only you and the studio can see these details. The studio is told whenever they change.</div><div class="err" id="payerr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">${D.pay[ME]?'Update payout details':'Save payout details'}</button></div></form>`)}</div>`};
+const VERIFIED=`<svg class="pver" viewBox="0 0 24 24" width="22" height="22" role="img" aria-label="Active account"><title>Active account</title><path fill="currentColor" d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z"/><path d="M8.5 12.2l2.3 2.3 4.7-4.9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const payoutInner=()=>{const p=P(ME),a=D.pay[ME]||{},k=S.payKind||a.kind||'momo';const provOpts=k==='momo'?MOMO_NETS:GH_BANKS;
+  return `${D.pay[ME]?`<div class="paybox"><div class="small muted">Currently paid to</div><b>${esc(KINDS[a.kind])}</b><div>${payLine(a,true)}</div><div class="small muted" style="margin-top:4px">Last changed ${dfmt(String(a.updated_at).slice(0,10))}</div></div>`:''}<form id="payform" novalidate>${field('Payment method','kind',{opts:[['momo','Mobile Money'],['bank','Bank account']],val:k})}${field(k==='momo'?'Network':'Bank','provider',{val:a.kind===k?a.provider:'',ph:k==='momo'?'MTN MoMo':'GCB Bank',ac:'off'})}<datalist id="provlist">${provOpts.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${two(field(k==='momo'?'Mobile Money number':'Account number','acct',{val:'',inputmode:'numeric',ph:k==='momo'?'024 123 4567':'Account number',ac:'off'}),field('Type the number again','acct2',{val:'',inputmode:'numeric',ac:'off'}))}${field(k==='momo'?'Name on the Mobile Money account':'Account name','aname',{val:a.kind===k?a.account_name:p.name,ac:'off'})}${k==='bank'?field('Branch (optional)','branch',{val:a.branch||'',ac:'off'}):''}<div class="hint">Only you and the studio can see these details. The studio is told whenever they change.</div><div class="err" id="payerr" role="alert"></div><div class="mact" style="justify-content:flex-start"><button class="btn" type="submit">${D.pay[ME]?'Update payout details':'Save payout details'}</button></div></form>`};
+function profilePage(adm){
+  const va=!!S.viewAs,pp=va?(D.partners.find(x=>x.id===ME)||P(ME)):null;
+  const name=va?pp.name:(MEP.full_name||''),email=va?pp.email:MEP.email,phone=va?pp.phone:(MEP.phone||''),city=va?pp.city:(MEP.city||'');
+  const joined=va?pp.joined:MEP.created_at,ne=va?pp.ne!==false:MEP.notify_email!==false,na=va?pp.na!==false:MEP.notify_alerts!==false;
+  const active=va?pp.st==='Active':MEP.status==='active',u=meAv();
+  const first=D.payments.filter(x=>x.p===ME&&!x.rev).map(x=>x.d).sort()[0];
+  const jd=joined?dfmt(String(joined).slice(0,10)):'—';
+  const stats=adm?[['Joined',jd],['Active partners',String(D.partners.filter(x=>x.st==='Active').length)],['Paid out',g(sumBy(D.payouts.filter(x=>!x.void),x=>x.amt))],['Role','Administrator']]
+                 :[['Joined',jd],['First commission',first?dfmt(first):'—'],['Earned',g(earned(ME))],['Balance',g(bal(ME))]];
+  const sw=(nm,on,lab,sub)=>`<label class="prow-t"><span><b>${lab}</b><small>${sub}</small></span><span class="sw"><input type="checkbox" name="${nm}" ${on?'checked':''} aria-label="${lab}"><i></i></span></label>`;
+  const hasN='Notification' in window,perm=hasN?Notification.permission:'unsupported';
+  const desk=!hasN?'<small class="muted">This browser does not support desktop alerts.</small>':perm==='granted'?'<small class="muted">Desktop alerts are on for this browser.</small>':perm==='denied'?'<small class="muted">Desktop alerts are blocked in this browser. Allow them in the browser\'s site settings.</small>':`<button type="button" class="btn sm line" data-act="deskalerts">Allow desktop alerts</button>`;
+  return `<section class="pcard">
+  <div class="pcover"></div>
+  <div class="phead"><label class="pav" for="photo-in" title="Change photo">${u?`<img src="${esc(u)}" alt="Profile photo">`:`<span>${inits(name||email)}</span>`}<span class="pcam">${ic('pencil',14)}</span></label><input type="file" id="photo-in" class="vh" accept="image/jpeg,image/png,image/webp"><div class="pacts">${u?act('Remove photo','photodel','','line'):''}<label class="btn sm white" for="photo-in">${u?'Change photo':'Upload photo'}</label></div></div>
+  <div class="pid"><h2>${esc(name||email)}${active?VERIFIED:''}</h2><p>${esc(email)}</p></div>
+  <div class="pstats">${stats.map(s=>`<div><span>${s[0]}</span><b>${s[1]}</b></div>`).join('')}</div>
+  <form id="pform" novalidate>
+   <div class="prow"><div class="pl"><h3>${adm?'Your details':'Public profile'}</h3><p>${adm?'Shown to partners in messages and the community.':'How the studio and other partners see you.'}</p></div>
+    <div class="pf">${field('Full name','fullname',{val:name,ac:'name'})}${two(field('Phone number','phone',{val:phone,type:'tel',ac:'tel',inputmode:'tel',ph:'024 123 4567'}),field('City or town','city',{val:city,ac:'address-level2',ph:'Accra'}))}<div class="hint">Your email can only be changed by the studio.</div></div></div>
+   <div class="prow"><div class="pl"><h3>Notifications</h3><p>How you hear about payments, payouts, referrals and messages.</p></div>
+    <div class="pf">${sw('notify_email',ne,'Email me','Each notification is also sent to '+esc(email)+'.')}${sw('notify_alerts',na,'Pop-up alerts','Show new notifications straight away while the portal is open.')}<div class="deskrow">${desk}</div></div></div>
+   <div class="err" id="perr" role="alert"></div>
+   <div class="pfoot"><button type="button" class="btn line" data-act="pcancel">Cancel</button><button class="btn" type="submit">Save changes</button></div>
+  </form>
+  ${adm?'':`<div class="prow"><div class="pl"><h3>How you get paid</h3><p>Mobile Money or a bank account. Only you and the studio can see the full number.</p></div><div class="pf">${payoutInner()}</div></div>`}
+  <div class="prow"><div class="pl"><h3>Log out of all devices</h3><p>Sign out everywhere, including phones and other computers. Use this if you think someone else knows your password.</p></div><div class="pf pr"><button type="button" class="btn line" data-act="signoutall">Log out everywhere</button></div></div>
+  </section>`}
+PG['partner-profile']=()=>profilePage(false);
 
 /* ---------- router + shell ---------- */
 const NAV={admin:[['dashboard','Dashboard','home'],['referrals','Referrals','send'],['clients','Clients','brief'],['projects','Projects','layers'],['payments','Payments','card'],['commissions','Commissions','pct'],['payouts','Payouts','wallet'],['partners','Partners','users'],['messages','Messages','chat'],['community','Community','megaphone'],['reports','Reports','chart'],['audit','Audit log','shield']],
@@ -1203,12 +1271,13 @@ document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.datase
 document.addEventListener('submit',e=>{
   if(e.target.id==='xform'){e.preventDefault();const v=$('#xin').value.trim();if(!v)return;$('#xin').value='';fire(()=>q(sb.from('community_messages').insert({body:v}))).then(()=>{const x=$('#xin');x&&x.focus()});return}
   if(e.target.id==='cform'){e.preventDefault();const v=$('#cin').value.trim();if(!v)return;const cid=role()==='admin'?S.conv:ME;if(!cid)return;$('#cin').value='';fire(()=>q(sb.from('messages').insert({partner_id:cid,body:v}))).then(()=>{$('#cin')&&$('#cin').focus()});return}
-  if(e.target.id==='pform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#perr').textContent=t};
-    const ph=(f.phone||'').trim(),digits=ph.replace(/[\s\-().]/g,'');
-    if(!ph)return er('Enter your phone number.');
-    if(!/^\+?\d{9,15}$/.test(digits))return er('Enter a phone number using digits only, like 024 123 4567 or +233 24 123 4567.');
-    if(!(f.city||'').trim())return er('Enter your city or town.');
-    fire(()=>q(sb.from('profiles').update({phone:ph,city:f.city.trim()}).eq('id',ME)),'Details saved')}
+  if(e.target.id==='pform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#perr').textContent=t},adm=ROLE==='admin';
+    const nm=(f.fullname||'').trim(),ph=(f.phone||'').trim(),digits=ph.replace(/[\s\-().]/g,''),ct=(f.city||'').trim();
+    if(nm.length<2)return er('Enter your full name.');
+    if(!ph&&!adm)return er('Enter your phone number.');
+    if(ph&&!/^\+?\d{9,15}$/.test(digits))return er('Enter a phone number using digits only, like 024 123 4567 or +233 24 123 4567.');
+    if(!ct&&!adm)return er('Enter your city or town.');
+    fire(()=>q(sb.from('profiles').update({full_name:nm,phone:ph||null,city:ct||null,notify_email:!!f.notify_email,notify_alerts:!!f.notify_alerts}).eq('id',ME)),'Changes saved')}
   if(e.target.id==='payform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#payerr').textContent=t};
     let n=(f.acct||'').replace(/[\s\-]/g,''),n2=(f.acct2||'').replace(/[\s\-]/g,'');
     if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n))n='0'+n.replace(/^\+?233/,'');if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n2))n2='0'+n2.replace(/^\+?233/,'');
@@ -1230,7 +1299,7 @@ document.addEventListener('keydown',e=>{
 
 const FS={pinning:false};
 function drawPins(){}function renderFb(){}function closeFb(){}
-sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){S.viewAs=null;S.realMe=null;ME=null;MEP=null;ROLE=null;resetD();render()}});
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){stopAlerts();S.viewAs=null;S.realMe=null;ME=null;MEP=null;ROLE=null;resetD();render()}});
 setInterval(()=>{if(!ME||document.hidden||$('#mbg').classList.contains('open'))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;reload().then(render)},60000);
 async function boot(){
   document.body.classList.add('authmode');
