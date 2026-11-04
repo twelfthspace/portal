@@ -29,11 +29,23 @@ const data = {
     { id: 'r3', partner_id: AMA, business: 'Tema Printworks', email: null, budget: 550000, status: 'rejected', decision_note: 'Outside our service area for now', client_id: null, created_at: T },
     { id: 'r4', partner_id: AMA, business: 'Takoradi Café', email: null, budget: 900000, status: 'approved', decision_note: null, client_id: C(1), created_at: T }],
   referral_flags: [{ referral_id: 'r2', note: 'Same as existing client "Accra Bakery and Pastry Company Limited", attributed to Ama Serwaa Mensah-Bonsu.' }],
-  messages: [{ id: 'm1', partner_id: AMA, sender_id: AMA, body: 'Hello studio, a very long message that keeps going to check that chat bubbles wrap properly instead of overflowing the screen on small phones. https://example.com/a/really/long/link/without/spaces/that/could/overflow', read_at: null, created_at: T },
+  messages: [{ id: 'm1', partner_id: AMA, sender_id: AMA, attachments: [], body: 'Hello studio, a very long message that keeps going to check that chat bubbles wrap properly instead of overflowing the screen on small phones. https://example.com/a/really/long/link/without/spaces/that/could/overflow', read_at: null, created_at: T },
              { id: 'm2', partner_id: AMA, sender_id: ADM, body: 'Thanks, noted.', read_at: null, created_at: T }],
   announcements: [{ id: 'n1', title: 'Payout days move to Fridays from the start of next month', body: 'From this month, recorded payouts are sent on Fridays.\nIf a payout date matters to you, message the studio.', pinned: true, created_at: T }],
   announcement_reads: [],
-  community_messages: [{ id: 'c1', sender_id: ADM, body: 'Welcome @Ama to the community space, please read the announcement.', created_at: T }, { id: 'c2', sender_id: AMA, body: 'Thank you!', created_at: T }],
+  channels: [{ id: 'k1', slug: 'general', name: 'general', description: 'The whole partner community. Say hello, ask questions, share tips.', admin_only: false, archived: false, position: 0, created_at: T },
+             { id: 'k2', slug: 'wins', name: 'wins', description: 'Closed a deal or got a referral approved? Share it here.', admin_only: false, archived: false, position: 1, created_at: T },
+             { id: 'k3', slug: 'studio-news', name: 'studio-news', description: 'Updates from the studio', admin_only: true, archived: false, position: 2, created_at: T }],
+  channel_reads: [],
+  community_messages: [
+    { id: 'c1', channel_id: 'k1', parent_id: null, sender_id: ADM, body: 'Welcome @Ama to the community space, please read the **announcement** and check https://example.com/a/very/long/link/that/should/wrap/nicely/inside/the/message/area', attachments: [], mentions: [AMA], created_at: T },
+    { id: 'c2', channel_id: 'k1', parent_id: null, sender_id: AMA, body: 'Thank you! Here is our brochure and a quick voice note.', attachments: [
+        { path: 'community/' + AMA + '/a-brochure-with-a-really-long-file-name-for-the-client-meeting.pdf', name: 'brochure-with-a-really-long-file-name-for-the-client-meeting.pdf', size: 482000, type: 'application/pdf' },
+        { path: 'community/' + AMA + '/b-photo.png', name: 'photo.png', size: 120000, type: 'image/png' },
+        { path: 'community/' + AMA + '/c-voice.webm', name: 'Voice note 0:12.webm', size: 40000, type: 'audio/webm', voice: true, duration: 12 }], mentions: [], created_at: T },
+    { id: 'c3', channel_id: 'k1', parent_id: 'c1', sender_id: KOJO, body: 'Great to be here', attachments: [], mentions: [], created_at: T },
+    { id: 'c4', channel_id: 'k1', parent_id: 'c1', sender_id: AMA, body: 'Same here! 🎉', attachments: [], mentions: [], created_at: T }],
+  message_reactions: [{ id: 'r1', message_type: 'community', message_id: 'c1', user_id: AMA, emoji: '🎉', created_at: T }, { id: 'r2', message_type: 'community', message_id: 'c1', user_id: KOJO, emoji: '🎉', created_at: T }, { id: 'r3', message_type: 'community', message_id: 'c2', user_id: ADM, emoji: '👍', created_at: T }],
   notifications: [{ id: 'x1', user_id: ADM, text: 'Ama Serwaa Mensah-Bonsu changed their payout details to MTN MoMo •••• 2264', link: 'admin-partners', read_at: null, created_at: T }],
   partner_balances: [{ partner_id: AMA, full_name: 'Ama', earned: 123456789, paid: 750000, held: 1500000, balance: 122706789, available: 121206789 },
                      { partner_id: KOJO, full_name: 'Kojo', earned: 0, paid: 0, held: 0, balance: 0, available: 0 },
@@ -42,7 +54,7 @@ const data = {
   audit_log: [{ id: 1, at: T, actor_id: ADM, action: 'update', entity: 'projects', entity_id: P(1), reason: 'Agreed with the client during the quarterly review meeting', old_row: { name: 'Complete brand refresh', rate_bp: 1000 }, new_row: { name: 'Complete brand refresh', rate_bp: 1250 } }],
 };
 
-if (process.env.EMPTY) { for (const k of Object.keys(data)) if (Array.isArray(data[k])) data[k] = []; profiles.splice(2); profiles[1].phone = null; profiles[1].city = null; }
+if (process.env.EMPTY) { for (const k of Object.keys(data)) if (Array.isArray(data[k]) && k !== 'channels') data[k] = []; profiles.splice(2); profiles[1].phone = null; profiles[1].city = null; }
 async function mock(page, me) {
   await page.route('https://portal.test/**', r => r.fulfill({ contentType: 'text/html', body: html }));
   await page.route('https://cdn.jsdelivr.net/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(path.join(sbdir, path.basename(new URL(r.request().url()).pathname))) }));
@@ -96,16 +108,21 @@ const MEASURE = () => {
     }
   }
   // icon buttons and arrows that sit on top of text
-  const icons = [...root.querySelectorAll('.mini-link,.swap,.dots,.ibtn,.more,.go,.circ,a > svg.ic,button > svg.ic')].filter(visible);
+  const icons = [...root.querySelectorAll('.mini-link,.swap,.dots,.ibtn,.more,.go,.circ,a > svg.ic,button > svg.ic')].filter(el => visible(el) && !el.closest('.hacts'));
+  const clipRect = el => { let r = el.getBoundingClientRect(), L = r.left, T = r.top, R = r.right, B = r.bottom;
+    for (let q = el.parentElement; q && q !== document.body; q = q.parentElement) { const cs = getComputedStyle(q); if (/(auto|scroll|hidden|clip)/.test(cs.overflowY + cs.overflowX)) { const b = q.getBoundingClientRect(); L = Math.max(L, b.left); T = Math.max(T, b.top); R = Math.min(R, b.right); B = Math.min(B, b.bottom); } }
+    return { left: L, top: T, right: R, bottom: B, width: Math.max(0, R - L), height: Math.max(0, B - T) }; };
+  const inView = el => { const c = clipRect(el); return c.width > 1 && c.height > 1; };
   const texts = [...root.querySelectorAll('b,span,small,p,h1,h2,h3,label,select,input,.v,.amt,.big,.lab')].filter(t => visible(t) && t.children.length === 0 || /SELECT|INPUT/.test(t.tagName));
   const drawer = document.querySelector('#rail').classList.contains('open') && innerWidth < 1100;
   for (const ic of icons) {
     if (drawer) break; // the open menu drawer covers the page on purpose
-    const a = ic.getBoundingClientRect(); if (!a.width) continue;
+    const a = clipRect(ic); if (a.width < 2 || a.height < 2) continue;
     for (const t of texts) {
       if (ic.contains(t) || t.contains(ic) || ic.closest('button,a') && ic.closest('button,a').contains(t)) continue;
+      if (!inView(t) || t.closest('.hacts')) continue;
       if (t.closest('#rail') && !document.querySelector('#rail').classList.contains('open') && innerWidth < 1100) continue;
-      const b = t.getBoundingClientRect(); if (!b.width || !b.height) continue;
+      const b = clipRect(t); if (b.width < 2 || b.height < 2) continue;
       const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left), oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
       if (ox > 3 && oy > 3) out.push('overlaps: ' + name(ic.closest('button,a') || ic) + ' covers ' + name(t));
     }
@@ -175,6 +192,7 @@ const MEASURE = () => {
       const cr = view.getBoundingClientRect();
       for (const blk of [...view.children].filter(visible)) { const r = blk.getBoundingClientRect(); if (r.height > 40 && r.right < cr.right - 40) out.push(`block stops short of the page width: ${name(blk).slice(0, 50)} [ends ${Math.round(r.right)} of ${Math.round(cr.right)}]`); }
       const sc = cv.getBoundingClientRect(); if (sc.right < innerWidth - 24) out.push(`page area stops short of the window: [${Math.round(sc.right)} of ${innerWidth}]`); } }
+  if (document.querySelector('.hub') && document.documentElement.scrollHeight > innerHeight + 2) out.push(`messages page scrolls: ${document.documentElement.scrollHeight}px tall in a ${innerHeight}px window`);
   const sw = document.documentElement.scrollWidth;
   if (sw > vw + 1) out.unshift(`PAGE SCROLLS SIDEWAYS: ${sw}px wide on a ${vw}px screen`);
   return [...new Set(out)].slice(0, 12);
@@ -224,8 +242,8 @@ async function run(who, extra) {
   return report;
 }
 (async () => {
-  const a = await run(ADM, ['admin-project-' + P(1), 'admin-partner-' + AMA, 'admin-client-' + C(1), 'admin-settings', 'admin-notifications']);
-  const p = await run(AMA, ['partner-profile', 'partner-statement', 'partner-client-' + C(1), 'partner-notifications']);
+  const a = await run(ADM, ['admin-messages~general~t-c1', 'admin-messages~dm-' + AMA, 'admin-messages~act', 'admin-messages~ann', 'admin-project-' + P(1), 'admin-partner-' + AMA, 'admin-client-' + C(1), 'admin-settings', 'admin-notifications']);
+  const p = await run(AMA, ['partner-messages~general', 'partner-messages~general~t-c1', 'partner-messages~studio-news', 'partner-messages~dm', 'partner-messages~act', 'partner-profile', 'partner-statement', 'partner-client-' + C(1), 'partner-notifications']);
   const all = Object.assign({}, ...Object.entries(a).map(([k, v]) => ({ ['ADMIN ' + k]: v })), ...Object.entries(p).map(([k, v]) => ({ ['PARTNER ' + k]: v })));
   const bad = Object.entries(all).filter(([, v]) => v.length);
   console.log(bad.length ? JSON.stringify(Object.fromEntries(bad), null, 1) : 'NO LAYOUT PROBLEMS FOUND');

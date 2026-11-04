@@ -25,10 +25,13 @@ const data = {
   referrals: [{ id: 'r1', partner_id: AMA, business: 'Labadi Gym', email: null, budget: 300000, status: 'pending', decision_note: null, client_id: null, created_at: T },
               { id: 'r2', partner_id: KOJO, business: 'Accra Bakery', email: null, budget: 0, status: 'flagged', decision_note: null, client_id: null, created_at: T }],
   referral_flags: [{ referral_id: 'r2', note: 'Same as existing client "Accra Bakery", attributed to Ama Mensah.' }],
-  messages: [{ id: 'm1', partner_id: AMA, sender_id: AMA, body: 'Hello <b>studio</b>', read_at: null, created_at: T }],
+  messages: [{ id: 'm1', partner_id: AMA, sender_id: AMA, attachments: [], body: 'Hello <b>studio</b>', read_at: null, created_at: T }],
   announcements: [{ id: 'n1', title: 'Payout days', body: 'Payouts move to Fridays from now on.', pinned: true, created_at: T }],
   announcement_reads: [],
-  community_messages: [{ id: 'c1', sender_id: ADM, body: 'Welcome @Ama', created_at: T }],
+  channels: [{ id: 'k1', slug: 'general', name: 'general', description: 'Everyone', admin_only: false, archived: false, position: 0, created_at: T }, { id: 'k2', slug: 'studio-news', name: 'studio-news', description: 'Studio only', admin_only: true, archived: false, position: 1, created_at: T }],
+  channel_reads: [],
+  message_reactions: [],
+  community_messages: [{ id: 'c1', channel_id: 'k1', parent_id: null, sender_id: ADM, body: 'Welcome @Ama <img src=x onerror=alert(1)>', attachments: [], mentions: [AMA], created_at: T }],
   notifications: [{ id: 'x1', user_id: ADM, text: 'Ama Mensah sent a message', link: 'admin-messages', read_at: null, created_at: T }],
   partner_balances: [{ partner_id: AMA, full_name: 'Ama Mensah', earned: 43000, paid: 10000, held: 13500, balance: 33000, available: 19500 },
                      { partner_id: KOJO, full_name: 'Kojo Boateng', earned: 0, paid: 0, held: 0, balance: 0, available: 0 }],
@@ -143,7 +146,27 @@ async function run(who) {
     await page.evaluate(() => { location.hash = 'partner-referrals' }); await page.waitForTimeout(150);
     await page.click('button[data-act=referral]'); await page.fill('#f-biz', 'Tema Prints');
     await page.click('#mform button[type=submit]'); await page.waitForTimeout(400);
-    const xss = await page.evaluate(() => { location.hash = 'partner-messages'; return new Promise(r => setTimeout(() => r(document.querySelector('#msgs').innerHTML), 200)) });
+    // messaging hub
+    await page.evaluate(() => { location.hash = 'partner-messages~general' }); await page.waitForTimeout(300);
+    writes.push('hub html escaped: ' + await page.evaluate(() => !document.querySelector('#hmsgs img[src="x"]') && document.querySelector('#hmsgs').textContent.includes('<img src=x')));
+    await page.fill('.hin[data-ctx="ch:k1"]', 'Hi @Kojo, **great** news'); await page.keyboard.press('Escape'); await page.focus('.hin[data-ctx="ch:k1"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
+    await page.hover('#m-c1'); await page.click('#m-c1 .hacts [data-react="community:c1|👍"]'); await page.waitForTimeout(300);
+    writes.push('reaction shown: ' + await page.evaluate(() => !!document.querySelector('#m-c1 .hreacts .hre.me')));
+    await page.hover('#m-c1'); await page.click('#m-c1 .hacts [data-emopick]'); await page.waitForTimeout(150);
+    writes.push('emoji picker: ' + await page.evaluate(() => document.querySelectorAll('.emopop [data-emoji]').length));
+    await page.click('.emopop [data-emoji="🔥"]'); await page.waitForTimeout(300);
+    await page.hover('#m-c1'); await page.click('#m-c1 .hacts [data-thread="c1"]'); await page.waitForTimeout(300);
+    writes.push('thread open: ' + await page.evaluate(() => !!document.querySelector('.hthr .hin[data-ctx="th:c1"]')));
+    await page.fill('.hin[data-ctx="th:c1"]', 'Reply in thread'); await page.focus('.hin[data-ctx="th:c1"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
+    await page.setInputFiles('.hmain [data-attin="ch:k1"]', { name: 'brief.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') }); await page.waitForTimeout(200);
+    writes.push('file chip: ' + await page.evaluate(() => !!document.querySelector('.hmain .hchip')));
+    await page.click('.hmain .hsend'); await page.waitForTimeout(500);
+    await page.evaluate(() => { location.hash = 'partner-messages~studio-news' }); await page.waitForTimeout(300);
+    writes.push('studio-only composer locked: ' + await page.evaluate(() => !!document.querySelector('.hcmp-off') && !document.querySelector('.hmain .hin')));
+    await page.evaluate(() => { location.hash = 'partner-messages~dm' }); await page.waitForTimeout(300);
+    await page.fill('.hin[data-ctx^="dm:"]', 'Private hello'); await page.focus('.hin[data-ctx^="dm:"]'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
+    const xss = await page.evaluate(() => document.querySelector('#hmsgs').innerHTML);
+    await page.screenshot({ path: path.join(outdir, 'hub-partner.png') });
     writes.push('message html: ' + xss.slice(0, 120));
   }
   await page.click('[data-act=signout]'); await page.waitForTimeout(400);
