@@ -42,6 +42,7 @@ const data = {
   audit_log: [{ id: 1, at: T, actor_id: ADM, action: 'update', entity: 'projects', entity_id: P(1), reason: 'Agreed with the client during the quarterly review meeting', old_row: { name: 'Complete brand refresh', rate_bp: 1000 }, new_row: { name: 'Complete brand refresh', rate_bp: 1250 } }],
 };
 
+if (process.env.EMPTY) { for (const k of Object.keys(data)) if (Array.isArray(data[k])) data[k] = []; profiles.splice(2); profiles[1].phone = null; profiles[1].city = null; }
 async function mock(page, me) {
   await page.route('https://portal.test/**', r => r.fulfill({ contentType: 'text/html', body: html }));
   await page.route('https://cdn.jsdelivr.net/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(path.join(sbdir, path.basename(new URL(r.request().url()).pathname))) }));
@@ -109,12 +110,51 @@ const MEASURE = () => {
       if (ox > 3 && oy > 3) out.push('overlaps: ' + name(ic.closest('button,a') || ic) + ' covers ' + name(t));
     }
   }
+  // text too close to a card's edge, text left of the card heading, uneven toolbars
+  const cards = [...root.querySelectorAll('.card,.glass,.acard,.pcard,.qbox')].concat([...document.querySelectorAll('#mbg.open .modal')]).filter(visible);
+  const boxed = el => { const cs = getComputedStyle(el); return parseFloat(cs.borderLeftWidth) > 0 || (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent'); };
+  for (const card of cards) {
+    if (!boxed(card)) continue;
+    const k = card.getBoundingClientRect(), h2 = card.querySelector(':scope > h2, :scope > .tt h2, :scope > .ch h2, :scope > div > h2');
+    const hl = h2 && visible(h2) ? h2.getBoundingClientRect().left : null;
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent.trim() ? 1 : 2 });
+    let n, seen = 0;
+    while ((n = walker.nextNode()) && seen < 400) {
+      seen++;
+      const el = n.parentElement; if (!el || !visible(el) || el.closest('.tip,.rmenu,.sr,select,option,.sug')) continue;
+      let sc = null; for (let q = el; q && q !== card; q = q.parentElement) { const ox = getComputedStyle(q).overflowX; if (ox === 'auto' || ox === 'scroll') { sc = q; break; } }
+      if (sc) continue;
+      let cut = false; for (let q = el; q && q !== card; q = q.parentElement) { const cs = getComputedStyle(q); if (cs.textOverflow === 'ellipsis' || /hidden|clip/.test(cs.overflowX)) { cut = true; break; } }
+      if (cut) continue;
+      if (el.closest('.cards,.pstats') && el.closest('.card,.glass,.pcard') !== card) continue;
+      const r = document.createRange(); r.selectNodeContents(n);
+      for (const b of r.getClientRects()) {
+        if (!b.width) continue;
+        const gapL = b.left - k.left, gapR = k.right - b.right;
+        if (gapL < 12 || gapR < 12) { out.push(`text touches card edge: "${n.textContent.trim().slice(0, 40)}" in ${name(card).slice(0, 40)} [${Math.round(gapL)}px / ${Math.round(gapR)}px]`); break; }
+        if (hl !== null && b.left < hl - 2 && !el.closest('.cv,td,th,.trow,.bk,.kv,.list')) { out.push(`text left of heading: "${n.textContent.trim().slice(0, 40)}" [${Math.round(b.left)} vs heading ${Math.round(hl)}]`); break; }
+      }
+    }
+  }
+  // amounts must never break across two lines
+  { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /GHS\s?[\d,.]+|^[\d,]+\.\d\d$/.test(n.textContent) && n.textContent.trim().length < 26 ? 1 : 2 });
+    let n; while ((n = w.nextNode())) { const el = n.parentElement; if (!el || !visible(el) || el.closest('.tip,.rmenu,.sr,option')) continue;
+      const amt = el.closest('.v,.big,.amt,b,td,.ta,span,div') || el; const r = document.createRange(); r.selectNodeContents(amt);
+      const rs = [...r.getClientRects()].filter(b => b.width > 1), split = rs.some(a => rs.some(b => b.top >= a.bottom - 1));
+      if (split && amt.textContent.trim().length < 26) out.push(`amount breaks across lines: "${amt.textContent.trim()}"`); } }
+  for (const bar of [...root.querySelectorAll('.pha')].filter(visible)) {
+    const ctrls = [...bar.querySelectorAll(':scope > .search, :scope > .btn, :scope > .fsel select, :scope > label > select, :scope > .tabs, :scope > select')].filter(visible);
+    const hs = ctrls.map(c => Math.round(c.getBoundingClientRect().height));
+    const tops = ctrls.map(c => Math.round(c.getBoundingClientRect().top));
+    const rows = {}; ctrls.forEach((c, i) => { (rows[tops[i]] = rows[tops[i]] || []).push(hs[i]) });
+    if (hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 2 && new Set(tops).size < hs.length) out.push(`toolbar controls uneven heights: ${hs.join('/')}px`);
+  }
   const sw = document.documentElement.scrollWidth;
   if (sw > vw + 1) out.unshift(`PAGE SCROLLS SIDEWAYS: ${sw}px wide on a ${vw}px screen`);
   return [...new Set(out)].slice(0, 12);
 };
 
-const SIZES = [[360, 740, 'phone-s'], [390, 844, 'phone'], [768, 1024, 'tablet'], [1000, 760, 'yours'], [1024, 768, 'laptop-s'], [1280, 800, 'laptop'], [1536, 900, 'wide']];
+const SIZES = [[360, 740, 'phone-s'], [390, 844, 'phone'], [768, 1024, 'tablet'], [1000, 760, 'yours'], [1024, 768, 'laptop-s'], [1280, 800, 'laptop'], [1440, 900, 'mac'], [1536, 900, 'wide']];
 
 async function run(who, extra) {
   const me = profiles.find(p => p.id === who), report = {};
@@ -135,13 +175,13 @@ async function run(who, extra) {
     for (const r of routes) {
       await page.evaluate(r => { location.hash = r }, r); await page.waitForTimeout(140);
       const res = await page.evaluate(MEASURE); if (res.length) report[`${label} ${r}`] = res;
-      if (SHOTS && (label === 'phone' || label === 'laptop' || label === 'yours')) await page.screenshot({ path: path.join(outdir, `${label}-${r}.png`), fullPage: true });
+      if (SHOTS && (label === 'phone' || label === 'laptop' || label === 'yours' || label === 'mac')) await page.screenshot({ path: path.join(outdir, `${label}-${r}.png`), fullPage: true });
     }
     // a few dialogs
     const dialogs = me.role === 'admin' ? [['admin-payouts', '[data-act=payout]'], ['admin-partners', '[data-act=invite]'], ['admin-partner-' + AMA, '[data-act=remove]']] : [['partner-referrals', 'button[data-act=referral]']];
     for (const [r, sel] of dialogs) {
       await page.evaluate(r => { location.hash = r }, r); await page.waitForTimeout(140);
-      const b = page.locator('#view ' + sel + ':visible').first(); if (!(await b.count())) { report[`${label} dialog ${sel}`] = ['button not visible']; continue; }
+      const b = page.locator('#view ' + sel + ':visible:enabled').first(); if (!(await b.count())) continue;
       await b.click({ timeout: 5000 }); await page.waitForTimeout(150);
       const res = await page.evaluate(MEASURE); if (res.length) report[`${label} dialog ${sel}`] = res;
       if (SHOTS && label === 'phone-s') await page.screenshot({ path: path.join(outdir, `${label}-dialog-${sel.replace(/\W+/g, '')}.png`) });
