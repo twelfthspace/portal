@@ -714,6 +714,7 @@ select:hover{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
   .rt td.act{justify-content:flex-end;padding-top:10px}
   .rt td.act:empty{display:none}
 }
+body.not-owner [data-act="invite"],body.not-owner [data-act="revoke"],body.not-owner [data-act="suspend"],body.not-owner [data-act="remove"],body.not-owner [data-act="rate"],body.not-owner [data-act="reassign"],body.not-owner [data-act="chnew"],body.not-owner [data-act="chedit"],body.not-owner [data-act="staffadd"],body.not-owner [data-act="staffsus"],body.not-owner [data-act="staffrem"]{display:none!important}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
@@ -770,7 +771,7 @@ const PST={not_started:'Not started',in_progress:'In progress',on_hold:'On hold'
 const PM={mobile_money:'Mobile money',bank_transfer:'Bank transfer',cash:'Cash'};
 const RST={pending:'Pending review',flagged:'Flagged',approved:'Approved',rejected:'Rejected'};
 const flip=o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[v,k])),PSTr=flip(PST),PMr=flip(PM);
-const blankD=()=>({cm:[],dmByP:{},channels:[],allChannels:[],creads:{},reacts:{},furl:{},online:new Set(),pay:{},avByName:{},avById:{},hold:5,notes:[],audit:[],adj:[],partners:[],invites:[],clients:[],projects:[],payments:[],payouts:[],refs:[],msgs:{},unreadA:{},unreadP:{},ann:[],read:{},chat:[],cs:{admin:{},partner:{}},dir:[],bal:{},newlink:null});
+const blankD=()=>({staff:[],staffInvites:[],cm:[],dmByP:{},channels:[],allChannels:[],creads:{},reacts:{},furl:{},online:new Set(),pay:{},avByName:{},avById:{},hold:5,notes:[],audit:[],adj:[],partners:[],invites:[],clients:[],projects:[],payments:[],payouts:[],refs:[],msgs:{},unreadA:{},unreadP:{},ann:[],read:{},chat:[],cs:{admin:{},partner:{}},dir:[],bal:{},newlink:null});
 const D=blankD();const resetD=()=>Object.assign(D,blankD());
 let ME=null,MEP=null,ROLE=null,BOOTED=false;
 const q=async p=>{const {data,error}=await p;if(error)throw error;return data};
@@ -855,7 +856,9 @@ async function loadAll(){
   D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[role()][m.id]=true});
   D.notes=notes.map(n=>({id:n.id,r:ROLE,t:n.text,h:n.link||(ROLE+'-dashboard'),n:!n.read_at}));
   D.bal=Object.fromEntries(bals.map(b=>[b.partner_id,b]));
-  D.invites=invites.map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,link:null}));
+  D.invites=invites.filter(i=>i.role!=='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,link:null}));
+  D.staffInvites=invites.filter(i=>i.role==='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email}));
+  D.staff=profiles.filter(p=>p.role!=='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,role:p.role,st:{active:'Active',suspended:'Suspended',removed:'Removed'}[p.status]||'Suspended'}));
   D.audit=audit.map(a=>({t:new Date(a.at),who:a.actor_id?nameOf(a.actor_id):'System',what:describe(a),reason:a.reason||''}));
   if(adm&&!D.partners.some(p=>p.id===S.conv))S.conv=(D.partners[0]||{}).id;
   await loadChat({chatm,msgs});
@@ -1099,6 +1102,28 @@ function chat(r){
   <div class="msgs" id="msgs">${m.length?m.map(x=>`<div class="bub ${(x.f==='a')===(r==='admin')?'me':''}">${esc(x.t)}<small>${esc(x.at)}</small></div>`).join(''):'<div class="empty">No messages yet. Say hello.</div>'}</div>
   <form class="compose" id="cform"><input id="cin" aria-label="Message" placeholder="Write a message" autocomplete="off"><button class="btn" type="submit">Send</button></form></div></div>`}
 const annSorted=()=>[...D.ann].sort((a,b)=>(b.pin-a.pin)||b.d.localeCompare(a.d));
+const isStaffRole=r=>r==='admin'||r==='accounts';
+const isOwner=()=>!!MEP&&MEP.role==='admin'&&!S.viewAs;
+const OWNER_ACTS=['invite','revoke','suspend','remove','rate','reassign','chnew','chedit','staffadd','staffsus','staffrem'];
+OWNER_ACTS.forEach(k=>{const f=ACT[k];if(f)ACT[k]=function(...a){if(!isOwner()){toast('Only the owner can do this.');return}return f.apply(this,a)}});
+function teamCard(){const own=isOwner(),L=D.staff.filter(x=>x.st!=='Removed').sort((a,b)=>(a.role==='admin'?0:1)-(b.role==='admin'?0:1));
+  const row=x=>`<div>${who(x.name,x.email,pIdx(x.id))}<span class="grow"></span><div class="acts">${tag(x.role==='admin'?'Owner':'Accounts',x.role==='admin'?'sun':'sky')}${x.st!=='Active'?stTag(x.st):''}${own&&x.role==='accounts'?act(x.st==='Active'?'Suspend':'Reactivate','staffsus',x.id,'line')+act('Remove','staffrem',x.id,'line'):''}</div></div>`;
+  return `<section class="pcard"><h2 class="ptitle2">Studio team</h2><div class="prow"><div class="pl"><h3>Who runs the portal</h3><p>The owner has full control. Accounts staff handle payments, payouts, clients, projects, referrals and messages, but can't manage people, rates or settings.</p></div>
+  <div class="pf"><div class="list">${L.map(row).join('')}${D.staffInvites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${tag('Invited','sun')}${own?act('Revoke','revoke',i.id,'line'):''}</div></div>`).join('')}</div>
+  ${own?`<div class="mact" style="justify-content:flex-start;margin-top:14px"><button type="button" class="btn" data-act="staffadd">${ic('plus',16)} Add staff member</button></div>`:''}</div></div></section>`}
+ACT.staffadd=function(){if(!isOwner()){toast('Only the owner can do this.');return}
+  modal('Add an Accounts staff member','They can handle payments, payouts, clients, projects, referrals and messages. They cannot manage people, rates or settings.',field('Full name','name')+field('Email address','email',{type:'email'})+field('How to send it','how',{opts:[['email','Email the invitation for me'],['link','Give me a link to send myself']]}),'Send invitation',async f=>{
+  const n=f.name.trim(),m=f.email.trim().toLowerCase();if(!n)return'Enter their name.';if(!MAIL.test(m))return'Enter a valid email address.';
+  if(D.staff.some(x=>x.email===m)||D.partners.some(x=>x.email===m)||D.invites.some(x=>x.email===m)||D.staffInvites.some(x=>x.email===m))return'This email already has an account or a pending invitation.';
+  let d;try{d=await callAdmin({action:'invite',role:'accounts',email:m,full_name:n,send_email:f.how!=='link'})}catch(e){return nice(e)}
+  await reload();
+  if(d&&d.link){D.newlink=d.link;info('Invitation ready',`<p class="muted">Copy this link and send it to ${esc(n)} yourself. It works once and expires in 24 hours. When they accept, they join as Accounts staff.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(d.link)}</textarea></div><div class="mact" style="justify-content:flex-start"><button type="button" class="btn soft" data-act="copylink" data-id="new">Copy link</button></div>`);render();return{keep:true}}
+  toast('Invitation emailed to '+m);return''})};
+ACT.staffsus=function(id){const x=D.staff.find(s=>s.id===id);if(!x)return;const on=x.st==='Active';
+  modal((on?'Suspend ':'Reactivate ')+esc(x.name),on?'They will be signed out and cannot sign in until reactivated.':'They will be able to sign in again.',reasonField(),on?'Suspend':'Reactivate',f=>{const e=needReason(f);if(e)return e;return doit(()=>callAdmin({action:on?'suspend':'reactivate',user_id:id,reason:f.reason.trim()}),x.name+' is now '+(on?'suspended':'active'))})};
+ACT.staffrem=function(id){const x=D.staff.find(s=>s.id===id);if(!x)return;
+  modal('Remove '+esc(x.name),'For a staff member who has left. Their login is closed for good; everything they recorded stays in the books and the audit log.',reasonField()+field('Type REMOVE to confirm','confirm',{ph:'REMOVE'}),'Remove',f=>{const e=needReason(f);if(e)return e;if((f.confirm||'').trim().toUpperCase()!=='REMOVE')return'Type REMOVE to confirm.';
+    return doit(()=>callAdmin({action:'remove',user_id:id,reason:f.reason.trim()}),x.name+' has been removed')},'pink')};
 const studioId=()=>(D.dir.find(p=>p.role==='admin'&&D.avById[p.id])||D.dir.find(p=>p.role==='admin')||{}).id;
 const postAuthor=(a,extra)=>{const id=a.by&&(D.dir.some(p=>p.id===a.by)||D.partners.some(p=>p.id===a.by))?a.by:studioId();const nm=id?nameOfId(id):'Twelfth Space';
   return `<div class="pauth">${id?hav(id):`<span class="hava"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span>`}<div><div class="pauth-n"><b>${esc(nm)}</b>${tag('Studio','sky')}</div><div class="sub">${dfmt(a.d)}${a.at?' at '+hhmm(Date.parse(a.at)):''} · ${extra}</div></div></div>`};
@@ -1139,7 +1164,7 @@ const toSignin='<div class="alinks"><a href="#signin">Back to sign in</a></div>'
 let AS={};
 const OPEN_ROUTES=['signin','forgot','suspended','accept-invite-expired'];
 function authShow(r){
-  if(!isAuth(r)){document.body.classList.remove('authmode');return false}
+  if(!isAuth(r)){document.body.classList.remove('authmode');const au=$('#auth');if(au&&au.innerHTML)au.innerHTML='';return false}
   if(AS.r!==r)AS={r};
   document.body.classList.add('authmode');closeRail();
   const dash=`<a class="btn wide" href="#${role()}-dashboard" style="margin-top:16px">Go to my dashboard</a>`;
@@ -1161,7 +1186,7 @@ async function startSession(){
   const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
   if(error||!p){await sb.auth.signOut();toast('This account is not set up for the portal.');return false}
   if(p.status!=='active'){location.hash='suspended';await sb.auth.signOut();return false}
-  ME=user.id;MEP=p;ROLE=p.role;
+  ME=user.id;MEP=p;ROLE=p.role==='partner'?'partner':'admin';
   try{await loadAll()}catch(e){toast(nice(e))}
   startAlerts();startChatLive();
   return true}
@@ -1198,7 +1223,7 @@ ACT.how=function(id){const x=D.payments.find(p=>p.id==id),pr=PR(x.pr),n=net(x),e
 
 PG['admin-messages']=()=>chat('admin');
 PG['admin-audit']=()=>card('Audit log',tbl(['When','Who','Action','Reason'],D.audit.map(a=>({c:[a.t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),esc(a.who),esc(a.what),esc(a.reason)||'—']})),[],'Nothing recorded yet.'));
-PG['admin-settings']=()=>profilePage(true);
+PG['admin-settings']=()=>profilePage(true)+teamCard();
 
 /* partner */
 const mineC=()=>D.clients.filter(c=>c.p===ME),mineP=()=>D.projects.filter(p=>CL(p.c).p===ME);
@@ -1265,7 +1290,7 @@ const dmUnread=pid=>(D.dmByP[pid]||[]).filter(m=>!m.read&&!isMe(m.sid)).length;
 const annUnread=()=>role()==='partner'?D.ann.filter(a=>!D.read[a.id]).length:0;
 function actItems(){const me=realMe(),h=role()==='admin'?'studio':hOf(P(me)),out=[];
   D.cm.forEach(m=>{if(isMe(m.sid))return;const tk=toks(m.body);
-    if(m.ments.includes(me)||tk.includes(h)||(tk.includes('everyone')&&roleOfId(m.sid)==='admin'))out.push({k:'mention',at:m.at,m});
+    if(m.ments.includes(me)||tk.includes(h)||(tk.includes('everyone')&&isStaffRole(roleOfId(m.sid))))out.push({k:'mention',at:m.at,m});
     else if(m.parent){const pa=D.cm.find(x=>x.id===m.parent);if(pa&&isMe(pa.sid))out.push({k:'reply',at:m.at,m})}});
   Object.entries(D.reacts).forEach(([key,L])=>{const [ty,id]=key.split(':');const m=ty==='community'?D.cm.find(x=>x.id===id):(Object.values(D.dmByP).flat().find(x=>x.id===id));if(!m||!isMe(m.sid))return;L.forEach(r=>{if(!isMe(r.u))out.push({k:'react',at:r.at,m,r})})});
   return out.sort((a,b)=>b.at-a.at).slice(0,60)}
@@ -1320,14 +1345,14 @@ function reactsHtml(key){const L=D.reacts[key]||[];if(!L.length)return'';const g
   return `<div class="hreacts">${Object.entries(g).map(([e,us])=>`<button type="button" class="hre ${us.includes(realMe())?'me':''}" data-react="${key}|${e}" title="${esc(us.map(nameOfId).join(', '))}" aria-label="${e} ${us.length}, react">${e}<span>${us.length}</span></button>`).join('')}<button type="button" class="hre add" data-emopick="react|${key}" aria-label="Add a reaction">${ic('smile',15)}<span>+</span></button></div>`}
 
 function msgHtml(m,ctx,compact){
-  const key=m.type+':'+m.id,mine=isMe(m.sid),adm=role()==='admin',isAdm=roleOfId(m.sid)==='admin';
+  const key=m.type+':'+m.id,mine=isMe(m.sid),adm=role()==='admin',isAdm=isStaffRole(roleOfId(m.sid));
   const tk=toks(m.body),men=!mine&&((m.ments||[]).includes(realMe())||tk.includes(vh())||tk.includes('everyone'));
   const replies=ctx==='ch'?D.cm.filter(x=>x.parent===m.id):[];
   const ed=S.editing===key;
   const acts=`<div class="hacts" role="toolbar" aria-label="Message actions">${HUB_QUICK.slice(0,3).map(e=>`<button type="button" data-react="${key}|${e}" aria-label="React ${e}">${e}</button>`).join('')}<button type="button" data-emopick="react|${key}" aria-label="More reactions" title="React">${ic('smile',16)}</button>${ctx==='ch'?`<button type="button" data-thread="${m.id}" aria-label="Reply in thread" title="Reply in thread">${ic('reply',16)}</button>`:''}${mine&&m.body?`<button type="button" data-medit="${key}" aria-label="Edit message" title="Edit">${ic('pencil',15)}</button>`:''}${mine||adm?`<button type="button" data-mdel="${key}" aria-label="Delete message" title="Delete">${ic('trash',15)}</button>`:''}</div>`;
   return `<div class="hmsg ${compact?'cmp':''} ${men?'ment':''} ${ed?'editing':''}" id="m-${m.id}">
   <div class="hl">${compact?`<span class="hts">${hhmm(m.at)}</span>`:hav(m.sid)}</div>
-  <div class="hb">${compact?'':`<div class="hh"><b>${esc(nameOfId(m.sid))}</b>${isAdm?tag('Studio','sky'):''}<time datetime="${new Date(m.at).toISOString()}">${hhmm(m.at)}</time>${m.edited?'<span class="hed">edited</span>':''}</div>`}
+  <div class="hb">${compact?'':`<div class="hh"><b>${esc(nameOfId(m.sid))}</b>${isAdm?tag(roleOfId(m.sid)==='accounts'?'Studio · Accounts':'Studio','sky'):''}<time datetime="${new Date(m.at).toISOString()}">${hhmm(m.at)}</time>${m.edited?'<span class="hed">edited</span>':''}</div>`}
    ${ed?`<div class="hedit"><textarea class="hin hedt" data-ctx="edit:${key}" rows="2" aria-label="Edit message">${esc(S.draft['edit:'+key]!=null?S.draft['edit:'+key]:m.body)}</textarea><div class="hedit-b"><span class="muted small">Enter to save · Esc to cancel</span><button type="button" class="btn sm line" data-mcancel="1">Cancel</button><button type="button" class="btn sm" data-msave="${key}">Save</button></div></div>`
        :(m.body?`<div class="htx">${fmtMsg(m.body)}${compact&&m.edited?' <span class="hed">edited</span>':''}</div>`:'')}
    ${attsHtml(m.atts)}${reactsHtml(key)}
@@ -1362,7 +1387,7 @@ function hubSide(){const adm=role()==='admin',k=hubKey(),au=actUnread(),an=annUn
   const dms=adm?D.partners.filter(p=>p.st!=='Removed'||(D.dmByP[p.id]||[]).length).map(p=>it('dm:'+p.id,`${hav(p.id,1)}<span class="nm">${esc(p.name)}</span>`,dmUnread(p.id),p.st!=='Active'?'dim':'')).join('')||'<div class="hs-empty">No partners yet.</div>'
              :it('dm:'+ME,`${studioId()?hav(studioId(),1):'<span class="hava sm"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span>'}<span class="nm">Twelfth Space studio</span>`,dmUnread(ME));
   return `<div class="hs-top">${it('act',`<span class="hsi-i">${ic('bell',16)}</span><span class="nm">Activity</span>`,au)}${it('ann',`<span class="hsi-i">${ic('megaphone',16)}</span><span class="nm">Announcements</span>`,an)}</div>
-  <div class="hs-h"><span>Channels</span>${adm?`<button type="button" data-act="chnew" aria-label="Add a channel" title="Add a channel">${ic('plus',15)}</button>`:''}</div>
+  <div class="hs-h"><span>Channels</span>${adm&&isOwner()?`<button type="button" data-act="chnew" aria-label="Add a channel" title="Add a channel">${ic('plus',15)}</button>`:''}</div>
   ${D.channels.map(c=>it('ch:'+c.id,`<span class="hsi-i hash">#</span><span class="nm">${esc(c.name)}</span>${c.admin_only?`<span class="hlk" title="Only the studio starts posts">${ic('lock',12)}</span>`:''}`,chUnread(c.id))).join('')}
   <div class="hs-h"><span>Direct messages</span></div>${dms}`}
 
@@ -1378,7 +1403,7 @@ function hubMain(){const adm=role()==='admin',t=S.hub.t;
   if(t==='ann'){const body=(PG[(adm?'admin':'partner')+'-announcements'])();return hubHead('Announcements',adm?'Posts every partner sees. Replies come to you as direct messages.':'News from the studio')+`<div class="hscroll hann">${body}</div>`}
   if(t==='ch'){const c=D.allChannels.find(c=>c.id===S.hub.id);if(!c)return hubHead('Channel not found','')+'<div class="hscroll"></div>';
     const list=D.cm.filter(m=>m.ch===c.id&&!m.parent),can=!c.archived&&(!c.admin_only||adm);
-    const right=`<span class="hmeta" title="Members">${ic('users',15)} ${D.dir.length}</span><span class="hmeta" title="Online now"><i class="ondot s"></i> ${online}</span>${adm?`<button type="button" class="ibtn" data-act="chedit" data-id="${c.id}" aria-label="Channel settings" title="Channel settings">${ic('gear',16)}</button>`:''}`;
+    const right=`<span class="hmeta" title="Members">${ic('users',15)} ${D.dir.length}</span><span class="hmeta" title="Online now"><i class="ondot s"></i> ${online}</span>${adm&&isOwner()?`<button type="button" class="ibtn" data-act="chedit" data-id="${c.id}" aria-label="Channel settings" title="Channel settings">${ic('gear',16)}</button>`:''}`;
     return hubHead(`# ${esc(c.name)}${c.admin_only?` <span class="hlk">${ic('lock',13)}</span>`:''}`,esc(c.description||''),right)+
      `<div class="hscroll" id="hmsgs"><div class="hwel"><span class="hwel-i hash">#</span><h3>Welcome to #${esc(c.name)}</h3><p>${esc(c.description||'')}${c.admin_only?' Only the studio starts posts here; everyone can reply in threads.':''} Be kind, and please don't share commission rates, client contracts or account details.</p></div>${msgList(list,'ch')}</div>
      <div class="htyping" data-ctx="ch:${c.id}" aria-live="polite"></div>${composer('ch:'+c.id,'Message #'+c.name,can,c.archived?'This channel is archived.':'Only the studio can start posts here. You can reply in threads.')}`}
@@ -1410,7 +1435,7 @@ function hubMarkRead(){if(!S.hub)return;const k=S.hub;
 /* ---------- sending ---------- */
 function mentionIds(body){const tk=toks(body),ids=new Set();
   D.dir.forEach(p=>{if(tk.includes(hOf(p)))ids.add(p.id)});
-  if(tk.includes('studio'))D.dir.filter(p=>p.role==='admin').forEach(p=>ids.add(p.id));
+  if(tk.includes('studio'))D.dir.filter(p=>isStaffRole(p.role)).forEach(p=>ids.add(p.id));
   if(tk.includes('everyone')&&role()==='admin')D.dir.forEach(p=>ids.add(p.id));
   ids.delete(realMe());return [...ids]}
 function addFiles(ctx,files){if(S.viewAs){toast('Read-only while viewing as a partner.');return}
@@ -1559,7 +1584,7 @@ function profilePage(adm){
   const active=va?pp.st==='Active':MEP.status==='active',u=meAv();
   const first=D.payments.filter(x=>x.p===ME&&!x.rev).map(x=>x.d).sort()[0];
   const jd=joined?dfmt(String(joined).slice(0,10)):'—';
-  const stats=adm?[['Joined',jd],['Active partners',String(D.partners.filter(x=>x.st==='Active').length)],['Paid out',g(sumBy(D.payouts.filter(x=>!x.void),x=>x.amt))],['Role','Administrator']]
+  const stats=adm?[['Joined',jd],['Active partners',String(D.partners.filter(x=>x.st==='Active').length)],['Paid out',g(sumBy(D.payouts.filter(x=>!x.void),x=>x.amt))],['Role',MEP.role==='accounts'?'Accounts':'Owner']]
                  :[['Joined',jd],['First commission',first?dfmt(first):'—'],['Earned',g(earned(ME))],['Balance',g(bal(ME))]];
   const sw=(nm,on,lab,sub)=>`<label class="prow-t"><span><b>${lab}</b><small>${sub}</small></span><span class="sw"><input type="checkbox" name="${nm}" ${on?'checked':''} aria-label="${lab}"><i></i></span></label>`;
   const hasN='Notification' in window,perm=hasN?Notification.permission:'unsupported';
@@ -1577,7 +1602,7 @@ function profilePage(adm){
    <div class="prow"><div class="pl"><h3>Notifications</h3><p>How you hear about payments, payouts, referrals and messages.</p></div>
     <div class="pf">${sw('notify_email',ne,'Email me','Each notification is also sent to '+fmtEmail(email)+'.')}${sw('notify_alerts',na,'Pop-up alerts','Show new notifications straight away while the portal is open.')}<div class="deskrow">${desk}</div></div></div>
    ${adm?`<div class="prow"><div class="pl"><h3>Commission rules</h3><p>How long new commission waits after a client payment before it can be paid out.</p></div>
-    <div class="pf">${field('Hold before a commission can be paid out','hold',{opts:[0,3,5,7,10].map(n=>[String(n),n+' business days']),val:String(D.hold)})}<div class="hint">Applies straight away to commission that is still on hold.</div></div></div>
+    <div class="pf">${isOwner()?field('Hold before a commission can be paid out','hold',{opts:[0,3,5,7,10].map(n=>[String(n),n+' business days']),val:String(D.hold)})+'<div class="hint">Applies straight away to commission that is still on hold.</div>':ro('Hold before a commission can be paid out',D.hold+' business days')+'<div class="hint">Only the owner can change this.</div>'}</div></div>
    <div class="prow"><div class="pl"><h3>Access</h3><p>Who can get into the portal.</p></div>
     <div class="pf">${two(ro('Invitation links','Work once and expire after 24 hours'),ro('Public sign-up','Off. Invitation only'))}</div></div>`:''}
    <div class="prow"><div class="pl"><h3>Log out of all devices</h3><p>Sign out on every phone and computer, including this one.</p></div><div class="pf pr"><button type="button" class="btn line" data-act="signoutall">Log out everywhere</button></div></div>
@@ -1670,7 +1695,7 @@ ACT.noteopen=function(i){const n=notesFor(role())[+i];if(n){n.n=false;sb.from('n
 const notesPage=()=>{const L=notesFor(role()),un=L.filter(n=>n.n).length;return `<div class="pha"><span class="muted">${un?un+' unread':'You are all caught up'}</span><span class="grow"></span>${un?`<button class="btn white" type="button" data-act="noteall">Mark all as read</button>`:''}</div>${card('Notifications',L.length?`<div class="notes">${L.map((n,i)=>`<button type="button" class="nrow ${n.n?'new':''}" data-act="noteopen" data-id="${i}"><span class="dot" aria-hidden="true"></span><span class="nt">${esc(n.t)}</span><span class="go">${ic('arrowr',14)}</span></button>`).join('')}</div>`:'<div class="empty">Nothing yet. Updates from the studio will show up here.</div>')}`};
 PG['admin-notifications']=notesPage;PG['partner-notifications']=notesPage;
 function render_(){
-  CUR_Q=null;if(!BOOTED)return;route=location.hash.slice(1);
+  CUR_Q=null;if(!BOOTED)return;route=location.hash.slice(1);document.body.classList.toggle('not-owner',!!MEP&&MEP.role==='accounts');
   if(!ME){if(!OPEN_ROUTES.includes(route)){location.replace('#signin');return}authShow(route);return}
   if(!(route.startsWith(role()+'-')||route==='reset'||route==='accept-invite')){location.replace('#'+role()+'-dashboard');return}
   if(hubRoute(route))return;
@@ -1753,7 +1778,7 @@ document.addEventListener('submit',e=>{
     if(!ph&&!adm)return er('Enter your phone number.');
     if(ph&&!/^\+?\d{9,15}$/.test(digits))return er('Enter a phone number using digits only, like 024 123 4567 or +233 24 123 4567.');
     if(!ct&&!adm)return er('Enter your city or town.');
-    fire(async()=>{await q(sb.from('profiles').update({full_name:nm,phone:ph||null,city:ct||null,notify_email:!!f.notify_email,notify_alerts:!!f.notify_alerts}).eq('id',ME));if(adm&&f.hold!==undefined&&Number(f.hold)!==D.hold)await q(sb.from('settings').update({hold_days:Number(f.hold)}).eq('id',1))},'Changes saved')}
+    fire(async()=>{await q(sb.from('profiles').update({full_name:nm,phone:ph||null,city:ct||null,notify_email:!!f.notify_email,notify_alerts:!!f.notify_alerts}).eq('id',ME));if(adm&&isOwner()&&f.hold!==undefined&&Number(f.hold)!==D.hold)await q(sb.from('settings').update({hold_days:Number(f.hold)}).eq('id',1))},'Changes saved')}
   if(e.target.id==='payform'){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er=t=>{$('#payerr').textContent=t};
     let n=(f.acct||'').replace(/[\s\-]/g,''),n2=(f.acct2||'').replace(/[\s\-]/g,'');
     if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n))n='0'+n.replace(/^\+?233/,'');if(f.kind==='momo'&&/^\+?233\d{9}$/.test(n2))n2='0'+n2.replace(/^\+?233/,'');

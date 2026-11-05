@@ -1,10 +1,10 @@
 // partner-admin: admin-only actions that need the Supabase secret key.
-//   invite         { email, full_name, send_email? }  -> sends the invite email, or returns a one-time link
+//   invite         { email, full_name, send_email?, role? }  -> invite a partner, or Accounts staff with role 'accounts'
 //   revoke_invite  { user_id }                         -> deletes an invited user who never signed in
 //   suspend        { user_id, reason }                 -> marks the partner suspended and blocks sign-in
 //   reactivate     { user_id, reason }                 -> reverses a suspension
 //   remove         { user_id, reason }                 -> partner has left: closes the login, keeps money history
-// The caller must be signed in as an active admin. Deploy with verify_jwt = false; auth is checked below.
+// The caller must be signed in as the active owner (role 'admin'); Accounts staff cannot use these actions. Deploy with verify_jwt = false; auth is checked below.
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   const { data: who, error: whoErr } = await admin.auth.getUser(token);
   if (whoErr || !who?.user) return json({ error: "Your session has expired. Sign in again." }, 401);
   const { data: me } = await admin.from("profiles").select("role,status").eq("id", who.user.id).single();
-  if (!me || me.role !== "admin" || me.status !== "active") return json({ error: "Only admins can do this." }, 403);
+  if (!me || me.role !== "admin" || me.status !== "active") return json({ error: "Only the owner can do this." }, 403);
 
   // A client that acts as the admin, so database functions see auth.uid() and write the audit log.
   const asAdmin = createClient(URL, PUBLISHABLE, {
@@ -51,23 +51,32 @@ Deno.serve(async (req) => {
     if (action === "invite") {
       const email = String(body.email ?? "").trim().toLowerCase();
       const full_name = String(body.full_name ?? "").trim();
-      if (!full_name) return json({ error: "Enter the partner's name." }, 400);
+      if (!full_name) return json({ error: "Enter the person's name." }, 400);
       if (!EMAIL.test(email)) return json({ error: "Enter a valid email address." }, 400);
       const { data: existing } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
       if (existing) return json({ error: "This email already has an account or a pending invitation." }, 409);
 
       // The page reads the invite tokens from the URL hash, so land on the bare site address.
       const redirectTo = PORTAL_URL ? PORTAL_URL.replace(/\/?$/, "/") : undefined;
+      const asStaff = body.role === "accounts";
+      // Staff invites become Accounts staff straight away (owner-only, recorded in the audit log).
+      const finish = async (userId: string) => {
+        if (!asStaff) return;
+        const { error } = await asAdmin.rpc("make_staff", { p_user: userId });
+        if (error) { await admin.auth.admin.deleteUser(userId); throw error; }
+      };
       if (body.send_email === false) {
         const { data, error } = await admin.auth.admin.generateLink({
           type: "invite", email, options: { data: { full_name }, redirectTo },
         });
         if (error) throw error;
-        return json({ user_id: data.user.id, link: data.properties.action_link });
+        await finish(data.user.id);
+        return json({ user_id: data.user.id, link: data.properties.action_link, role: asStaff ? "accounts" : "partner" });
       }
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { data: { full_name }, redirectTo });
       if (error) throw error;
-      return json({ user_id: data.user.id, sent: true });
+      await finish(data.user.id);
+      return json({ user_id: data.user.id, sent: true, role: asStaff ? "accounts" : "partner" });
     }
 
     if (action === "revoke_invite") {

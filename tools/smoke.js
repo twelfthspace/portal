@@ -12,7 +12,9 @@ const T = new Date().toISOString();
 const profiles = [
   { id: ADM, role: 'admin', status: 'active', full_name: 'Studio Admin', email: 'admin@studio.test', phone: null, city: null, account_mask: null },
   { id: AMA, role: 'partner', status: 'active', full_name: 'Ama Mensah', email: 'ama@studio.test', phone: '0240000000', city: 'Accra', account_mask: '****1234' },
-  { id: KOJO, role: 'partner', status: 'active', full_name: 'Kojo Boateng', email: 'kojo@studio.test', phone: null, city: null, account_mask: null }];
+  { id: KOJO, role: 'partner', status: 'active', full_name: 'Kojo Boateng', email: 'kojo@studio.test', phone: null, city: null, account_mask: null },
+  { id: '00000000-0000-4000-8000-000000000009', role: 'accounts', status: 'active', full_name: 'Esi Accounts', email: 'esi@studio.test', phone: null, city: null, account_mask: null }];
+const ACC = '00000000-0000-4000-8000-000000000009';
 const data = {
   settings: { id: 1, hold_days: 5, invite_expiry_days: 1 },
   clients: [{ id: CL1, name: 'Accra Bakery', contact: 'Nana', email: null, partner_id: AMA, created_at: T }],
@@ -73,7 +75,7 @@ async function run(who) {
     if (u.pathname.startsWith('/storage/v1/')) { return json([]); }
     const t = u.pathname.replace('/rest/v1/', '');
     if (m !== 'GET') { writes.push(m + ' ' + t + ' ' + (r.request().postData() || u.search)); return json(acc.includes('object') ? { id: 'new-id', status: 'pending' } : []); }
-    let rows = t === 'profiles' ? (me.role === 'admin' ? profiles : [me]) : data[t];
+    let rows = t === 'profiles' ? (me.role !== 'partner' ? profiles : [me]) : data[t];
     if (me.role === 'partner' && Array.isArray(rows) && ['referral_flags', 'audit_log'].includes(t)) rows = [];
     if (me.role === 'partner' && t === 'partner_balances') rows = rows.filter(b => b.partner_id === me.id);
     if (me.role === 'partner' && t === 'notifications') rows = [];
@@ -86,9 +88,9 @@ async function run(who) {
   await page.screenshot({ path: path.join(outdir, 'signin.png') });
   await page.fill('#f-email', me.email); await page.fill('#f-cur', 'Passw0rd!x');
   await page.click('#signinform button[type=submit]');
-  await page.waitForFunction(r => location.hash === '#' + r + '-dashboard' && !document.body.classList.contains('authmode'), me.role, { timeout: 10000 });
+  await page.waitForFunction(r => location.hash === '#' + r + '-dashboard' && !document.body.classList.contains('authmode'), me.role === 'partner' ? 'partner' : 'admin', { timeout: 10000 });
   const routes = await page.evaluate(() => [...document.querySelectorAll('#nav a')].map(a => a.getAttribute('href').slice(1)));
-  const extra = me.role === 'admin' ? ['admin-project-' + PR1, 'admin-partner-' + AMA, 'admin-client-' + CL1, 'admin-settings', 'admin-notifications']
+  const extra = me.role !== 'partner' ? ['admin-project-' + PR1, 'admin-partner-' + AMA, 'admin-client-' + CL1, 'admin-settings', 'admin-notifications']
                                     : ['partner-profile', 'partner-statement', 'partner-client-' + CL1, 'partner-notifications', 'admin-dashboard'];
   const bad = [];
   for (const r of routes.concat(extra)) {
@@ -99,7 +101,24 @@ async function run(who) {
   }
   const finalHash = await page.evaluate(() => location.hash);
   // exercise a few writes
-  if (me.role === 'admin') {
+  if (me.role === 'accounts') {
+    const seen = {};
+    for (const [r, sel] of [['admin-partners', '[data-act=invite]'], ['admin-partners', '[data-act=suspend]'], ['admin-partners', '[data-act=remove]'], ['admin-project-' + PR1, '[data-act=rate]'], ['admin-client-' + CL1, '[data-act=reassign]'], ['admin-messages', '[data-act=chnew]'], ['admin-settings', '[data-act=staffadd]']]) {
+      await page.evaluate(r => { location.hash = r }, r); await page.waitForTimeout(200);
+      seen[sel] = await page.evaluate(sel => [...document.querySelectorAll(sel)].some(b => b.offsetParent !== null), sel); }
+    writes.push('owner-only buttons visible to accounts: ' + JSON.stringify(seen));
+    await page.evaluate(() => { location.hash = 'admin-settings' }); await page.waitForTimeout(200);
+    writes.push('accounts settings: ' + JSON.stringify(await page.evaluate(() => ({ holdLocked: !document.querySelector('#f-hold') && /Only the owner/.test(document.body.textContent), team: /Studio team/.test(document.body.textContent), role: [...document.querySelectorAll('.pstats div')].map(d => d.textContent).find(t => t.startsWith('Role')) }))));
+    await page.evaluate(() => { location.hash = 'admin-payments' }); await page.waitForTimeout(200);
+    writes.push('accounts can record payments: ' + await page.evaluate(() => [...document.querySelectorAll('[data-act=payment]')].some(b => b.offsetParent !== null)));
+    await page.evaluate(() => { location.hash = 'admin-partners' }); await page.waitForTimeout(200);
+    writes.push('accounts can view as partner: ' + await page.evaluate(() => [...document.querySelectorAll('[data-act=viewas]')].some(b => b.offsetParent !== null)));
+  } else if (me.role === 'admin') {
+    await page.evaluate(() => { location.hash = 'admin-settings' }); await page.waitForTimeout(250);
+    writes.push('owner sees Add staff member: ' + await page.evaluate(() => [...document.querySelectorAll('[data-act=staffadd]')].some(b => b.offsetParent !== null)));
+    await page.click('[data-act=staffadd]'); await page.waitForTimeout(150);
+    await page.fill('#mform #f-name', 'Esi Mensah'); await page.fill('#mform #f-email', 'esi.new@studio.test'); await page.click('#mform button[type=submit]'); await page.waitForTimeout(400);
+    await page.keyboard.press('Escape');
     await page.evaluate(() => { location.hash = 'admin-payouts' }); await page.waitForTimeout(150);
     await page.click('[data-act=payout][data-id="' + AMA + '"]');
     await page.fill('#f-amt', '50.00'); await page.fill('#f-ref', 'MTN-9'); await page.fill('#f-mask', '****9');
@@ -185,4 +204,4 @@ async function run(who) {
   console.log(JSON.stringify({ who: me.role, routes: routes.length + extra.length, bad, finalHash, afterOut, errors, writes }, null, 1));
   await browser.close();
 }
-(async () => { await run(ADM); await run(AMA); })().catch(e => { console.error(e); process.exit(1); });
+(async () => { await run(ADM); await run(AMA); await run(ACC); })().catch(e => { console.error(e); process.exit(1); });
