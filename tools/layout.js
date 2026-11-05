@@ -13,7 +13,7 @@ const T = new Date().toISOString();
 const profiles = [
   { id: ADM, role: 'admin', status: 'active', full_name: 'Twelfth Space Studio', email: 'twelfthspaces@gmail.com', phone: null, city: null, avatar_path: null },
   { id: AMA, role: 'partner', status: 'active', full_name: 'Ama Serwaa Mensah-Bonsu', email: 'ama.serwaa.mensahbonsu@longdomain-example.com', phone: '0240000000', city: 'Accra', avatar_path: null },
-  { id: KOJO, role: 'partner', status: 'suspended', full_name: 'Kojo Boateng', email: 'kojo@studio.test', phone: null, city: null, avatar_path: null },
+  { id: KOJO, role: 'partner', status: 'suspended', full_name: 'Kojo Boateng', email: 'franciscaanamsakia@gmail.com', phone: null, city: null, avatar_path: null },
   { id: OLD, role: 'partner', status: 'removed', full_name: 'Former Partner Name', email: 'removed@x.invalid', phone: null, city: null, avatar_path: null }];
 const C = i => '10000000-0000-4000-8000-00000000000' + i, P = i => '20000000-0000-4000-8000-00000000000' + i;
 const clients = [1, 2, 3].map(i => ({ id: C(i), name: ['Accra Bakery and Pastry Company Limited', 'Kumasi Logistics', 'Osu Fitness Studio'][i - 1], contact: 'Nana Aidoo', email: null, partner_id: i === 2 ? KOJO : AMA, created_at: T }));
@@ -153,6 +153,19 @@ const MEASURE = () => {
       }
     }
   }
+  // an email must never be split in the middle of a word
+  { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /[A-Za-z0-9]/.test(n.textContent) ? 1 : 2 });
+    let n; while ((n = w.nextNode())) { const el = n.parentElement; if (!el || !visible(el) || !el.closest('.eml, .kv, .who, .pid, small')) continue;
+      const full = (el.closest('.eml') || el).textContent; if (!/[^@\s]+@[^@\s]+\.[^@\s]+/.test(full)) continue;
+      const t = n.textContent; let prevTop = null;
+      for (let i = 0; i < t.length; i++) { const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + 1); const b = r.getBoundingClientRect(); if (!b.width) continue;
+        if (prevTop !== null && b.top > prevTop + 4 && !/[\s.@]/.test(t[i - 1] || '') && t[i] !== '@') { out.push(`email split mid-word: "${full.trim().slice(0, 50)}" between "${t[i - 1]}" and "${t[i]}"`); break; }
+        prevTop = b.top; } } }
+  // emails read as one piece: inline parts, at most two lines
+  for (const em of [...root.querySelectorAll('.eml')].filter(visible)) {
+    if ([...em.querySelectorAll('.emp')].some(x => getComputedStyle(x).display !== 'inline')) { out.push('email parts are not inline: "' + em.textContent.slice(0, 40) + '"'); continue; }
+    const r = document.createRange(); r.selectNodeContents(em); const ts = [...r.getClientRects()].filter(b => b.width > 1).map(b => b.top).sort((x, y) => x - y), lines = ts.filter((t, i) => i === 0 || t - ts[i - 1] > 6).length;
+    if (lines > (innerWidth < 600 ? 3 : 2)) out.push(`email spread over ${lines} lines: "${em.textContent.slice(0, 40)}"`); }
   // amounts must never break across two lines
   { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /GHS\s?[\d,.]+|^[\d,]+\.\d\d$/.test(n.textContent) && n.textContent.trim().length < 26 ? 1 : 2 });
     let n; while ((n = w.nextNode())) { const el = n.parentElement; if (!el || !visible(el) || el.closest('.tip,.rmenu,.sr,option')) continue;

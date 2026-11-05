@@ -522,7 +522,10 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 /* feedback hidden */
 #fab,.fab,#fbp,.fbp{display:none!important}
 
-.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 20px}.kv>div{min-width:0}.kv span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}.kv b{font-weight:600;overflow-wrap:anywhere}.kv a{color:inherit;text-decoration:underline}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 20px}.kv>div{min-width:0}.kv span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}.kv b{font-weight:600;overflow-wrap:anywhere}
+.kv{container-type:inline-size}@container (min-width:620px){.kv>.kv-w{grid-column:span 2}}
+.eml,.kv .eml,.who .eml,.pid .eml{overflow-wrap:break-word;word-break:normal}.emp{white-space:nowrap}
+.eml,.emp,.kv .eml,.kv .emp,.who .eml,.who .emp,.pid .eml,.pid .emp,.uinfo .eml,.uinfo .emp{display:inline!important;margin:0!important;padding:0!important;font:inherit!important;color:inherit!important;background:none!important;border:0!important}.kv a{color:inherit;text-decoration:underline}
 .kv .tag{display:inline-flex;width:auto}
 
 .frhero{display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--dark);color:#fff}.frhero h2{color:#fff;font-size:22px;margin:4px 0 8px}.frhero p{color:#dfe5d2;margin:0;max-width:46ch}.frhero .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sand)}
@@ -560,7 +563,7 @@ body.authmode .fab{background:#fff;color:#14181a;border-left-color:#8a9680}
 .pcam{position:absolute;right:6px;bottom:6px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;border:2px solid var(--card)}
 .pacts{display:flex;gap:8px;padding-bottom:6px;flex-wrap:wrap}.pacts label{cursor:pointer}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.pid{padding:14px 32px 0;min-width:0}.pid h2{font-size:26px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}.pid p{color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.pid{padding:14px 32px 0;min-width:0}.pid h2{font-size:26px;display:block;overflow-wrap:break-word}.pid h2 .pver{display:inline-block;vertical-align:-3px;margin-left:8px}.pid p{color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
 .pver{color:var(--info);flex:none}
 .pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 32px 0;padding-bottom:22px;border-bottom:1px solid var(--line)}
 .pstats>div{padding:0 18px;border-left:1px solid var(--line);min-width:0}.pstats>div:first-child{padding-left:0;border-left:0}
@@ -694,6 +697,23 @@ select:hover{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 @media (max-width:899px){.hub,.hub.th{grid-template-columns:minmax(0,1fr);height:calc(100dvh - 230px);min-height:440px;border-radius:20px}
  .hub .hside,.hub .hmain,.hub .hthr{display:none}.hub.v-list .hside,.hub.v-conv .hmain,.hub.v-thread .hthr{display:flex}.hub.v-thread:not(.th) .hmain{display:flex}
  .hside{border-right:0}.hthr{border-left:0}.hback{display:grid}.hmsg{padding:6px 14px;grid-template-columns:36px minmax(0,1fr);gap:10px}.hday{margin:10px 14px}.hcmp,.hcmp-off{margin:0 10px 10px}.hhd{padding:8px 12px;gap:8px}.hmeta{display:none}.hwel{padding:18px 14px 10px}.hvoice audio{max-width:160px}}
+.card:has(.rt){container-type:inline-size}
+@container (max-width:700px){
+  .rt .cv{text-align:right;min-width:0;overflow-wrap:anywhere}
+  .rt td.lead .cv{text-align:left;width:100%}
+  .rt td.act .cv{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;width:100%}
+  .card .rt tr{background:transparent;border:0;border-top:1px solid var(--line-2);border-radius:0;padding:12px 0;margin:0}
+  .card .rt tr:first-child{border-top:0;padding-top:0}
+  .rt thead{display:none}
+  .rt,.rt tbody,.rt tr,.rt td{display:block;width:100%}
+  .rt tr{background:#F8F8EE;border:1px solid var(--line-2);border-radius:16px;padding:10px 14px;margin-bottom:10px}
+  .rt td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:6px 0;text-align:right}
+  .rt td:before{content:attr(data-l);color:var(--muted);font-size:12px;font-weight:500;text-align:left;flex:none}
+  .rt td.lead{text-align:left;justify-content:flex-start;padding:0 0 8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .rt td.lead:before,.rt td.act:before{display:none}
+  .rt td.act{justify-content:flex-end;padding-top:10px}
+  .rt td.act:empty{display:none}
+}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
@@ -900,7 +920,12 @@ function tbl(heads,rows,rc=[],empty){
   const b=rows.map(r=>`<tr ${r.href?`class="link" data-href="${r.href}"`:''}>${r.c.map((x,i)=>`<td data-l="${esc(heads[i])}" class="${i===0?'lead ':''}${heads[i]===''?'act ':''}${rc.includes(i)?'r num':''}">${x===''?'':'<div class="cv">'+x+'</div>'}</td>`).join('')}</tr>`).join('');
   return rows.length?`<table class="rt"><thead><tr>${h}</tr></thead><tbody>${b}</tbody></table>`:`<div class="empty">${CUR_Q&&S.q[CUR_Q]?`No matches for “${esc(S.q[CUR_Q])}”. <button type="button" class="linkbtn" data-clearq="${CUR_Q}">Clear search</button>`:esc(empty||"Nothing to show yet.")}</div>`;
 }
-const who=(n,s,i)=>`<div class="who">${av(n,i)}<div><b>${esc(n)}</b>${s?`<span>${esc(s)}</span>`:''}</div></div>`;
+const isEmail=s=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(s||'').trim());
+const fmtEmail=s=>{s=String(s||'').trim();if(!isEmail(s))return esc(s);const i=s.lastIndexOf('@'),parts=[];
+  s.slice(0,i).split(/(?<=\.)/).forEach(x=>parts.push(x));parts.push('@'+s.slice(i+1).split(/(?<=\.)/)[0]);s.slice(i+1).split(/(?<=\.)/).slice(1).forEach(x=>parts.push(x));
+  return `<span class="eml">${parts.map(x=>`<span class="emp">${esc(x)}</span>`).join('<wbr>')}</span>`};
+const escE=s=>isEmail(s)?fmtEmail(s):esc(s);
+const who=(n,s,i)=>`<div class="who">${av(n,i)}<div><b>${esc(n)}</b>${s?`<span>${escE(s)}</span>`:''}</div></div>`;
 const act=(label,a,id='',cls='soft',extra='')=>`<button type="button" class="btn sm ${cls}" data-act="${a}" data-id="${id}" ${extra}>${label}</button>`;
 const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink',Removed:''}[s]||'');
 const weekLabels=()=>[5,4,3,2,1,0].map(w=>{const d=new Date(TODAY+'T00:00:00');d.setDate(d.getDate()-w*7);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})});
@@ -951,7 +976,7 @@ const ACT={
   if(d&&d.link){D.newlink=d.link;info('Invitation ready',`<p class="muted">Copy this link and send it to ${esc(n)} yourself. It works once and expires in 24 hours.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(d.link)}</textarea></div><div class="mact" style="justify-content:flex-start"><button type="button" class="btn soft" data-act="copylink" data-id="new">Copy link</button></div>`);render();return{keep:true}}
   toast('Invitation emailed to '+m);return''})},
  copylink(id){if(id==='new'&&D.newlink)copy(D.newlink);else toast('Links are only shown when created. Revoke and invite again for a new one.')},
- revoke(id){const i=D.invites.find(x=>x.id===id);modal('Revoke invitation',i?esc(i.name)+' · '+esc(i.email):'','','Revoke',()=>doit(()=>callAdmin({action:'revoke_invite',user_id:id}),'Invitation revoked'),'pink')},
+ revoke(id){const i=D.invites.find(x=>x.id===id);modal('Revoke invitation',i?esc(i.name)+' · '+fmtEmail(i.email):'','','Revoke',()=>doit(()=>callAdmin({action:'revoke_invite',user_id:id}),'Invitation revoked'),'pink')},
  suspend(id){const p=P(id),on=p.st==='Active';modal(on?'Suspend '+esc(p.name):'Reactivate '+esc(p.name),on?'They will be signed out and cannot sign in until reactivated.':'They will be able to sign in again.',reasonField(),on?'Suspend':'Reactivate',f=>{const e=needReason(f);if(e)return e;return doit(()=>callAdmin({action:on?'suspend':'reactivate',user_id:id,reason:f.reason.trim()}),p.name+' is now '+(on?'suspended':'active'))})},
  approve(id){const r=D.refs.find(x=>x.id==id);fire(()=>rpc('approve_referral',{p_referral:id}),'Approved. '+r.biz+' is now a client of '+P(r.p).name)},
  reject(id){const r=D.refs.find(x=>x.id==id);modal('Reject '+esc(r.biz),'The partner is told it was not accepted.',reasonField(),'Reject',f=>{const e=needReason(f);if(e)return e;return doit(()=>rpc('reject_referral',{p_referral:id,p_reason:f.reason.trim()}),'Referral rejected')})},
@@ -1544,13 +1569,13 @@ function profilePage(adm){
   return `<section class="pcard">
   <div class="pcover"></div>
   <div class="phead"><label class="pav" for="photo-in" title="Change photo">${u?`<img src="${esc(u)}" alt="Profile photo">`:`<span>${inits(name||email)}</span>`}<span class="pcam">${ic('pencil',14)}</span></label><input type="file" id="photo-in" class="vh" accept="image/jpeg,image/png,image/webp"><div class="pacts">${u?act('Remove photo','photodel','','line'):''}<label class="btn sm white" for="photo-in">${u?'Change photo':'Upload photo'}</label></div></div>
-  <div class="pid"><h2>${esc(name||email)}${active?VERIFIED:''}</h2><p>${esc(email)}</p></div>
+  <div class="pid"><h2>${esc(name||email)}${active?VERIFIED:''}</h2><p>${fmtEmail(email)}</p></div>
   <div class="pstats">${stats.map(s=>`<div><span>${s[0]}</span><b>${s[1]}</b></div>`).join('')}</div>
   <form id="pform" novalidate>
    <div class="prow"><div class="pl"><h3>${adm?'Your details':'Public profile'}</h3><p>${adm?'Shown to partners in messages and the community.':'How the studio and other partners see you.'}</p></div>
     <div class="pf">${field('Full name','fullname',{val:name,ac:'name'})}${two(field('Phone number','phone',{val:phone,type:'tel',ac:'tel',inputmode:'tel',ph:'024 123 4567'}),field('City or town','city',{val:city,ac:'address-level2',ph:'Accra'}))}<div class="hint">Your email can only be changed by the studio.</div></div></div>
    <div class="prow"><div class="pl"><h3>Notifications</h3><p>How you hear about payments, payouts, referrals and messages.</p></div>
-    <div class="pf">${sw('notify_email',ne,'Email me','Each notification is also sent to '+esc(email)+'.')}${sw('notify_alerts',na,'Pop-up alerts','Show new notifications straight away while the portal is open.')}<div class="deskrow">${desk}</div></div></div>
+    <div class="pf">${sw('notify_email',ne,'Email me','Each notification is also sent to '+fmtEmail(email)+'.')}${sw('notify_alerts',na,'Pop-up alerts','Show new notifications straight away while the portal is open.')}<div class="deskrow">${desk}</div></div></div>
    ${adm?`<div class="prow"><div class="pl"><h3>Commission rules</h3><p>How long new commission waits after a client payment before it can be paid out.</p></div>
     <div class="pf">${field('Hold before a commission can be paid out','hold',{opts:[0,3,5,7,10].map(n=>[String(n),n+' business days']),val:String(D.hold)})}<div class="hint">Applies straight away to commission that is still on hold.</div></div></div>
    <div class="prow"><div class="pl"><h3>Access</h3><p>Who can get into the portal.</p></div>
@@ -1580,7 +1605,7 @@ function profCard(r){
   const p=P(ME),st=[true,!!p.phone,!!p.city,!!D.pay[ME],D.refs.some(x=>x.p===ME)],pc=Math.round(st.filter(Boolean).length/st.length*100);
   return `<div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>${pc===100?'Profile complete':'Complete profile'}</b><p>${pc===100?'You are ready to be paid.':'Add the missing details to be ready for payouts.'}</p></div><a class="btn soft wide" href="#partner-profile">${pc===100?'View profile':'Complete profile'}</a>`}
 const back=(h,l)=>`<a class="btn white" href="#${h}">${ic('back',16)} ${l}</a>`;
-const kv=rows=>`<div class="kv">${rows.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`;
+const kv=rows=>`<div class="kv">${rows.map(r=>`<div${r[2]?` class="${r[2]}"`:''}><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`;
 const cPaid=c=>sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),x=>x.amt);
 const cCom=c=>sumBy(D.payments.filter(x=>CL(PR(x.pr).c).id===c.id),com);
 function payRows(list,admin){return tbl(['Date','Reference','Received','Commission',''],list.map(x=>({c:[dfmt(x.d),`${esc(x.ref)}<div class="small muted">${esc(CL(PR(x.pr).c).name)} · ${esc(x.m)}${x.rev?' · reversed':''}</div>`,g(x.amt),g(com(x)),x.rev?tag('Reversed'):act('How','how',x.id,'line')]})),[2,3])}
@@ -1588,7 +1613,7 @@ PG.partnerD=id=>{const p=P(id);if(!p)return PG['admin-partners']();
   const cs=D.clients.filter(c=>c.p===id),prs=D.projects.filter(x=>CL(x.c).p===id),po=D.payouts.filter(x=>x.p===id).sort((a,b)=>b.d.localeCompare(a.d)),rf=D.refs.filter(x=>x.p===id);
   return `<div class="pha">${back('admin-partners','Partners')}<span class="grow"></span><a class="btn white" href="#admin-messages">${ic('chat',16)} Message</a>${p.st==='Removed'?'':act('View as partner','viewas',id,'white')+act(p.st==='Active'?'Suspend':'Reactivate','suspend',id,'white')+act('Remove partner','remove',id,'line')}<button class="btn pink" data-act="payout" data-id="${id}" type="button">${ic('plus',16)} Record payout</button></div>
   <div class="stack"><div class="cards">${stat('Earned so far',gs(earned(id)),pluralize(cs.length,'client'))}${stat('Paid out',gs(paid(id)),pluralize(po.filter(x=>!x.void).length,'payout'))}${stat('Balance',gs(bal(id)),'Available now '+g(avail(id)))}</div>
-  ${card('Details',kv([['Status',stTag(p.st)],['Email',esc(p.email)],['Phone',esc(p.phone)],['City',esc(p.city)],['Payout to',D.pay[id]?esc(KINDS[D.pay[id].kind])+' · '+payLine(D.pay[id],true):'<span class="muted">Not added yet</span>']]))}
+  ${card('Details',kv([['Status',stTag(p.st)],['Email',fmtEmail(p.email),'kv-w'],['Phone',esc(p.phone)],['City',esc(p.city)],['Payout to',D.pay[id]?esc(KINDS[D.pay[id].kind])+' · '+payLine(D.pay[id],true):'<span class="muted">Not added yet</span>']]))}
   ${card('Clients',tbl(['Client','Projects','Paid so far','Commission'],cs.map(c=>({href:'admin-client-'+c.id,c:[who(c.name,c.contact,D.clients.indexOf(c)),D.projects.filter(x=>x.c===c.id).length,g(cPaid(c)),g(cCom(c))]})),[2,3]))}
   ${card('Projects',tbl(['Project','Client','Rate','Status'],prs.map(x=>({href:'admin-project-'+x.id,c:[`<b>${esc(x.name)}</b>`,esc(CL(x.c).name),pct(x.rate),stTag(x.st)]})),[2]))}
   ${card('Payouts',tbl(['Date','Reference','Method','Amount'],po.map(x=>({c:[dfmt(x.d),esc(x.id)+'<div class="small muted">'+esc(x.ref)+'</div>',esc(x.m),x.void?tag('Voided'):g(x.amt)]})),[3]))}
@@ -1636,7 +1661,7 @@ ACT.pcsv=function(){const rows=[['Date','Entry','Detail','Amount (GHS)']].concat
 ACT.print=function(){window.print()};
 PG['partner-statement']=()=>{const me=P(ME),f=FS_('st'),L=pick('st',ledger().filter(l=>l.p===ME),l=>l.a).sort((a,b)=>a.d.localeCompare(b.d)),inc=sumBy(L.filter(l=>l.a>0),l=>l.a),out=sumBy(L.filter(l=>l.a<0),l=>l.a);
   return `<div class="pha noprint">${back('partner-commissions','Commissions')}${sel('st','per',PERS,'Period')}<span class="grow"></span><button class="btn pink" type="button" data-act="print">Print or save as PDF</button></div>
-  <section class="card statement"><div class="sthead"><div><p class="eyebrow">Commission statement</p><h2>${esc(me.name)}</h2><p class="muted">${esc(me.email)}</p></div><div class="stmeta"><span>Period</span><b>${PERS.find(x=>x[0]===f.per)[1]}</b><span>Issued</span><b>${dfmt(TODAY)}</b></div></div>
+  <section class="card statement"><div class="sthead"><div><p class="eyebrow">Commission statement</p><h2>${esc(me.name)}</h2><p class="muted">${fmtEmail(me.email)}</p></div><div class="stmeta"><span>Period</span><b>${PERS.find(x=>x[0]===f.per)[1]}</b><span>Issued</span><b>${dfmt(TODAY)}</b></div></div>
   <div class="kv" style="margin:14px 0"><div><span>Commission earned</span><b>${g(inc)}</b></div><div><span>Paid out and deductions</span><b>${g(out)}</b></div><div><span>Net for the period</span><b>${g(inc+out)}</b></div><div><span>Current balance</span><b>${g(bal(ME))}</b></div></div>
   ${tbl(['Date','Entry','Detail','Amount'],L.map(l=>({c:[dfmt(l.d),lTag(l.t),esc(l.n),(l.a>0?'+':'')+g(l.a)]})),[3],'Nothing in this period.')}<p class="muted small" style="margin-top:14px">Amounts are in Ghana cedis (GHS). Commission is paid after the ${D.hold}-business-day hold. Payouts are made outside the portal.</p></section>`};
 /* ---- notifications page ---- */
