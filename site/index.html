@@ -714,7 +714,7 @@ select:hover{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
   .rt td.act{justify-content:flex-end;padding-top:10px}
   .rt td.act:empty{display:none}
 }
-body.not-owner [data-act="invite"],body.not-owner [data-act="revoke"],body.not-owner [data-act="suspend"],body.not-owner [data-act="remove"],body.not-owner [data-act="rate"],body.not-owner [data-act="reassign"],body.not-owner [data-act="chnew"],body.not-owner [data-act="chedit"],body.not-owner [data-act="staffadd"],body.not-owner [data-act="staffsus"],body.not-owner [data-act="staffrem"]{display:none!important}
+body.not-owner [data-act="invite"],body.not-owner [data-act="revoke"],body.not-owner [data-act="relink"],body.not-owner [data-act="suspend"],body.not-owner [data-act="remove"],body.not-owner [data-act="rate"],body.not-owner [data-act="reassign"],body.not-owner [data-act="chnew"],body.not-owner [data-act="chedit"],body.not-owner [data-act="staffadd"],body.not-owner [data-act="staffsus"],body.not-owner [data-act="staffrem"]{display:none!important}
 /* partner profile */
 .pprof{container-type:inline-size}
 .pgrid,.pgrid2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
@@ -817,6 +817,7 @@ a.chip:hover{background:#F8F8EE}
 .ptabs .pt-h{margin-bottom:14px}
 .tcnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:rgba(62,70,49,.1);font-size:11.5px;color:inherit}
 .tabs .on .tcnt{background:rgba(255,255,255,.2)}
+.ph-ready.inv{background:var(--sand-2);border-color:#E3E79B}.ph-ic{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;flex:none}
 .pop .pall{display:block;text-align:center;font-weight:600;border-top:1px solid var(--grey-2);margin-top:6px;padding:12px 8px;min-height:44px}
 
 </style>
@@ -868,7 +869,7 @@ function parseMoney(s){s=String(s||'').replace(/[,\s]/g,'').replace(/^GHS/i,'');
 
 /* ---------- live data (Supabase) ---------- */
 const SB_URL='https://bflvfcvltkpyshnedgtf.supabase.co',SB_KEY='sb_publishable_G6saB-vGvsaXFFuP38v1sA_KmD6NzRB';
-const BOOT_HASH=location.hash,BASE=location.origin+location.pathname;
+const BOOT_HASH=location.hash,BASE=location.origin+location.pathname;let JOIN=null;
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const PST={not_started:'Not started',in_progress:'In progress',on_hold:'On hold',completed:'Completed',cancelled:'Cancelled'};
 const PM={mobile_money:'Mobile money',bank_transfer:'Bank transfer',cash:'Cash'};
@@ -959,8 +960,8 @@ async function loadAll(){
   D.cs={admin:{},partner:{}};const seen=+(lsGet('ts-seen-'+ME)||0);D.chat.forEach(m=>{if(m.at<=seen||m.sid===ME)D.cs[role()][m.id]=true});
   D.notes=notes.map(n=>({id:n.id,r:ROLE,t:n.text,h:n.link||(ROLE+'-dashboard'),n:!n.read_at}));
   D.bal=Object.fromEntries(bals.map(b=>[b.partner_id,b]));
-  D.invites=invites.filter(i=>i.role!=='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,link:null}));
-  D.staffInvites=invites.filter(i=>i.role==='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email}));
+  D.invites=invites.filter(i=>i.role!=='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,at:i.invited_at,link:null}));
+  D.staffInvites=invites.filter(i=>i.role==='accounts').map(i=>({id:i.id,name:i.full_name||i.email,email:i.email,at:i.invited_at}));
   D.staff=profiles.filter(p=>p.role!=='partner').map(p=>({id:p.id,name:p.full_name||p.email,email:p.email,role:p.role,st:{active:'Active',suspended:'Suspended',removed:'Removed'}[p.status]||'Suspended'}));
   D.audit=audit.map(a=>({t:new Date(a.at),who:a.actor_id?nameOf(a.actor_id):'System',what:describe(a),reason:a.reason||''}));
   if(adm&&!D.partners.some(p=>p.id===S.conv))S.conv=(D.partners[0]||{}).id;
@@ -1033,7 +1034,7 @@ const fmtEmail=s=>{s=String(s||'').trim();if(!isEmail(s))return esc(s);const i=s
 const escE=s=>isEmail(s)?fmtEmail(s):esc(s);
 const who=(n,s,i)=>`<div class="who">${av(n,i)}<div><b>${esc(n)}</b>${s?`<span>${escE(s)}</span>`:''}</div></div>`;
 const act=(label,a,id='',cls='soft',extra='')=>`<button type="button" class="btn sm ${cls}" data-act="${a}" data-id="${id}" ${extra}>${label}</button>`;
-const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink',Removed:''}[s]||'');
+const stTag=s=>tag(s,{Approved:'mint',Active:'mint','In progress':'sky',Flagged:'pink','Pending review':'sun',Suspended:'pink',Invited:'sun',Completed:'mint','On hold':'sun',Cancelled:'',Rejected:'',Voided:'pink',Removed:''}[s]||'');
 const weekLabels=()=>[5,4,3,2,1,0].map(w=>{const d=new Date(TODAY+'T00:00:00');d.setDate(d.getDate()-w*7);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})});
 function chart(id,vals,kind){
   const mx=Math.max(1,...vals),a=S.bar[id]!=null?S.bar[id]:vals.length-1,Lb=weekLabels();
@@ -1079,9 +1080,9 @@ const ACT={
   if(D.partners.some(p=>p.email===m)||D.invites.some(i=>i.email===m))return'This email already has an account or a pending invitation.';
   let d;try{d=await callAdmin({action:'invite',email:m,full_name:n,send_email:f.how!=='link'})}catch(e){return nice(e)}
   await reload();
-  if(d&&d.link){D.newlink=d.link;info('Invitation ready',`<p class="muted">Copy this link and send it to ${esc(n)} yourself. It works once and expires in 24 hours.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(d.link)}</textarea></div><div class="mact" style="justify-content:flex-start"><button type="button" class="btn soft" data-act="copylink" data-id="new">Copy link</button></div>`);render();return{keep:true}}
+  if(d&&d.link){linkReady(n,d.link);render();return{keep:true}}
   toast('Invitation emailed to '+m);return''})},
- copylink(id){if(id==='new'&&D.newlink)copy(D.newlink);else toast('Links are only shown when created. Revoke and invite again for a new one.')},
+ copylink(id){if(id==='new'&&D.newlink)copy(D.newlink);else toast('Links are only shown when created. Use New link to make a fresh one.')},
  revoke(id){const i=D.invites.find(x=>x.id===id);modal('Revoke invitation',i?esc(i.name)+' · '+fmtEmail(i.email):'','','Revoke',()=>doit(()=>callAdmin({action:'revoke_invite',user_id:id}),'Invitation revoked'),'pink')},
  suspend(id){const p=P(id),on=p.st==='Active';modal(on?'Suspend '+esc(p.name):'Reactivate '+esc(p.name),on?'They will be signed out and cannot sign in until reactivated.':'They will be able to sign in again.',reasonField(),on?'Suspend':'Reactivate',f=>{const e=needReason(f);if(e)return e;return doit(()=>callAdmin({action:on?'suspend':'reactivate',user_id:id,reason:f.reason.trim()}),p.name+' is now '+(on?'suspended':'active'))})},
  approve(id){const r=D.refs.find(x=>x.id==id);fire(()=>rpc('approve_referral',{p_referral:id}),'Approved. '+r.biz+' is now a client of '+P(r.p).name)},
@@ -1178,8 +1179,8 @@ PG['admin-dashboard']=()=>{
   return `<div class="dgrid"><div class="col">${left}</div><div class="mid">${txCard('Transactions','Client payments in and payouts out',adminRows(),{flts:['All','Received','Paid out'],href:'admin-payments',label:'View all payments',none:'No transactions yet. Record a payment when a client pays, and payouts will show here too.'})}</div><div class="col">${right}</div></div>`};
 PG['admin-partners']=()=>{const L=D.partners.filter(p=>p.st!=='Removed'&&has(S.q.pt,p.name,p.email,p.city)),F=D.partners.filter(p=>p.st==='Removed');
   return `<div class="pha">${searchBox('pt','Search partners')}<span class="grow"></span><button class="btn pink" data-act="invite" type="button">${ic('plus',16)} Invite a partner</button></div><div class="stack">
-  ${card('Growth Partners',tbl(['Partner','Status','Clients','Balance',''],L.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,p.email,pIdx(p.id)),stTag(p.st),D.clients.filter(c=>c.p===p.id).length,g(bal(p.id)),`<div class="acts">${act('View as partner','viewas',p.id,'soft')}${act(p.st==='Active'?'Suspend':'Reactivate','suspend',p.id,'line')}${act('Remove','remove',p.id,'line')}</div>`]})),[2,3],'No partners yet. Invite your first one.'))}
-  ${card('Pending invitations',D.invites.length?`<div class="list">${D.invites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${act('Revoke','revoke',i.id,'line')}</div></div>`).join('')}</div>`:'<div class="empty">No pending invitations.</div>')}
+  ${card('Growth Partners',tbl(['Partner','Status','Clients','Balance',''],L.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,p.email,pIdx(p.id)),stTag(pSt(p)),D.clients.filter(c=>c.p===p.id).length,g(bal(p.id)),`<div class="acts">${act('View as partner','viewas',p.id,'soft')}${act(p.st==='Active'?'Suspend':'Reactivate','suspend',p.id,'line')}${act('Remove','remove',p.id,'line')}</div>`]})),[2,3],'No partners yet. Invite your first one.'))}
+  ${card('Pending invitations',D.invites.length?`<div class="list">${D.invites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts"><span class="small muted">Sent ${sentD(i.at)}</span>${act('New link','relink',i.id,'soft')}${act('Revoke','revoke',i.id,'line')}</div></div>`).join('')}</div>`:'<div class="empty">No pending invitations.</div>')}
   ${F.length?card('Former partners',`<p class="muted small" style="margin-bottom:10px">People who have left. Their past commission and payouts stay in your books.</p>`+tbl(['Partner','Clients','Earned','Balance'],F.map(p=>({href:'admin-partner-'+p.id,c:[who(p.name,'Former partner',pIdx(p.id)),D.clients.filter(c=>c.p===p.id).length,g(earned(p.id)),g(bal(p.id))]})),[1,2,3])):''}</div>`};
 PG['admin-referrals']=()=>{const tabs=['All','Pending review','Flagged','Approved','Rejected'],L=D.refs.filter(r=>S.tab==='All'||r.st===S.tab);
   return `<div class="pha"><div class="tabs" role="tablist">${tabs.map(t=>`<button type="button" role="tab" data-tab="${t}" class="${S.tab===t?'on':''}">${t}${t!=='All'?' '+D.refs.filter(r=>r.st===t).length:''}</button>`).join('')}</div></div>
@@ -1207,12 +1208,12 @@ function chat(r){
 const annSorted=()=>[...D.ann].sort((a,b)=>(b.pin-a.pin)||b.d.localeCompare(a.d));
 const isStaffRole=r=>r==='admin'||r==='accounts';
 const isOwner=()=>!!MEP&&MEP.role==='admin'&&!S.viewAs;
-const OWNER_ACTS=['invite','revoke','suspend','remove','rate','reassign','chnew','chedit','staffadd','staffsus','staffrem'];
+const OWNER_ACTS=['invite','relink','revoke','suspend','remove','rate','reassign','chnew','chedit','staffadd','staffsus','staffrem'];
 OWNER_ACTS.forEach(k=>{const f=ACT[k];if(f)ACT[k]=function(...a){if(!isOwner()){toast('Only the owner can do this.');return}return f.apply(this,a)}});
 function teamCard(){const own=isOwner(),L=D.staff.filter(x=>x.st!=='Removed').sort((a,b)=>(a.role==='admin'?0:1)-(b.role==='admin'?0:1));
   const row=x=>`<div>${who(x.name,x.email,pIdx(x.id))}<span class="grow"></span><div class="acts">${tag(x.role==='admin'?'Owner':'Accounts',x.role==='admin'?'sun':'sky')}${x.st!=='Active'?stTag(x.st):''}${own&&x.role==='accounts'?act(x.st==='Active'?'Suspend':'Reactivate','staffsus',x.id,'line')+act('Remove','staffrem',x.id,'line'):''}</div></div>`;
   return `<section class="pcard"><h2 class="ptitle2">Studio team</h2><div class="prow"><div class="pl"><h3>Who runs the portal</h3><p>The owner has full control. Accounts staff handle payments, payouts, clients, projects, referrals and messages, but can't manage people, rates or settings.</p></div>
-  <div class="pf"><div class="list">${L.map(row).join('')}${D.staffInvites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${tag('Invited','sun')}${own?act('Revoke','revoke',i.id,'line'):''}</div></div>`).join('')}</div>
+  <div class="pf"><div class="list">${L.map(row).join('')}${D.staffInvites.map(i=>`<div>${who(i.name,i.email,3)}<span class="grow"></span><div class="acts">${tag('Invited','sun')}${own?act('New link','relink',i.id,'soft')+act('Revoke','revoke',i.id,'line'):''}</div></div>`).join('')}</div>
   ${own?`<div class="mact" style="justify-content:flex-start;margin-top:14px"><button type="button" class="btn" data-act="staffadd">${ic('plus',16)} Add staff member</button></div>`:''}</div></div></section>`}
 ACT.staffadd=function(){if(!isOwner()){toast('Only the owner can do this.');return}
   modal('Add an Accounts staff member','They can handle payments, payouts, clients, projects, referrals and messages. They cannot manage people, rates or settings.',field('Full name','name')+field('Email address','email',{type:'email'})+field('How to send it','how',{opts:[['email','Email the invitation for me'],['link','Give me a link to send myself']]}),'Send invitation',async f=>{
@@ -1220,13 +1221,31 @@ ACT.staffadd=function(){if(!isOwner()){toast('Only the owner can do this.');retu
   if(D.staff.some(x=>x.email===m)||D.partners.some(x=>x.email===m)||D.invites.some(x=>x.email===m)||D.staffInvites.some(x=>x.email===m))return'This email already has an account or a pending invitation.';
   let d;try{d=await callAdmin({action:'invite',role:'accounts',email:m,full_name:n,send_email:f.how!=='link'})}catch(e){return nice(e)}
   await reload();
-  if(d&&d.link){D.newlink=d.link;info('Invitation ready',`<p class="muted">Copy this link and send it to ${esc(n)} yourself. It works once and expires in 24 hours. When they accept, they join as Accounts staff.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(d.link)}</textarea></div><div class="mact" style="justify-content:flex-start"><button type="button" class="btn soft" data-act="copylink" data-id="new">Copy link</button></div>`);render();return{keep:true}}
+  if(d&&d.link){linkReady(n,d.link,' When they accept, they join as Accounts staff.');render();return{keep:true}}
   toast('Invitation emailed to '+m);return''})};
 ACT.staffsus=function(id){const x=D.staff.find(s=>s.id===id);if(!x)return;const on=x.st==='Active';
   modal((on?'Suspend ':'Reactivate ')+esc(x.name),on?'They will be signed out and cannot sign in until reactivated.':'They will be able to sign in again.',reasonField(),on?'Suspend':'Reactivate',f=>{const e=needReason(f);if(e)return e;return doit(()=>callAdmin({action:on?'suspend':'reactivate',user_id:id,reason:f.reason.trim()}),x.name+' is now '+(on?'suspended':'active'))})};
 ACT.staffrem=function(id){const x=D.staff.find(s=>s.id===id);if(!x)return;
   modal('Remove '+esc(x.name),'For a staff member who has left. Their login is closed for good; everything they recorded stays in the books and the audit log.',reasonField()+field('Type REMOVE to confirm','confirm',{ph:'REMOVE'}),'Remove',f=>{const e=needReason(f);if(e)return e;if((f.confirm||'').trim().toUpperCase()!=='REMOVE')return'Type REMOVE to confirm.';
     return doit(()=>callAdmin({action:'remove',user_id:id,reason:f.reason.trim()}),x.name+' has been removed')},'pink')};
+const sentD=t=>t?new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'earlier';
+const pSt=p=>p.st==='Active'&&D.invites.some(i=>i.id===p.id)?'Invited':p.st;
+function linkReady(name,link,extra){D.newlink=link;const fn=String(name||'').trim().split(/\s+/)[0]||'there';
+  const msg='Hi '+fn+', here is your invitation to the Twelfth Space portal:\n'+link+'\n\nOpen it and press "Accept invitation", then choose a password. The link works once, so please use it soon.';
+  info('Invitation link ready',`<p class="muted">Send this to ${esc(name)} on WhatsApp or by email. It works once and expires soon, so send it straight away.${extra||''}</p><p class="small muted">It opens an <b>Accept invitation</b> button, so WhatsApp link previews can't use it up.</p><div class="fld"><textarea id="linkbox" rows="3" readonly>${esc(link)}</textarea></div><div class="mact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn soft" data-act="copylink" data-id="new">${ic('copy',15)} Copy link</button><a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${ic('wa',15)} Send on WhatsApp</a></div>`)}
+ACT.relink=function(id){if(!isOwner()){toast('Only the owner can do this.');return}
+  const i=D.invites.find(x=>x.id===id)||D.staffInvites.find(x=>x.id===id);if(!i){toast('This invitation was already accepted or revoked.');return}
+  modal('New invitation for '+esc(i.name),`${fmtEmail(i.email)} · first sent ${sentD(i.at)}. A new link replaces the old one, which stops working.`,field('How to send it','how',{opts:[['link','Give me a link to send on WhatsApp (recommended)'],['email','Email it again']]}),'Make new link',async f=>{
+    let d;try{d=await callAdmin({action:'invite_link',user_id:id,send_email:f.how==='email'})}catch(e){return nice(e)}
+    await reload();
+    if(d&&d.link){linkReady(i.name,d.link,D.staffInvites.some(x=>x.id===id)?' When they accept, they join as Accounts staff.':'');render();return{keep:true}}
+    toast('Invitation emailed again to '+i.email+'. Ask them to check Spam and Promotions.');render();return''})};
+ACT.joinnow=async function(){const tok=JOIN;if(!tok){location.replace('#accept-invite-expired');return}
+  const b=document.querySelector('[data-act=joinnow]');if(b){b.disabled=true;b.textContent='Checking your invitation…'}
+  try{if(ME)await sb.auth.signOut({scope:'local'})}catch(_){}
+  const {error}=await sb.auth.verifyOtp({token_hash:tok,type:'invite'});JOIN=null;
+  if(error){location.replace('#accept-invite-expired');return}
+  if(await startSession()){location.replace('#accept-invite');render()}else if(location.hash==='#join')location.replace('#signin')};
 const studioId=()=>(D.dir.find(p=>p.role==='admin'&&D.avById[p.id])||D.dir.find(p=>p.role==='admin')||{}).id;
 const postAuthor=(a,extra)=>{const id=a.by&&(D.dir.some(p=>p.id===a.by)||D.partners.some(p=>p.id===a.by))?a.by:studioId();const nm=id?nameOfId(id):'Twelfth Space';
   return `<div class="pauth">${id?hav(id):`<span class="hava"><span class="av" style="background:var(--dark);color:var(--sand)">TS</span></span>`}<div><div class="pauth-n"><b>${esc(nm)}</b>${tag('Studio','sky')}</div><div class="sub">${dfmt(a.d)}${a.at?' at '+hhmm(Date.parse(a.at)):''} · ${extra}</div></div></div>`};
@@ -1250,13 +1269,14 @@ const ctabs=()=>{const un=role()==='partner'?D.ann.filter(a=>!D.read[a.id]).leng
 PG['admin-community']=()=>ctabs()+(S.ctab==='news'?PG['admin-announcements']():chatPane());
 PG['partner-community']=()=>ctabs()+(S.ctab==='news'?PG['partner-announcements']():chatPane());
 /* ---------- sign-in screens (preview only: no real accounts) ---------- */
-const AUTH_TITLES={'signin':'Sign in','forgot':'Forgot password','reset':'Reset password','suspended':'Account suspended','accept-invite':'Accept invitation','accept-invite-expired':'Invitation expired'};
+const AUTH_TITLES={'signin':'Sign in','forgot':'Forgot password','reset':'Reset password','suspended':'Account suspended','accept-invite':'Accept invitation','join':'Accept invitation','accept-invite-expired':'Invitation expired'};
 const isAuth=r=>Object.prototype.hasOwnProperty.call(AUTH_TITLES,r);
 const pw=(l,n,hint)=>`<div class="fld"><label for="f-${n}">${l}</label><div class="pw"><input id="f-${n}" name="${n}" type="password" autocomplete="${n==='cur'?'current-password':'new-password'}"><button type="button" data-showpw="f-${n}" aria-label="Show password">Show</button></div>${hint?`<div class="hint">${hint}</div>`:''}</div>`;
 const pwRules=v=>[['At least 8 characters',v.length>=8],['A letter and a number',/[A-Za-z]/.test(v)&&/[0-9]/.test(v)]];
 const rulesHtml=v=>`<ul class="rl-list" id="pwrules">${pwRules(v).map(r=>`<li class="rl ${r[1]?'ok':''}"><span>${r[1]?'✓':'○'}</span>${r[0]}</li>`).join('')}</ul>`;
 const AUTHCFG={
  'signin':{h:'Welcome back',d:'Sign in to see your clients and commission.',s:['Track your clients','See every commission','Get paid on time'],a:-1},
+ 'join':{h:'Get started with us',d:'Complete these easy steps to register your account.',s:['Accept your invitation','Complete your profile','Submit your first client'],a:0},
  'accept-invite':{h:'Get started with us',d:'Complete these easy steps to register your account.',s:['Accept your invitation','Complete your profile','Submit your first client'],a:0},
  'forgot':{h:'Let us get you back in',d:'Reset links work once and expire in 1 hour.',s:['Enter your email','Check your inbox','Choose a new password'],a:0},
  'reset':{h:'Nearly there',d:'Choose a strong password you have not used before.',s:['Enter your email','Check your inbox','Choose a new password'],a:2},
@@ -1265,7 +1285,7 @@ const AUTHCFG={
 const authCard=(h,sub,body)=>{const c=AUTHCFG[AS.r]||AUTHCFG.signin;return `<div class="aw"><section class="al"><div class="alogo"><img src="${document.querySelector('.logo-full').src}" alt="Twelfth Space"></div><div class="al-b"><div class="al-t"><h2>${c.h}</h2><p>${c.d}</p></div><ol class="steps">${c.s.map((x,k)=>`<li class="${k===c.a?'on':''}"><span>${k+1}</span>${x}</li>`).join('')}</ol></div></section><section class="ar"><div class="acard"><h1>${h}</h1>${sub?`<p class="muted">${sub}</p>`:''}${body}</div></section></div>`};
 const toSignin='<div class="alinks"><a href="#signin">Back to sign in</a></div>';
 let AS={};
-const OPEN_ROUTES=['signin','forgot','suspended','accept-invite-expired'];
+const OPEN_ROUTES=['signin','forgot','suspended','accept-invite-expired','join'];
 function authShow(r){
   if(!isAuth(r)){document.body.classList.remove('authmode');const au=$('#auth');if(au&&au.innerHTML)au.innerHTML='';return false}
   if(AS.r!==r)AS={r};
@@ -1276,7 +1296,8 @@ function authShow(r){
   else if(r==='forgot')h=AS.sent?authCard('Check your email','If that address has an account, a reset link is on its way. It works once and expires in 1 hour.',toSignin):authCard('Forgot password','Enter your email and we will send a reset link.',`<form id="forgotform" novalidate>${field('Email address','email',{type:'email',ph:'you@example.com'})}<div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Send reset link</button></form>${toSignin}`);
   else if(r==='reset')h=AS.done?authCard('Password changed','You are signed in with your new password.',dash):authCard('Choose a new password','Pick something you do not use anywhere else.',`<form id="resetform" novalidate>${pw('New password','new')}${rulesHtml('')}${pw('Confirm new password','new2')}<div class="err" id="aerr" role="alert"></div><button class="btn wide" type="submit" style="margin-top:16px">Change password</button></form>`);
   else if(r==='suspended')h=authCard('Account suspended','Your Growth Partner account is paused, so you cannot sign in right now. Your records are safe and your earnings are not affected. Contact the studio to ask for a review.',toSignin);
-  else if(r==='accept-invite-expired')h=authCard('This invitation is no longer valid','The link has expired or was already used. Invitation links work once and expire after 24 hours. Ask the studio to send you a new one.',toSignin);
+  else if(r==='join')h=JOIN?authCard('You are invited','Press the button to accept your invitation to the Twelfth Space portal. Next you choose a password.',`${ME?`<p class="small muted">This device is signed in as ${escE(MEP.email)}. Accepting signs that account out here first.</p>`:''}<div class="err" id="aerr" role="alert"></div><button type="button" class="btn wide" data-act="joinnow" style="margin-top:16px">Accept invitation</button>`):authCard('This invitation is no longer valid','The link has expired or was already used. Ask the studio to send you a new one.',toSignin);
+  else if(r==='accept-invite-expired')h=authCard('This invitation is no longer valid','The link has expired or was already used. Invitation links work once and expire after a short time. Ask the studio to send you a new one.',toSignin);
   else{
     if(AS.done)h=authCard('Welcome, '+esc(AS.done),'Your account is ready.',dash);
     else if(!MEP)h=authCard('This invitation is no longer valid','The link has expired or was already used.',toSignin);
@@ -1748,18 +1769,18 @@ const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.leng
 const relD=d=>{const s=String(d||'').slice(0,10);if(!s)return'';const n=Math.round((new Date(TODAY+'T00:00:00')-new Date(s+'T00:00:00'))/864e5);return n===0?'Today':n===1?'Yesterday':n>1&&n<7?n+' days ago':dfmt(s)};
 function pHero(id){const p=P(id),a=D.pay[id],rem=p.st==='Removed',first=esc(pFirst(p.name)),on=!rem&&!!(D.online&&D.online.has(id)),rf=D.refs.filter(x=>x.p===id);
   const miss=[[p.phone,'a phone number'],[p.city,'a city'],[a,'payout details'],[rf.length,'a first referral']].filter(c=>!c[0]).map(c=>c[1]),pc=Math.round((5-miss.length)/5*100);
-  const pic=D.avById&&D.avById[id],tel=ghTel(p.phone),since=p.joined?new Date(p.joined).toLocaleDateString('en-GB',{month:'short',year:'numeric'}):'';
+  const inv=D.invites.find(x=>x.id===id),pic=D.avById&&D.avById[id],tel=ghTel(p.phone),since=p.joined?new Date(p.joined).toLocaleDateString('en-GB',{month:'short',year:'numeric'}):'';
   const lastPo=D.payouts.filter(x=>x.p===id&&!x.void).sort((x,y)=>y.d.localeCompare(x.d))[0];
   const facts=[['Clients',D.clients.filter(c=>c.p===id).length],['Projects',D.projects.filter(x=>CL(x.c).p===id).length],['Referrals',rf.length],['Last payout',lastPo?dfmt(lastPo.d):'None yet']];
   const chips=rem?'':`<div class="ph-chips">
     <span class="chip-g"><a class="chip" href="mailto:${esc(p.email)}">${ic('mail',16)}<span>${fmtEmail(p.email)}</span></a><button type="button" class="chip-c" data-act="copytxt" data-id="${esc(p.email)}" aria-label="Copy email address" title="Copy email">${ic('copy',15)}</button></span>
     ${p.phone?`<span class="chip-g"><a class="chip" href="tel:+${tel}">${ic('phone',16)}<span>${esc(p.phone)}</span></a><a class="chip-c wa" href="https://wa.me/${tel}" target="_blank" rel="noopener" aria-label="WhatsApp ${first}" title="WhatsApp">${ic('wa',15)}</a></span>`:`<span class="chip ghost">${ic('phone',16)}<span>No phone yet</span></span>`}
     ${p.city?`<span class="chip">${ic('pin',16)}<span>${esc(p.city)}</span></span>`:`<span class="chip ghost">${ic('pin',16)}<span>City not added</span></span>`}</div>`;
-  const ready=rem?`<div class="ph-ready"><div class="ptx"><b>Left the studio</b><p>Their login is closed. Past commission and payouts stay in the books.</p></div></div>`
+  const ready=inv?`<div class="ph-ready inv"><span class="ph-ic">${ic('mail',20)}</span><div class="ptx"><b>Invitation not accepted yet</b><p>Sent ${sentD(inv.at)}. If ${first} can't find it, send a fresh link on WhatsApp.</p></div><button type="button" class="btn sm" data-act="relink" data-id="${id}">${ic('refresh',15)} New invite link</button></div>`:rem?`<div class="ph-ready"><div class="ptx"><b>Left the studio</b><p>Their login is closed. Past commission and payouts stay in the books.</p></div></div>`
     :`<div class="ph-ready"><div class="ring" style="--p:${pc}"><span>${pc}%</span></div><div class="ptx"><b>${miss.length?'Profile '+pc+'% ready':'Ready to be paid'}</b><p>${miss.length?'Missing '+andList(miss)+'.':'Every detail is in place.'}</p></div>${miss.length?`<button type="button" class="btn sm white" data-chat="${id}">${ic('chat',15)} Ask ${first}</button>`:''}</div>`;
   return `<section class="card phero ${rem?'gone':p.st==='Suspended'?'sus':''}"><div class="ph-cover" aria-hidden="true"></div>
   <div class="ph-main"><span class="ph-av" style="background:${AVC[Math.abs(pIdx(id))%AVC.length]}">${pic?`<img src="${esc(pic)}" alt="">`:inits(p.name)}${on?'<i class="ph-on" title="Online now"></i>':''}</span>
-  <div class="ph-id"><p class="ph-eb">${rem?'Former partner':'Growth Partner'}${since?' · since '+since:''}</p><div class="ph-nm">${esc(p.name)}</div><div class="ph-tags">${stTag(p.st)}${on?tag('Online now','mint'):''}</div></div>${ready}</div>
+  <div class="ph-id"><p class="ph-eb">${rem?'Former partner':'Growth Partner'}${since?' · since '+since:''}</p><div class="ph-nm">${esc(p.name)}</div><div class="ph-tags">${stTag(pSt(p))}${on?tag('Online now','mint'):''}</div></div>${ready}</div>
   ${chips}<div class="ph-facts">${facts.map(f=>`<div><span>${f[0]}</span><b>${f[1]}</b></div>`).join('')}</div></section>`}
 function pMoney(id){const b=B(id),pa=Math.max(b.paid,0),av=Math.max(b.available,0),hd=Math.max(b.held,0),tot=pa+av+hd,first=esc(pFirst(P(id).name));
   const seg=(v,c)=>v>0?`<i class="${c}" style="flex:${v} 1 0"></i>`:'';
@@ -1771,7 +1792,7 @@ function pMoney(id){const b=B(id),pa=Math.max(b.paid,0),av=Math.max(b.available,
   <p class="pm-note">${tot?`New commission waits ${D.hold} business day${D.hold===1?'':'s'} on hold before it can be paid out.`:`Nothing earned yet. Commission shows up here when a client ${first} brought in pays the studio.`}</p>
   ${top.length?`<div class="pm-src"><span class="lab">Where it comes from</span>${top.map(e=>`<a class="pm-row" href="#admin-client-${esc(e[0])}"><span class="nm">${esc(CL(e[0]).name)}</span><b>${g(e[1])}<small>${Math.round(e[1]/sum*100)}%</small></b><span class="pm-tr"><i style="width:${Math.max(3,Math.round(e[1]/top[0][1]*100))}%"></i></span></a>`).join('')}${src.length>3?`<p class="pm-note">And ${src.length-3} more client${src.length-3===1?'':'s'}.</p>`:''}</div>`:''}</section>`}
 function pWallet(id){const a=D.pay[id],p=P(id),first=esc(pFirst(p.name));
-  if(!a)return `<section class="card pwal"><h2>Payout account</h2><div class="wallet none"><span class="w-ic">${ic('wallet',22)}</span><b>No payout account yet</b><p>${first} hasn't said where to send money yet. They add it under Profile, and you're told when they do.</p>${p.st==='Removed'?'':`<button type="button" class="btn sm" data-chat="${id}">${ic('chat',15)} Ask ${first} to add it</button>`}</div></section>`;
+  if(!a)return `<section class="card pwal"><h2>Payout account</h2><div class="wallet none"><span class="w-ic">${ic('wallet',22)}</span><b>No payout account yet</b><p>${first} hasn't said where to send money yet. They add it under Profile, and you're told when they do.</p>${p.st==='Removed'||D.invites.some(x=>x.id===id)?'':`<button type="button" class="btn sm" data-chat="${id}">${ic('chat',15)} Ask ${first} to add it</button>`}</div></section>`;
   const show=S.reveal===id,num=show?spaced(a.account_number):'•••• '+esc(String(a.account_number).slice(-4));
   return `<section class="card pwal"><h2>Payout account</h2><div class="wallet w-${netOf(a)}"><div class="w-top"><span class="w-kind">${esc(KINDS[a.kind]||'')}</span><span class="w-sim" aria-hidden="true"></span></div><div class="w-prov">${esc(a.provider)}</div><div class="w-no">${show?esc(num):num}</div>
   <div class="w-bot"><div><small>Account name</small><b>${esc(a.account_name)}</b></div>${a.branch?`<div><small>Branch</small><b>${esc(a.branch)}</b></div>`:''}</div></div>
@@ -1851,7 +1872,7 @@ PG['admin-notifications']=notesPage;PG['partner-notifications']=notesPage;
 function render_(){
   CUR_Q=null;if(!BOOTED)return;route=location.hash.slice(1);document.body.classList.toggle('not-owner',!!MEP&&MEP.role==='accounts');
   if(!ME){if(!OPEN_ROUTES.includes(route)){location.replace('#signin');return}authShow(route);return}
-  if(!(route.startsWith(role()+'-')||route==='reset'||route==='accept-invite')){location.replace('#'+role()+'-dashboard');return}
+  if(!(route.startsWith(role()+'-')||route==='reset'||route==='accept-invite'||route==='join')){location.replace('#'+role()+'-dashboard');return}
   if(hubRoute(route))return;
   if(authShow(route))return;
   let r=role(),key=route.split('-').slice(1).join('-'),html,title;
@@ -1960,6 +1981,7 @@ setInterval(()=>{if(!ME||document.hidden||$('#mbg').classList.contains('open'))r
 async function boot(){
   document.body.classList.add('authmode');
   $('#auth').innerHTML='<div class="aw"><section class="ar" style="grid-column:1/-1"><div class="acard"><p class="muted">Loading the portal…</p></div></section></div>';
+  const jm=/^#join=([A-Za-z0-9_-]{16,256})$/.exec(BOOT_HASH);if(jm){JOIN=jm[1];history.replaceState(null,'',BASE+'#join')}
   const lt=(/[#&]type=([a-z]+)/.exec(BOOT_HASH)||[])[1],le=/[#&]error(_code)?=/.test(BOOT_HASH);
   let sess=null;try{sess=(await sb.auth.getSession()).data.session}catch(_){}
   BOOTED=true;S.open=false;

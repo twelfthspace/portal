@@ -1,5 +1,6 @@
 // partner-admin: admin-only actions that need the Supabase secret key.
 //   invite         { email, full_name, send_email?, role? }  -> invite a partner, or Accounts staff with role 'accounts'
+//   invite_link    { user_id, send_email? }            -> a fresh link (or email) for someone who has not accepted yet
 //   revoke_invite  { user_id }                         -> deletes an invited user who never signed in
 //   suspend        { user_id, reason }                 -> marks the partner suspended and blocks sign-in
 //   reactivate     { user_id, reason }                 -> reverses a suspension
@@ -24,6 +25,10 @@ const json = (body: unknown, status = 200) =>
 const admin = createClient(URL, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const FOREVER = "876000h"; // about 100 years
+// Links we hand out point at the portal, which only redeems the token when the person presses a button,
+// so chat apps and mail scanners that open links for previews cannot use them up.
+const joinLink = (hashed?: string) =>
+  PORTAL_URL && hashed ? PORTAL_URL.replace(/\/?$/, "/") + "#join=" + hashed : null;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -71,12 +76,35 @@ Deno.serve(async (req) => {
         });
         if (error) throw error;
         await finish(data.user.id);
-        return json({ user_id: data.user.id, link: data.properties.action_link, role: asStaff ? "accounts" : "partner" });
+        const link = joinLink(data.properties.hashed_token) ?? data.properties.action_link;
+        return json({ user_id: data.user.id, link, role: asStaff ? "accounts" : "partner" });
       }
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { data: { full_name }, redirectTo });
       if (error) throw error;
       await finish(data.user.id);
       return json({ user_id: data.user.id, sent: true, role: asStaff ? "accounts" : "partner" });
+    }
+
+    if (action === "invite_link") {
+      // The first invitation went missing or expired: make a new one for the same person.
+      const id = String(body.user_id ?? "");
+      const { data: got, error: gErr } = await admin.auth.admin.getUserById(id);
+      const u = got?.user;
+      if (gErr || !u?.email) return json({ error: "Invitation not found." }, 404);
+      if (!u.invited_at || u.last_sign_in_at || u.email_confirmed_at) {
+        return json({ error: "This person has already accepted. They can sign in, or use Forgot password." }, 409);
+      }
+      const { data: prof } = await admin.from("profiles").select("status").eq("id", id).maybeSingle();
+      if (!prof || prof.status !== "active") return json({ error: "Reactivate this person before sending a new link." }, 409);
+      const redirectTo = PORTAL_URL ? PORTAL_URL.replace(/\/?$/, "/") : undefined;
+      if (body.send_email === true) {
+        const { error } = await admin.auth.admin.inviteUserByEmail(u.email, { redirectTo });
+        if (error) throw error;
+        return json({ sent: true });
+      }
+      const { data, error } = await admin.auth.admin.generateLink({ type: "invite", email: u.email, options: { redirectTo } });
+      if (error) throw error;
+      return json({ link: joinLink(data.properties.hashed_token) ?? data.properties.action_link });
     }
 
     if (action === "revoke_invite") {
