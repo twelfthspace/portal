@@ -78,7 +78,7 @@ async function open(meId, url, opts = {}) {
     check(await page.isVisible('[data-act=relink][data-id="' + FRA + '"]'), 'pending invitations list has a New link button');
     await page.evaluate(id => { location.hash = 'admin-partner-' + id }, FRA); await page.waitForTimeout(300);
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(150);
-    await page.screenshot({ path: path.join(process.env.SHOTS || '.', 'invite-owner-desktop.png'), fullPage: true });
+    if (process.env.SHOTS) await page.screenshot({ path: path.join(process.env.SHOTS, 'invite-owner-desktop.png'), fullPage: true });
     await page.setViewportSize({ width: 1280, height: 860 });
     const ban = await page.textContent('.pban');
     check(ban.includes("hasn't accepted the invitation yet") && ban.includes('Emailed 4 Nov'), 'partner page banner says the invitation was not accepted, emailed 4 Nov');
@@ -103,7 +103,7 @@ async function open(meId, url, opts = {}) {
     check(st.calls.some(c => c.includes('"send_email":true')), 'Email it again asks the server to re-send the email');
     check((await page.textContent('#toast')).includes('Spam'), 'tells you to ask her to check Spam: ' + await page.textContent('#toast'));
     await page.setViewportSize({ width: 390, height: 844 }); await page.evaluate(() => { location.hash = 'admin-partner-00000000-0000-4000-8000-000000000009' }); await page.waitForTimeout(300);
-    await page.screenshot({ path: path.join(process.env.SHOTS || '.', 'invite-owner-phone.png'), fullPage: false });
+    if (process.env.SHOTS) await page.screenshot({ path: path.join(process.env.SHOTS, 'invite-owner-phone.png'), fullPage: false });
     check(st.errors.length === 0, 'no page errors (owner) ' + st.errors.join(' | '));
     await browser.close();
   }
@@ -113,7 +113,7 @@ async function open(meId, url, opts = {}) {
     check(await page.isVisible('[data-act=joinnow]'), 'invitee sees an Accept invitation button');
     check(await page.evaluate(() => location.hash) === '#join', 'the token is removed from the address bar');
     check(st.verify === 0, 'nothing is redeemed just by opening the link (previews are safe)');
-    await page.screenshot({ path: path.join(process.env.SHOTS || '.', 'invite-join.png') });
+    if (process.env.SHOTS) await page.screenshot({ path: path.join(process.env.SHOTS, 'invite-join.png') });
     await page.click('[data-act=joinnow]');
     await page.waitForSelector('#acceptform', { timeout: 8000 }).catch(() => {});
     check(st.verify === 1 && st.calls[0].includes('"token_hash":"' + TOKEN + '"') && st.calls[0].includes('"type":"invite"'), 'Accept redeems the token once: ' + st.calls[0]);
